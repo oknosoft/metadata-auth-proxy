@@ -74,10 +74,7 @@ module.exports = function(webpackEnv) {
       isEnvDevelopment && require.resolve('style-loader'),
       isEnvProduction && {
         loader: MiniCssExtractPlugin.loader,
-        options: Object.assign(
-          {},
-          shouldUseRelativeAssetPaths ? { publicPath: '../../' } : undefined
-        ),
+        options: shouldUseRelativeAssetPaths ? { publicPath: '../../' } : {},
       },
       {
         loader: require.resolve('css-loader'),
@@ -205,7 +202,7 @@ module.exports = function(webpackEnv) {
               // Pending futher investigation:
               // https://github.com/terser-js/terser/issues/120
               inline: 2,
-              //keep_fnames: true,
+              keep_fnames: true,
             },
             mangle: {
               safari10: true,
@@ -260,7 +257,9 @@ module.exports = function(webpackEnv) {
       // We placed these paths second because we want `node_modules` to "win"
       // if there are any conflicts. This matches Node resolution mechanism.
       // https://github.com/facebook/create-react-app/issues/253
-      modules: ['node_modules', paths.appNodeModules].concat(modules.additionalModulePaths || []),
+      modules: ['node_modules', paths.appNodeModules].concat(
+        modules.additionalModulePaths || []
+      ),
       // These are the reasonable defaults supported by the Node ecosystem.
       // We also include JSX as a common component filename extension to support
       // some tools, although we do not recommend using it, see:
@@ -599,6 +598,12 @@ module.exports = function(webpackEnv) {
           async: isEnvDevelopment,
           useTypescriptIncrementalApi: true,
           checkSyntacticErrors: true,
+          resolveModuleNameModule: process.versions.pnp
+            ? `${__dirname}/pnpTs.js`
+            : undefined,
+          resolveTypeReferenceDirectiveModule: process.versions.pnp
+            ? `${__dirname}/pnpTs.js`
+            : undefined,
           tsconfig: paths.appTsConfig,
           reportFiles: [
             '**',
