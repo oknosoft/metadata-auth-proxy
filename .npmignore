@@ -1,0 +1,12 @@
+.DS_Store
+.idea
+build
+config
+src/public/data
+/scripts/stats.json
+node_modules
+src/public
+scripts
+
+/package-lock.json
+*.log
