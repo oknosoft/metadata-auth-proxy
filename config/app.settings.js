@@ -21,40 +21,39 @@ module.exports = function settings(prm) {
     // расположение couchdb для nodejs
     couch_local: process.env.COUCHLOCAL || 'http://cou221:5984/wb_',
 
-    pouch_filter: {
-      meta: 'auth/meta'
+    // расположение couchdb для браузера
+    get couch_path() {
+      return process && process.versions && process.versions.node ? this.couch_local : '/couchdb/wb_';
     },
+
+    // без автономного режима
+    couch_direct: true,
+
+    pouch_filter: {},
+
+    use_meta: false,
 
     // авторизация couchdb
     user_node: {
       username: process.env.DBUSER || 'admin',
       password: process.env.DBPWD || 'admin',
-      suffix: process.env.DBSUFFIX || '',
       templates: Boolean(process.env.DBTEMPLATES),
-    },
-
-    couch_direct: true,
-
-    // расположение couchdb
-    get couch_path() {
-      return this.couch_local;
     },
 
     // по умолчанию, обращаемся к зоне 21
     zone: process.env.ZONE || 21,
 
     // расположение rest-сервиса 1c по умолчанию
-    rest_path: '/quick/api/',
+    rest_path: '/adm/api/',
 
     keys: {
       dadata: 'bc6f1add49fc97e9db87781cd613235064dbe0f9',
-      yandex: '0ab2c686-6aca-4311-ae5e-087829702ae7',
       geonames: 'oknosoft',
     },
 
     server: {
-      prefix: '/quick/api',       // Mount path, no trailing slash
-      port: process.env.PORT || 3017,     // Port
+      prefix: '/adm/api',         // Mount path, no trailing slash
+      port: process.env.PORT || 3016,     // Port
       maxpost: 40 * 1024 * 1024,  // Max size of POST request
 
       rater: {                    // Request rate locker

@@ -51,6 +51,7 @@ const exclude = [];
 const minimsl = [
   'cat.delivery_areas',
   'cat.delivery_directions',
+  'cat.formulas',
   'cat.production_params',
 ];
 

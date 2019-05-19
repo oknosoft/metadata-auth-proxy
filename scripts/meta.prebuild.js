@@ -96,20 +96,30 @@ $p.wsql.init((prm) => {
       debug('Получаем скрипт таблиц alasql');
       $p.md.create_tables((sql) => {
 
-        text = '/* eslint-disable */\nexport default function meta_init($p) {\n\n'
-          + '$p.wsql.alasql(\'' + sql + '\', []);\n\n'
-          + '$p.md.init(' + JSON.stringify(_m) + ');\n\n'
-          + text + '};';
+        text = `/* eslint-disable */
+module.exports = function meta_init($p) {
+  $p.wsql.alasql('${sql}', []);\n  
+  $p.md.init(${JSON.stringify(_m)});\n  
+  ${text}};`;
 
         debug('Записываем результат');
-        let fname = path.resolve(__dirname, '../src/metadata/init.js');
+        let fname = path.resolve(__dirname, '../server/metadata/init.js');
         fs.writeFile(fname, text, 'utf8', (err) => {
           if (err) {
             debug(err);
             process.exit(1);
           } else {
             debug(`Успешно записан > ${fname}`);
-            process.exit(0);
+            fname = path.resolve(__dirname, '../src/metadata/init.js');
+            fs.writeFile(fname, text.replace('module.exports =', 'export default'), 'utf8', (err) => {
+              if (err) {
+                debug(err);
+                process.exit(1);
+              } else {
+                debug(`Успешно записан > ${fname}`);
+                process.exit(0);
+              }
+            });
           }
         });
 
