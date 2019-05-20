@@ -43,8 +43,10 @@ module.exports = function settings(prm) {
     // по умолчанию, обращаемся к зоне 21
     zone: process.env.ZONE || 21,
 
-    // расположение rest-сервиса 1c по умолчанию
-    rest_path: '/adm/api/',
+    // расположение rest-сервиса по умолчанию
+    get rest_path() {
+      return this.server.prefix;
+    },
 
     keys: {
       dadata: 'bc6f1add49fc97e9db87781cd613235064dbe0f9',

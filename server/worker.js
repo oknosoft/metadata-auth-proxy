@@ -48,8 +48,14 @@ module.exports = function (runtime) {
   // статический контент
   app.use(serve);
 
+  // методы управления пользователями и репликациями
   const router = require('./router')(runtime);
   app.use(router.middleware());
+
+  // proxy к серверам couchdb
+  const proxy = require('./couchdb-proxy')(runtime);
+  app.use(proxy);
+
   app.listen(conf.server.port);
 
 }
