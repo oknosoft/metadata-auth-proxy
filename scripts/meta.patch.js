@@ -77,6 +77,9 @@ module.exports = function(meta) {
           delete mgrs[name].tabular_sections[fld];
         }
       }
+      if(mgrs[name] && mgrs[name].cachable === 'doc') {
+        mgrs[name].cachable = 'ram';
+      }
     }
   }
 }

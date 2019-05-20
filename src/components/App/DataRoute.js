@@ -4,7 +4,7 @@ import {Switch, Route} from 'react-router';
 import qs from 'qs';
 
 import {withObj} from 'metadata-redux';
-import NeedAuth, {ltitle} from 'metadata-react/App/NeedAuth'; // страница "необхлдима авторизация"
+import NeedAuth, {ltitle} from 'metadata-react/App/NeedAuth'; // страница "необходима авторизация"
 
 import NotFound from '../Markdown/NotFound';
 
@@ -15,7 +15,7 @@ const lazy = {
   DataObj: stub,
   FrmReport: stub,
 };
-import(/* webpackChunkName: "metadata-react" */ 'metadata-react/DataList').then(module => lazy.DataList = module.default);
+import(/* webpackChunkName: "metadata-react" */ 'metadata-react/DynList').then(module => lazy.DataList = module.default);
 import(/* webpackChunkName: "metadata-react" */ 'metadata-react/DataTree').then(module => lazy.DataTree = module.default);
 import(/* webpackChunkName: "metadata-react" */ 'metadata-react/FrmObj').then(module => lazy.DataObj = module.default);
 import(/* webpackChunkName: "metadata-react" */ 'metadata-react/FrmReport').then(module => lazy.FrmReport = module.default);

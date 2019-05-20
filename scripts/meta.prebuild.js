@@ -50,9 +50,19 @@ $p.wsql.init((prm) => {
   // расположение couchdb
   prm.couch_path = config.couch_local;
 
+  prm.use_meta = config.use_meta;
+
+
 }, ($p) => {
 
-  const db = new MetaEngine.classes.PouchDB(config.couch_local + 'meta', {skip_setup: true});
+  const db = new MetaEngine.classes.PouchDB(config.couch_local + 'meta',
+    {
+      auth: {
+        username: process.env.DBUSER,
+        password: process.env.DBPWD
+      },
+      skip_setup: true,
+    });
 
   let _m;
 

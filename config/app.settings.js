@@ -9,7 +9,7 @@ module.exports = function settings(prm) {
   if(!prm) {
     prm = {};
   };
-  
+
   return Object.assign(prm, {
 
     // разделитель для localStorage
@@ -33,14 +33,7 @@ module.exports = function settings(prm) {
 
     use_meta: false,
 
-    // авторизация couchdb
-    user_node: {
-      username: process.env.DBUSER || 'admin',
-      password: process.env.DBPWD || 'admin',
-      templates: Boolean(process.env.DBTEMPLATES),
-    },
-
-    // по умолчанию, обращаемся к зоне 21
+    // по умолчанию, обращаемся к зоне adm
     zone: process.env.ZONE || 21,
 
     // расположение rest-сервиса по умолчанию
@@ -77,6 +70,13 @@ module.exports = function settings(prm) {
       killDelay: 10e3           // Delay between shutdown msg to worker and kill, ms
     },
 
+  }, process && process.versions && process.versions.node && {
+    // авторизация couchdb
+    user_node: {
+      username: process.env.DBUSER || 'admin',
+      password: process.env.DBPWD || 'admin',
+      templates: Boolean(process.env.DBTEMPLATES),
+    },
   });
 
 };

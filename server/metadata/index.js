@@ -48,6 +48,9 @@ module.exports = function (runtime) {
     user_log_in(name) {
       log(`logged in ${job_prm.couch_local}, user:${name}, zone:${job_prm.zone}`);
     },
+    on_log_in() {
+      return Promise.resolve();
+    },
     user_log_fault(err) {
       log(`login error ${err}`);
     },

@@ -37,41 +37,53 @@ meta_init($p);
 // скрипт инициализации в привязке к store приложения
 export function init(store) {
 
-  try {
-    const {dispatch} = store;
+  return import('pouchdb-authentication')
+    .then(() => {
+      const {dispatch} = store;
 
-    // подключаем metaMiddleware
-    addMiddleware(metaMiddleware($p));
+      // подключаем metaMiddleware
+      addMiddleware(metaMiddleware($p));
 
-    // сообщяем адаптерам пути, суффиксы и префиксы
-    const {wsql, job_prm, adapters: {pouch}} = $p;
-    if(wsql.get_user_param('couch_path') !== job_prm.couch_local && process.env.NODE_ENV !== 'development') {
-      wsql.set_user_param('couch_path', job_prm.couch_local);
-    }
-    pouch.init(wsql, job_prm);
+      // сообщяем адаптерам пути, суффиксы и префиксы
+      const {wsql, job_prm, adapters: {pouch}, classes} = $p;
+      if(wsql.get_user_param('couch_path') !== job_prm.couch_local && process.env.NODE_ENV !== 'development') {
+        wsql.set_user_param('couch_path', job_prm.couch_local);
+      }
+      pouch.init(wsql, job_prm);
 
-    // выполняем модификаторы
-    modifiers($p, dispatch);
+      pouch.on({
+        on_log_in() {
+          const {auth} = pouch.remote.ram.__opts;
+          pouch.remote.meta = new classes.PouchDB(pouch.props.path + 'meta', {skip_setup: true, auth});
+          Object.defineProperty(pouch.local, 'meta', {get(){ return pouch.remote.meta}});
+          return pouch.remote.meta.info();
+        },
+        pouch_doc_ram_loaded() {
+          pouch.emit('pouch_complete_loaded');
+        },
+      });
 
-    // информируем хранилище о готовности MetaEngine
-    dispatch(metaActions.META_LOADED($p));
 
-    // читаем локальные данные в ОЗУ
-    return $p.adapters.pouch.load_data();
+      // выполняем модификаторы
+      modifiers($p, dispatch);
 
-    // // читаем локальные данные в ОЗУ
-    // pouch.load_changes({docs});
-    // pouch.call_data_loaded({
-    //   total_rows: docs.length,
-    //   docs_written: docs.length,
-    //   page: 1,
-    //   limit: 300,
-    //   start: Date.now(),
-    // });
-  }
-  catch (err) {
-    $p && $p.record_log(err);
-  }
+      // информируем хранилище о готовности MetaEngine
+      dispatch(metaActions.META_LOADED($p));
+
+      // читаем локальные данные в ОЗУ
+      //return $p.adapters.pouch.load_data();
+
+      // // читаем локальные данные в ОЗУ
+      // pouch.load_changes({docs});
+      // pouch.call_data_loaded({
+      //   total_rows: docs.length,
+      //   docs_written: docs.length,
+      //   page: 1,
+      //   limit: 300,
+      //   start: Date.now(),
+      // });
+    })
+    .catch((err) => $p && $p.record_log(err));
 
 }
 
