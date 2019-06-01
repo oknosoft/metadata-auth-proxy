@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 
+import {stitle, description} from './menu_items';
+
 class DumbScreen extends Component {
 
   render() {
@@ -18,10 +20,10 @@ class DumbScreen extends Component {
 
     return <div className='splash' style={{marginTop: top}}>
       <div className="description">
-        <h1 itemProp="name">business-programming</h1>
+        <h1 itemProp="name">{stitle}</h1>
         <p>Категория: <span itemProp="applicationSubCategory">management</span></p>
         <div itemProp="description">
-          <p>Управление бизнесом, ресурсами и потоками задач</p>
+          <p>{description}</p>
         </div>
       </div>
 

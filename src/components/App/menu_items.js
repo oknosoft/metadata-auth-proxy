@@ -12,6 +12,7 @@ import IconRouter from '@material-ui/icons/Router';
 export const stitle = 'auth-proxy';
 export const htitle = 'Администрирование пользователей';
 export const ltitle = 'Пользователи абонентов';
+export const description = 'Администрирование пользователей и отделов абонентов';
 
 const items = [
   {
@@ -111,7 +112,5 @@ export function item_props(path) {
   }
   return res || {};
 }
-
-export const description = 'Администрирование пользователей и отделов абонентов';
 
 export default items;
