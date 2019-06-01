@@ -18,6 +18,9 @@ import modifiers from './modifiers';
 import {addMiddleware} from 'redux-dynamic-middlewares';
 import {metaActions, metaMiddleware} from 'metadata-redux';
 
+import on_log_in from '../../server/metadata/on_log_in';
+import load_ram from './common/load_ram';
+
 // подключаем плагины к MetaEngine
 MetaEngine
   .plugin(plugin_pouchdb)     // подключаем pouchdb-адаптер к прототипу metadata.js
@@ -53,13 +56,10 @@ export function init(store) {
 
       pouch.on({
         on_log_in() {
-          const {auth} = pouch.remote.ram.__opts;
-          pouch.remote.meta = new classes.PouchDB(pouch.props.path + 'meta', {skip_setup: true, auth});
-          Object.defineProperty(pouch.local, 'meta', {get(){ return pouch.remote.meta}});
-          return pouch.remote.meta.info();
+          return on_log_in(pouch, classes);
         },
         pouch_doc_ram_loaded() {
-          pouch.emit('pouch_complete_loaded');
+          load_ram({pouch, job_prm});
         },
       });
 

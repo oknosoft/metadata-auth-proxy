@@ -23,6 +23,7 @@
     "url": "https://github.com/oknosoft/metadata-auth-proxy/issues"
   },
   "homepage": "https://light.oknosoft.ru/adm",
+  "proxy": "http://localhost:3016/",
   "dependencies": {
     "@koa/cors": "^2.2.3",
     "koa": "^2.5.3",

@@ -10,6 +10,7 @@ const settings = require('../../config/app.settings');
 
 // функция инициализации структуры метаданных
 const meta_init = require('./init');
+const on_log_in = require('./on_log_in');
 
 module.exports = function (runtime) {
 
@@ -30,7 +31,7 @@ module.exports = function (runtime) {
   meta_init($p);
 
   // сообщяем адаптерам пути, суффиксы и префиксы
-  const {wsql, job_prm, adapters: {pouch}} = $p;
+  const {wsql, job_prm, adapters: {pouch}, classes} = $p;
   wsql.set_user_param('user_name', user_node.username);
   if(user_node.suffix) {
     pouch.props._suffix = user_node.suffix;
@@ -49,7 +50,7 @@ module.exports = function (runtime) {
       log(`logged in ${job_prm.couch_local}, user:${name}, zone:${job_prm.zone}`);
     },
     on_log_in() {
-      return Promise.resolve();
+      return on_log_in(pouch, classes);
     },
     user_log_fault(err) {
       log(`login error ${err}`);

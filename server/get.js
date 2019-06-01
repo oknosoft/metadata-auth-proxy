@@ -7,8 +7,11 @@
  */
 
 // формирует json описания продукции заказа
-async function calc_order(ctx, next) {
-
+async function ram_data(ctx, next) {
+  switch (ctx.params.ref){
+  case 'all':
+    ctx.body = {ok: true};
+  }
 }
 
 module.exports = function ($p, log) {
@@ -16,8 +19,8 @@ module.exports = function ($p, log) {
 
     try{
       switch (ctx.params.class){
-      case 'doc.calc_order':
-        return await calc_order(ctx, next);
+      case 'ram':
+        return await ram_data(ctx, next);
       default:
         ctx.status = 403;
         ctx.body = {

@@ -40,6 +40,7 @@ class RootProvider extends React.Component {
 
   componentDidMount() {
     // font-awesome, roboto и стили metadata подгрузим асинхронно
+    import('./styles/global.css');
     import('metadata-react/styles/roboto/font.css');
     import('metadata-react/styles/react-data-grid.css');
     import('font-awesome/css/font-awesome.min.css');
@@ -67,6 +68,12 @@ class RootProvider extends React.Component {
 
 RootProvider.childContextTypes = {
   store: PropTypes.object,
-}
+};
 
 render(<RootProvider/>, document.getElementById('root'));
+
+serviceWorker.register({
+  onUpdate() {
+    $p && $p.record_log('Доступен новый контент, обновите страницу');
+  }
+});

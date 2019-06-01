@@ -1,10 +1,12 @@
-
 /**
  * Reducer initial state
  */
+
+import {ltitle} from '../../components/App/menu_items';
+
 export default {
   'common': {
-    title: 'Демо metadata.js',
+    title: ltitle,
   },
   OrderList: {
     state_filter: '',
