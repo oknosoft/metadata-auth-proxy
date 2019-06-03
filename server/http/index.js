@@ -8,15 +8,28 @@
 
 const http = require('http');
 const httpProxy = require('http-proxy');
+const keepAliveAgent = new http.Agent({ keepAlive: true });
 const url = require('url');
 const conf = require('../../config/app.settings')();
+const {name, version} = require('../../package.json');
+
+function setVia(proxyRes, req, res) {
+  const existing = res.getHeader('Via');
+  const viaheader = `${existing ? existing + ', ' : ''} ${name}/${version}`;
+  res.setHeader('Via', viaheader);
+}
 
 module.exports = function (log) {
 
   //
   // Create a proxy server with custom application logic
   //
-  const proxy = httpProxy.createProxyServer({});
+  const proxy = httpProxy.createProxyServer({
+    xfwd: true,
+    agent: keepAliveAgent,
+  });
+
+  proxy.on('proxyRes', setVia);
 
   //
   // Create your custom server and just call `proxy.web()` to proxy
@@ -31,10 +44,33 @@ module.exports = function (log) {
     case 'couchdb':
       // You can define here your custom logic to handle the request
       // and then proxy the request.
-      proxy.web(req, res, {
-        target: `http://cou221:5984${parsed.path.replace('/couchdb', '')}`,
-        ignorePath: true,
-      });
+      if(parsed.query && parsed.query.includes('feed=longpoll')) {
+        const upstreamReq = http.request({
+          method: req.method,
+          headers: req.headers,
+          hostname: 'cou221',
+          port: 5984,
+          path: parsed.path.replace('/couchdb', ''),
+          agent: keepAliveAgent,
+        }, upstreamRes => {
+          for(const header in upstreamRes.headers) {
+            (header.startsWith('x-couch') || header === 'server') && res.setHeader(header, upstreamRes.headers[header]);
+          }
+          setVia(upstreamRes, req, res);
+          upstreamRes.pipe(res);
+        });
+        if(req.method === 'POST') {
+
+        }
+        upstreamReq.end();
+      }
+      else {
+        proxy.web(req, res, {
+          target: `http://cou221:5984${parsed.path.replace('/couchdb', '')}`,
+          ignorePath: true,
+        });
+      }
+
       break;
     case 'adm':
       res.writeHead(200, { 'Content-Type': 'application/json' });
