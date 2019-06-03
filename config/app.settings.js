@@ -4,6 +4,9 @@
  *
  * @param prm {Object} - в свойствах этого объекта определяем параметры работы программы
  */
+
+const is_node = typeof process !== 'undefined' && process.versions && process.versions.node;
+
 module.exports = function settings(prm) {
 
   if(!prm) {
@@ -23,7 +26,7 @@ module.exports = function settings(prm) {
 
     // расположение couchdb для браузера
     get couch_path() {
-      return process && process.versions && process.versions.node ? this.couch_local : '/couchdb/wb_';
+      return is_node ? this.couch_local : '/couchdb/wb_';
     },
 
     // без автономного режима
@@ -47,16 +50,16 @@ module.exports = function settings(prm) {
     },
 
     server: {
-      prefix: '/adm/api',         // Mount path, no trailing slash
-      port: process.env.PORT || 3016,     // Port
-      maxpost: 40 * 1024 * 1024,  // Max size of POST request
+      prefix: '/adm/api',             // Mount path, no trailing slash
+      port: process.env.PORT || 3016, // Port
+      maxpost: 40 * 1024 * 1024,      // Max size of POST request
 
-      rater: {                    // Request rate locker
-        all: {                    // Total requests limit
-          interval: 3,            // Seconds, collect interval
-          limit: 300              // Max requests per interval
+      rater: {                        // Request rate locker
+        all: {                        // Total requests limit
+          interval: 3,                // Seconds, collect interval
+          limit: 300                  // Max requests per interval
         },
-        ip: {                     // Per-ip requests limit
+        ip: {                         // Per-ip requests limit
           interval: 10,
           limit: 100
         }
@@ -70,7 +73,7 @@ module.exports = function settings(prm) {
       killDelay: 10e3           // Delay between shutdown msg to worker and kill, ms
     },
 
-  }, process && process.versions && process.versions.node && {
+  }, is_node && {
     // авторизация couchdb
     user_node: {
       username: process.env.DBUSER || 'admin',

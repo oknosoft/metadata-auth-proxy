@@ -2,7 +2,7 @@
 
 const join = require('url').resolve;
 const rp = require('request-promise-native');
-const requestLib = require('request');
+const request = require('request');
 
 const options = {
   host: 'http://cou221:5984',
@@ -82,7 +82,7 @@ module.exports = function (runtime) {
       }
     }
 
-    const res = (parsedBody || ctx.method === 'GET') ? await rp(opt) : await pipe(ctx.req, opt);
+    const res = ((parsedBody || ctx.method === 'GET') && ctx.query.feed !== 'longpoll') ? await rp(opt) : await pipe(ctx.req, opt);
 
     for (const name in res.headers) {
       // http://stackoverflow.com/questions/35525715/http-get-parse-error-code-hpe-unexpected-content-length
@@ -148,11 +148,11 @@ function getParsedBody(ctx) {
 /**
  * Pipes the incoming request body through request()
  */
-function pipe(incomingRequest, opt) {
+function pipe(req, opt) {
   return new Promise((resolve, reject) => {
-    incomingRequest.pipe(requestLib(opt, (error, response) => {
-      if (error) return reject(error);
+    req.pipe(request(opt, (error, response) => {
+      if(error) return reject(error);
       resolve(response);
-    }))
+    }));
   });
 }

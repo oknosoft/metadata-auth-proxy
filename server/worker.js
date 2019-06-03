@@ -8,21 +8,23 @@
 
 'use strict';
 
-// Koa http server
-const Koa = require('koa');
+// // Koa http server
+// const Koa = require('koa');
+//
+// // Register the cors as Koa middleware
+// const cors = require('@koa/cors');
+//
+// // Static
+// const serve = require('./static');
 
-// Register the cors as Koa middleware
-const cors = require('@koa/cors');
-
-// Static
-const serve = require('./static');
+const http = require('./http');
 
 module.exports = function (runtime) {
 
   // Logger
   const log = require('./logger')(runtime);
 
-  const conf = require('../config/app.settings')()
+  const conf = require('../config/app.settings')();
 
   // Cluster
   if(runtime && runtime.cluster) {
@@ -39,23 +41,25 @@ module.exports = function (runtime) {
     });
   }
 
-  // экземпляр Koa-приложения
-  const app = new Koa();
+  // // экземпляр Koa-приложения
+  // const app = new Koa();
+  //
+  // // добавляем заголовки cors
+  // app.use(cors({credentials: true, maxAge: 600}));
+  //
+  // // статический контент
+  // app.use(serve);
+  //
+  // // методы управления пользователями и репликациями
+  // const router = require('./router')(runtime);
+  // app.use(router.middleware());
+  //
+  // // proxy к серверам couchdb
+  // const proxy = require('./couchdb-proxy')(runtime);
+  // app.use(proxy);
+  //
+  // app.listen(conf.server.port);
 
-  // добавляем заголовки cors
-  app.use(cors({credentials: true, maxAge: 600}));
-
-  // статический контент
-  app.use(serve);
-
-  // методы управления пользователями и репликациями
-  const router = require('./router')(runtime);
-  app.use(router.middleware());
-
-  // proxy к серверам couchdb
-  const proxy = require('./couchdb-proxy')(runtime);
-  app.use(proxy);
-
-  app.listen(conf.server.port);
+  http(log);
 
 }
