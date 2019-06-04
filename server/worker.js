@@ -31,8 +31,12 @@ module.exports = function (runtime) {
     // monitors controllable shutdown
     // and starts shutdown proc
     process.on('message', function (msg) {
-      log(`Worker received ${msg.event} event`);
-      if(msg && msg.event == 'shutdown') runtime.cluster.worker.kill();
+      if(msg.event) {
+        log(`Worker received ${msg.event} event`);
+        if(msg && msg.event == 'shutdown') {
+          runtime.cluster.worker.kill();
+        }
+      }
     });
 
     process.on('unhandledRejection', error => {

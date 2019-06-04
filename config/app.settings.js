@@ -79,6 +79,7 @@ module.exports = function settings(prm) {
       username: process.env.DBUSER || 'admin',
       password: process.env.DBPWD || 'admin',
       templates: Boolean(process.env.DBTEMPLATES),
+      secret: process.env.COUCHSECRET,
     },
   });
 

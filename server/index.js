@@ -11,6 +11,7 @@ const worker = require('./worker'),
     cluster: require('cluster'),
     root: __dirname
   },
+  {RateLimiterClusterMaster} = require('rate-limiter-flexible'),
   conf = require('../config/app.settings')(),
   log = require('./logger')(runtime);
 
@@ -34,6 +35,9 @@ if (runtime.cluster.isMaster) {
   fs.watch(require.resolve('../config/app.settings'), (event, filename) => {
     _restart('Config changed');
   });
+
+  // Doesn't require any options, it is only storage and messages handler
+  new RateLimiterClusterMaster();
 
   // Fork workers
   for (let i = 0; i < cpus; i++) {

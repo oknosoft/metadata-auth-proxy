@@ -6,7 +6,7 @@
  * Created by Evgeniy Malyarov on 05.02.2019.
  */
 
-const getBody = require('./body');
+const getBody = require('./getBody');
 
 async function calc_order_sent(ctx, next, $p) {
   const {cat, doc, enm, Editor, utils: {moment}} = $p;
