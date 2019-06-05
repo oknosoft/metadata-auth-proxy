@@ -9,17 +9,19 @@
 const http = require('http');
 const url = require('url');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
-const conf = require('../../config/app.settings')();
 
+const {end404} = require('./end');
 
-module.exports = function (log) {
+module.exports = function ($p, log) {
 
-  const couchdbProxy = require('./couchdb-proxy')(log);
+  const couchdbProxy = require('./couchdb-proxy')($p, log);
+  const adm = require('./adm')($p, log);
+  const conf = require('../../config/app.settings')();
 
-  const rateLimiter = new RateLimiterCluster({
-    keyPrefix: 'limiter', // Must be unique for each limiter
-    points: 100,
-    duration: 2,
+  const ipLimiter = new RateLimiterCluster({
+    keyPrefix: 'ip', // Must be unique for each limiter
+    points: conf.server.rater.ip.limit,
+    duration: conf.server.rater.ip.interval,
     timeoutMs: 3000 // Promise is rejected, if master doesn't answer for 3 secs
   });
 
@@ -32,7 +34,7 @@ module.exports = function (log) {
 
     const {remotePort, remoteAddress} = res.socket;
 
-    rateLimiter.consume(remoteAddress, 1) // consume 2 points
+    ipLimiter.consume(remoteAddress, 1) // consume 1 points
       .then((rateLimiterRes) => {
 
         const parsed = req.parsed = url.parse(req.url);
@@ -40,31 +42,30 @@ module.exports = function (log) {
 
         switch (parsed.paths[0]) {
         case 'couchdb':
-          couchdbProxy(req, res);
-          break;
+          return couchdbProxy(req, res);
 
         case 'adm':
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end('{ok: true}', 'utf-8');
-          break;
+          return adm(req, res);
 
         default:
-          res.writeHead(404, { 'Content-Type': 'application/json' });
-          res.end(`{
-    "status": 404,
-    "message": "path '${parsed.paths[0]}' not available"\n}`, 'utf-8');
+          end404(res, parsed.paths[0]);
         }
 
       })
       .catch((rateLimiterRes) => {
-        res.writeHead(429, { 'Content-Type': 'application/json' });
-        res.end(`{
-    "status": 429,
-    "message": "Too many requests"\n}`, 'utf-8');
+        if(!res.finished) {
+          const body = {
+            error: true,
+            status: 429,
+            message: `Too many requests`,
+          };
+          res.statusCode = body.status;
+          res.setHeader('Content-Type', 'application/json');
+          res.end(JSON.stringify(body));
+        }
       });
   });
 
-  log(`listening on port ${conf.server.port}`);
   server.listen(conf.server.port);
 
 };

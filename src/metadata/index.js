@@ -5,6 +5,7 @@ import plugin_pouchdb from 'metadata-pouchdb';
 import plugin_ui from 'metadata-abstract-ui';
 import plugin_ui_tabulars from 'metadata-abstract-ui/tabulars';
 import plugin_react from 'metadata-react/plugin';
+import adapter_memory from 'pouchdb-adapter-memory';
 
 // функция установки параметров сеанса
 import settings from '../../config/app.settings';
@@ -52,14 +53,20 @@ export function init(store) {
       if(wsql.get_user_param('couch_path') !== job_prm.couch_local && process.env.NODE_ENV !== 'development') {
         wsql.set_user_param('couch_path', job_prm.couch_local);
       }
+
+      classes.PouchDB.plugin(adapter_memory);
+
       pouch.init(wsql, job_prm);
 
       pouch.on({
         on_log_in() {
-          return on_log_in(pouch, classes);
+          return on_log_in({pouch, classes})
+            .then(() => {
+              load_ram({pouch, job_prm});
+            });
         },
         pouch_doc_ram_loaded() {
-          load_ram({pouch, job_prm});
+          pouch.emit('pouch_complete_loaded');
         },
       });
 

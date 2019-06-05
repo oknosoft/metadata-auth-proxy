@@ -31,7 +31,7 @@ module.exports = function (runtime) {
   meta_init($p);
 
   // сообщяем адаптерам пути, суффиксы и префиксы
-  const {wsql, job_prm, adapters: {pouch}, classes} = $p;
+  const {wsql, job_prm, adapters: {pouch}, classes, cat} = $p;
   wsql.set_user_param('user_name', user_node.username);
   if(user_node.suffix) {
     pouch.props._suffix = user_node.suffix;
@@ -50,7 +50,7 @@ module.exports = function (runtime) {
       log(`logged in ${job_prm.couch_local}, user:${name}, zone:${job_prm.zone}`);
     },
     on_log_in() {
-      return on_log_in(pouch, classes);
+      return on_log_in({pouch, classes, job_prm, cat});
     },
     user_log_fault(err) {
       log(`login error ${err}`);
@@ -86,7 +86,7 @@ module.exports = function (runtime) {
   // загружаем кешируемые справочники в ram и начинаем следить за изменениями ram
   pouch
     .log_in(user_node.username, user_node.password)
-    .then(() => pouch.load_data());
+    .then(() => pouch.load_data(pouch.remote.ram));
 
   return $p;
 }

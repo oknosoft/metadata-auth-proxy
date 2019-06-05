@@ -13,7 +13,8 @@ export default function load_ram({pouch, job_prm}) {
     credentials: 'include',
     headers: {Authorization: 'Basic ' + btoa(unescape(encodeURIComponent(auth.username + ':' + auth.password)))},
   })
+    .then((res) => res.json())
     .then((res) => {
-      pouch.emit('pouch_complete_loaded');
+      pouch.load_changes(res);
     });
 }

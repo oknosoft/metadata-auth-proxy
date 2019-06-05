@@ -23,7 +23,7 @@ const headerFields = {
   }
 };
 
-module.exports = function (log) {
+module.exports = function ($p, log) {
 
   //
   // Create a proxy server with custom application logic

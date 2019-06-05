@@ -38,7 +38,7 @@ module.exports = function (runtime) {
   const $p = metadata(runtime);
 
   router.loadMethods()
-    .get('/:class/:ref', limiter, get($p, log))
+    .adm('/:class/:ref', limiter, get($p, log))
     .post('/:class/:ref', limiter, post($p, log));
   return router;
 

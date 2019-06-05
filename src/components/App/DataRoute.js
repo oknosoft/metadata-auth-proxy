@@ -4,7 +4,7 @@ import {Switch, Route} from 'react-router';
 import qs from 'qs';
 
 import {withObj} from 'metadata-redux';
-import NeedAuth, {ltitle} from 'metadata-react/App/NeedAuth'; // страница "необходима авторизация"
+import NeedAuth from 'metadata-react/App/NeedAuth'; // страница "необходима авторизация"
 
 import NotFound from '../Markdown/NotFound';
 
@@ -37,7 +37,6 @@ class DataRoute extends Component {
         <NeedAuth
           handleNavigate={handlers.handleNavigate}
           handleIfaceState={handlers.handleIfaceState}
-          title={ltitle}
           offline={couch_direct && offline}
         />
       );

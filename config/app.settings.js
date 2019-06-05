@@ -15,6 +15,8 @@ module.exports = function settings(prm) {
 
   return Object.assign(prm, {
 
+    is_node,
+
     // разделитель для localStorage
     local_storage_prefix: 'wb_',
 
@@ -34,6 +36,13 @@ module.exports = function settings(prm) {
 
     pouch_filter: {},
 
+    // ram не реплицируем
+    noreplicate: ['ram'],
+
+    // ram держим в озу - конфиденциальные хвосты в idb нам не нужны
+    couch_memory: ['ram'],
+
+    // на самом деле, базу meta используем, но подключим руками, а не инитом движка
     use_meta: false,
 
     // по умолчанию, обращаемся к зоне adm
@@ -56,12 +65,12 @@ module.exports = function settings(prm) {
 
       rater: {                        // Request rate locker
         all: {                        // Total requests limit
-          interval: 3,                // Seconds, collect interval
-          limit: 300                  // Max requests per interval
+          interval: 4,                // Seconds, collect interval
+          limit: 1000,                // Max requests per interval
         },
         ip: {                         // Per-ip requests limit
-          interval: 10,
-          limit: 100
+          interval: 1,
+          limit: 100,
         }
       }
     },

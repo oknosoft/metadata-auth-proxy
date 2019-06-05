@@ -24,7 +24,7 @@ import Settings from '../Settings';                 // страница наст
 
 
 import withStyles from './styles';
-import compose from 'recompose/compose';
+import {compose} from 'redux';
 
 import items, {item_props, stitle} from './menu_items'; // массив элементов меню и метод для вычисления need_meta, need_user по location.pathname
 
@@ -116,7 +116,7 @@ class AppView extends Component {
       }
 
       let need_auth = meta_loaded && state.need_user && ((!user.try_log_in && !user.logged_in) || (couch_direct && offline));
-      if(need_auth && !couch_direct && $p.current_user && $p.current_user.name == user.name) {
+      if(need_auth && !couch_direct && props.complete_loaded && $p.current_user && $p.current_user.name == user.name) {
         need_auth = false;
       }
 
