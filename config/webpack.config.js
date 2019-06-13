@@ -581,13 +581,13 @@ module.exports = function(webpackEnv) {
           navigateFallback: publicUrl + '/index.html',
           navigateFallbackBlacklist: [
             // Exclude URLs starting with /_, as they're likely an API call
-            new RegExp('^(/_|/auth|/user|/couchdb)'),
+            new RegExp('^(/_|/auth|/user|/couchdb|/r/)'),
             // Exclude URLs containing a dot, as they're likely a resource in
             // public/ and not a SPA route
             new RegExp('/[^/]+\\.[^/]+$'),
           ],
           // дополнительные скрипты сервисворкера
-          importScripts: ['sw-ext.js'],
+          //importScripts: ['sw-ext.js'],
         }),
       // TypeScript type checking
       useTypeScript &&

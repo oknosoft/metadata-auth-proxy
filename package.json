@@ -1,6 +1,6 @@
 {
   "name": "metadata-auth-proxy",
-  "version": "2.0.1",
+  "version": "0.0.2",
   "description": "Сервис администрирования пользователей",
   "repository": {
     "type": "git",
@@ -26,11 +26,11 @@
   "proxy": "http://localhost:3016/",
   "dependencies": {
     "http-proxy": "^1.17.0",
-    "metadata-abstract-ui": "2.0.20-beta.1",
-    "metadata-core": "2.0.20-beta.1",
-    "metadata-pouchdb": "2.0.20-beta.1",
-    "metadata-react": "2.0.20-beta.1",
-    "metadata-redux": "2.0.20-beta.1",
+    "metadata-abstract-ui": "2.0.20-beta.3",
+    "metadata-core": "2.0.20-beta.3",
+    "metadata-pouchdb": "2.0.20-beta.3",
+    "metadata-react": "2.0.20-beta.3",
+    "metadata-redux": "2.0.20-beta.3",
     "passport-facebook": "^3.0.0",
     "passport-github": "^1.1",
     "passport-google-oauth": "^2.0",
@@ -81,7 +81,7 @@
     "postcss-normalize": "7.0.1",
     "postcss-preset-env": "6.6.0",
     "postcss-safe-parser": "4.0.1",
-    "raw-loader": "^2.0.0",
+    "raw-loader": "^3.0.0",
     "react": "^16.8.6",
     "react-app-polyfill": "^1.0.1",
     "react-dev-utils": "^9.0.1",

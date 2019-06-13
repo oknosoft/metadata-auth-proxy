@@ -57,10 +57,7 @@ $p.wsql.init((prm) => {
 
   const db = new MetaEngine.classes.PouchDB(config.couch_local + 'meta',
     {
-      auth: {
-        username: process.env.DBUSER,
-        password: process.env.DBPWD
-      },
+      auth: config.user_node,
       skip_setup: true,
     });
 
@@ -73,7 +70,6 @@ $p.wsql.init((prm) => {
     return db.get('meta')
   })
     .catch((err) => {
-    debug('Не удалось получить объект meta из CouchDB\nПроверьте логин, пароль и строку подключения');
     debug('Не удалось получить объект meta из CouchDB\nПроверьте логин, пароль и строку подключения');
     debug(err);
     process.exit(1);

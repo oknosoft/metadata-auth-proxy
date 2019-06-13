@@ -7,11 +7,7 @@
 
 const is_node = typeof process !== 'undefined' && process.versions && process.versions.node;
 
-module.exports = function settings(prm) {
-
-  if(!prm) {
-    prm = {};
-  };
+module.exports = function settings(prm = {}) {
 
   return Object.assign(prm, {
 

@@ -10,12 +10,13 @@ const http = require('http');
 const url = require('url');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
 
-const {end404} = require('./end');
+const {end401, end404, end500} = require('./end');
 
 module.exports = function ($p, log) {
 
   const couchdbProxy = require('./couchdb-proxy')($p, log);
   const adm = require('./adm')($p, log);
+  const auth = require('../auth')($p, log);
   const conf = require('../../config/app.settings')();
 
   const ipLimiter = new RateLimiterCluster({
@@ -34,23 +35,32 @@ module.exports = function ($p, log) {
 
     const {remotePort, remoteAddress} = res.socket;
 
-    ipLimiter.consume(remoteAddress, 1) // consume 1 points
+    // проверяем лимит запросов в секунду
+    ipLimiter.consume(remoteAddress, 1)
       .then((rateLimiterRes) => {
 
-        const parsed = req.parsed = url.parse(req.url);
-        parsed.paths = parsed.pathname.replace('/', '').split('/');
+        // пытаемся авторизовать пользователя
+        return auth(req)
+          .then((token) => {
 
-        switch (parsed.paths[0]) {
-        case 'couchdb':
-          return couchdbProxy(req, res);
+            const parsed = req.parsed = url.parse(req.url);
+            parsed.paths = parsed.pathname.replace('/', '').split('/');
 
-        case 'adm':
-          return adm(req, res);
+            switch (parsed.paths[0]) {
+            case 'couchdb':
+              return couchdbProxy(req, res);
 
-        default:
-          end404(res, parsed.paths[0]);
-        }
+            case 'adm':
+              return adm(req, res);
 
+            default:
+              end404(res, parsed.paths[0]);
+            }
+
+          })
+          .catch((err) => {
+            end401({res, err, log});
+          });
       })
       .catch((rateLimiterRes) => {
         if(!res.finished) {

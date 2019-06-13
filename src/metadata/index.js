@@ -6,6 +6,7 @@ import plugin_ui from 'metadata-abstract-ui';
 import plugin_ui_tabulars from 'metadata-abstract-ui/tabulars';
 import plugin_react from 'metadata-react/plugin';
 import adapter_memory from 'pouchdb-adapter-memory';
+import proxy_login from './couchdb/proxy';
 
 // функция установки параметров сеанса
 import settings from '../../config/app.settings';
@@ -41,56 +42,54 @@ meta_init($p);
 // скрипт инициализации в привязке к store приложения
 export function init(store) {
 
-  return import('pouchdb-authentication')
-    .then(() => {
-      const {dispatch} = store;
+  const {dispatch} = store;
 
-      // подключаем metaMiddleware
-      addMiddleware(metaMiddleware($p));
+  // подключаем metaMiddleware
+  addMiddleware(metaMiddleware($p));
 
-      // сообщяем адаптерам пути, суффиксы и префиксы
-      const {wsql, job_prm, adapters: {pouch}, classes} = $p;
-      if(wsql.get_user_param('couch_path') !== job_prm.couch_local && process.env.NODE_ENV !== 'development') {
-        wsql.set_user_param('couch_path', job_prm.couch_local);
-      }
+  // сообщяем адаптерам пути, суффиксы и префиксы
+  const {wsql, job_prm, adapters: {pouch}, classes} = $p;
+  if(wsql.get_user_param('couch_path') !== job_prm.couch_local && process.env.NODE_ENV !== 'development') {
+    wsql.set_user_param('couch_path', job_prm.couch_local);
+  }
 
-      classes.PouchDB.plugin(adapter_memory);
+  classes.PouchDB
+    .plugin(adapter_memory)
+    .plugin(proxy_login);
 
-      pouch.init(wsql, job_prm);
+  pouch.init(wsql, job_prm);
 
-      pouch.on({
-        on_log_in() {
-          return on_log_in({pouch, classes})
-            .then(() => {
-              load_ram({pouch, job_prm});
-            });
-        },
-        pouch_doc_ram_loaded() {
-          pouch.emit('pouch_complete_loaded');
-        },
-      });
+  pouch.on({
+    on_log_in() {
+      return on_log_in({pouch, classes})
+        .then(() => {
+          load_ram({pouch, job_prm});
+        });
+    },
+    pouch_doc_ram_loaded() {
+      pouch.emit('pouch_complete_loaded');
+    },
+  });
 
 
-      // выполняем модификаторы
-      modifiers($p, dispatch);
+  // выполняем модификаторы
+  modifiers($p, dispatch);
 
-      // информируем хранилище о готовности MetaEngine
-      dispatch(metaActions.META_LOADED($p));
+  // информируем хранилище о готовности MetaEngine
+  dispatch(metaActions.META_LOADED($p));
 
-      // читаем локальные данные в ОЗУ
-      //return $p.adapters.pouch.load_data();
+  // читаем локальные данные в ОЗУ
+  //return $p.adapters.pouch.load_data();
 
-      // // читаем локальные данные в ОЗУ
-      // pouch.load_changes({docs});
-      // pouch.call_data_loaded({
-      //   total_rows: docs.length,
-      //   docs_written: docs.length,
-      //   page: 1,
-      //   limit: 300,
-      //   start: Date.now(),
-      // });
-    })
-    .catch((err) => $p && $p.record_log(err));
+  // // читаем локальные данные в ОЗУ
+  // pouch.load_changes({docs});
+  // pouch.call_data_loaded({
+  //   total_rows: docs.length,
+  //   docs_written: docs.length,
+  //   page: 1,
+  //   limit: 300,
+  //   start: Date.now(),
+  // });
 
 }
 
