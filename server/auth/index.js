@@ -3,7 +3,6 @@
  */
 
 const user_pass_regexp = /^([^:]*):(.*)$/;
-
 const cache = require('./cache');
 
 // контекст авторизации
@@ -13,6 +12,7 @@ const auth = {
 
   },
 };
+const oauth = require('./oauth')(auth);
 
 // создаём методы провайдеров
 for(const provider of auth.settings.providers) {
@@ -24,8 +24,9 @@ function decodeBase64 (str) {
 }
 
 function extractAuth(req) {
-  const {authorization} = req.headers;
+  let {authorization} = req.headers;
   if(authorization) {
+    authorization = authorization.replace('Basic', 'Google');
     for(const provider in auth.providers) {
       const settings = auth.settings[provider];
       const {authPrefix} = settings;
@@ -59,7 +60,11 @@ module.exports = function ({cat}, log) {
    * @param req
    * @return {Promise<string>}
    */
-  return async (req) => {
+  return async (req, res) => {
+
+    if(req.parsed.paths[0] === 'auth') {
+      return oauth(req, res);
+    }
 
     // проверяем авторизацию
     const authorization = extractAuth(req);
@@ -69,7 +74,7 @@ module.exports = function ({cat}, log) {
 
     let token = cache.get(authorization.key);
     if(!token) {
-      token = await authorization.method();
+      token = await authorization.method(req, res);
       if(!token) {
         throw new TypeError(`Неверный логин/пароль для провайдера ${authorization.provider}`);
       }

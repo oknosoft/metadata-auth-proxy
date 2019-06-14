@@ -8,6 +8,7 @@
 
 const http = require('http');
 const url = require('url');
+const qs = require('qs');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
 
 const {end401, end404, end500} = require('./end');
@@ -39,28 +40,30 @@ module.exports = function ($p, log) {
     ipLimiter.consume(remoteAddress, 1)
       .then((rateLimiterRes) => {
 
+        const parsed = req.parsed = url.parse(req.url);
+        parsed.paths = parsed.pathname.replace('/', '').split('/');
+        req.query = qs.parse(parsed.query);
+
         // пытаемся авторизовать пользователя
-        return auth(req)
+        return auth(req, res)
           .then((token) => {
+            if(token) {
+              switch (parsed.paths[0]) {
+              case 'couchdb':
+                return couchdbProxy(req, res);
 
-            const parsed = req.parsed = url.parse(req.url);
-            parsed.paths = parsed.pathname.replace('/', '').split('/');
+              case 'adm':
+                return adm(req, res);
 
-            switch (parsed.paths[0]) {
-            case 'couchdb':
-              return couchdbProxy(req, res);
-
-            case 'adm':
-              return adm(req, res);
-
-            default:
-              end404(res, parsed.paths[0]);
+              default:
+                end404(res, parsed.paths[0]);
+              }
             }
-
           })
           .catch((err) => {
             end401({res, err, log});
           });
+
       })
       .catch((rateLimiterRes) => {
         end500({res, log, err: {
