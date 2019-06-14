@@ -63,16 +63,11 @@ module.exports = function ($p, log) {
           });
       })
       .catch((rateLimiterRes) => {
-        if(!res.finished) {
-          const body = {
+        end500({res, log, err: {
             error: true,
             status: 429,
             message: `Too many requests`,
-          };
-          res.statusCode = body.status;
-          res.setHeader('Content-Type', 'application/json');
-          res.end(JSON.stringify(body));
-        }
+          }});
       });
   });
 

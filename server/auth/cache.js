@@ -4,7 +4,7 @@
  */
 
 const liveTime = 300000;
-const cache = new Object(null);
+const cache = Object.create(null);
 
 function clearCache(force) {
   const now = Date.now();

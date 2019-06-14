@@ -36,7 +36,7 @@ module.exports = function settings(prm = {}) {
     noreplicate: ['ram'],
 
     // ram держим в озу - конфиденциальные хвосты в idb нам не нужны
-    couch_memory: ['ram'],
+    couch_memory: is_node ? [] : ['ram'],
 
     // на самом деле, базу meta используем, но подключим руками, а не инитом движка
     use_meta: false,

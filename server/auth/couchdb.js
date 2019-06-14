@@ -7,6 +7,15 @@
  * Created by Evgeniy Malyarov on 13.06.2019.
  */
 
+const fetch = require('node-fetch');
+
 module.exports = function () {
-  return Promise.resolve();
+
+  const authorization = this.settings.authPrefix + this.key;
+  return fetch(this.settings.url, {
+    credentials: 'include',
+    headers: {Accept: 'application/json', authorization},
+  })
+    .then(res => res.json())
+    .then(res => res.ok && `org.couchdb.user:${this.username}`);
 }

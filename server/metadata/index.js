@@ -11,6 +11,8 @@ const settings = require('../../config/app.settings');
 // функция инициализации структуры метаданных
 const meta_init = require('./init');
 const on_log_in = require('./on_log_in');
+const ram_changes = require('./ram_changes');
+const modifiers = require('./modifiers');
 
 module.exports = function (runtime) {
 
@@ -42,7 +44,7 @@ module.exports = function (runtime) {
   pouch.init(wsql, job_prm);
 
   // // подключим модификаторы
-  // modifiers($p);
+  modifiers($p);
 
   // подключаем обработчики событий адаптера данных
   pouch.on({
@@ -65,20 +67,7 @@ module.exports = function (runtime) {
       log(`ready to receive queries, listen on port: ${server.port}`);
     },
     pouch_doc_ram_loaded() {
-      pouch.local.ram.changes({
-        since: 'now',
-        live: true,
-        include_docs: true,
-      })
-        .on('change', (change) => {
-          // формируем новый
-          pouch.load_changes({docs: [change.doc]});
-        })
-        .on('error', (err) => {
-          log(`change error ${err}`);
-        });
-      log(`loadind to ram: READY`);
-      pouch.emit('pouch_complete_loaded');
+      ram_changes({pouch, log});
     },
   });
 

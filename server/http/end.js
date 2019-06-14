@@ -7,19 +7,22 @@
  */
 
 function end(res, body) {
-  res.statusCode = body.status;
-  res.setHeader('Content-Type', 'application/json');
-  res.end(JSON.stringify(body));
+  if(!res.finished) {
+    res.statusCode = body.status;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(body));
+  }
 }
 
 module.exports = {
   end401({res, err, log}) {
+    log(err);
     end(res, {
       error: true,
       status: 401,
-      message: `Unauthorized\n${err.stack || err.message || ''}`,
+      message: `Unauthorized\n${err.message || ''}`,
     });
-    log(err);
+
   },
   end404(res, path) {
     end(res, {
@@ -29,11 +32,11 @@ module.exports = {
     });
   },
   end500({res, err, log}) {
+    log(err);
     end(res, {
       error: true,
       status: err.status || 500,
-      message: err.stack || err.message,
+      message: err.message || 'unknown error',
     });
-    log(err);
   }
 };

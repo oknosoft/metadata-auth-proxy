@@ -27,7 +27,8 @@ function extractAuth(req) {
   const {authorization} = req.headers;
   if(authorization) {
     for(const provider in auth.providers) {
-      const {authPrefix} = auth.settings[provider];
+      const settings = auth.settings[provider];
+      const {authPrefix} = settings;
       if(authorization.startsWith(authPrefix)) {
         try{
           const key = authorization.substr(authPrefix.length);
@@ -35,7 +36,7 @@ function extractAuth(req) {
           if(decoded) {
             return {
               provider,
-              authPrefix,
+              settings,
               key,
               username: decoded[1],
               password: decoded[2],
@@ -51,7 +52,7 @@ function extractAuth(req) {
   }
 }
 
-module.exports = function ($p, log) {
+module.exports = function ({cat}, log) {
 
   /**
    * Получает на вход httpRequest и возвращает Promise с идентификатором пользователя или reject, усли авторизоваться не удалось
@@ -59,8 +60,6 @@ module.exports = function ($p, log) {
    * @return {Promise<string>}
    */
   return async (req) => {
-
-    //return true;
 
     // проверяем авторизацию
     const authorization = extractAuth(req);
@@ -71,11 +70,20 @@ module.exports = function ($p, log) {
     let token = cache.get(authorization.key);
     if(!token) {
       token = await authorization.method();
+      if(!token) {
+        throw new TypeError(`Неверный логин/пароль для провайдера ${authorization.provider}`);
+      }
+      cache.put(authorization.key, token);
     }
-    if(!token) {
-      throw new TypeError(`Неверный логин/пароль для провайдера ${authorization.provider}`);
+    const user = cat.users.by_auth(token);
+    if(!user) {
+      throw new TypeError(`Пользователь '${authorization.username}' авторизован провайдером '${authorization.provider
+      }', но отсутствует в справочнике 'Пользователи'`);
     }
-    cache.put(authorization.key, token);
-    return token;
+    if(!user.roles || !user.roles.includes('ram_reader') || user.invalid) {
+      throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
+    }
+
+    return user;
   }
 }

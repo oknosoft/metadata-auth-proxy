@@ -18,8 +18,6 @@ module.exports = function on_log_in({pouch, classes, job_prm, cat}) {
     :
     meta
       .then(() => {
-        // спецбаза пользователей
-        pouch.remote.users = new classes.PouchDB(pouch.props.path + 'users', opts);
 
         // грузим из meta
         let res = Promise.resolve();
