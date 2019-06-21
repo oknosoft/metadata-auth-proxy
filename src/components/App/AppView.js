@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import {Switch, Route} from 'react-router';
 import Typography from '@material-ui/core/Typography';
@@ -9,7 +9,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Snack from 'metadata-react/App/Snack';       // сообщения в верхней части страницы (например, обновить после первого запуска)
 import Alert from 'metadata-react/App/Alert';       // диалог сообщения пользователю
 import Confirm from 'metadata-react/App/Confirm';   // диалог вопросов пользователю (да, нет)
-import FrmLogin from 'metadata-react/FrmLogin';     // логин и свойства подключения
+import FrmLogin from '../Login/FrmLogin';     // логин и свойства подключения
 import NeedAuth from 'metadata-react/App/NeedAuth'; // страница "необхлдима авторизация"
 import AppDrawer from 'metadata-react/App/AppDrawer';
 import HeaderButtons from 'metadata-react/Header/HeaderButtons';
@@ -29,7 +29,7 @@ import {compose} from 'redux';
 import items, {item_props, stitle} from './menu_items'; // массив элементов меню и метод для вычисления need_meta, need_user по location.pathname
 
 // основной layout
-class AppView extends Component {
+class AppView extends React.Component {
 
   constructor(props, context) {
     super(props, context);

@@ -31,28 +31,39 @@ function redirect(url, status) {
   this.end();
 };
 
-const html = `<!DOCTYPE html>
+function fin(res, err, user, info) {
+  if(err) {
+    throw err;
+  }
+  user.issued = Date.now();
+
+  const html = `<!DOCTYPE html>
 <html lang="ru">
 <head>
-    <title><%= error ? 'Ошибка авторизации' : 'Успешная авторизация' %></title>
+    <title>${err ? 'Ошибка авторизации' : 'Успешная авторизация'}</title>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 </head>
 <body>
 <script type="text/javascript">
-    if (window.opener) {
-        window.opener.focus();
-        var session = <%- JSON.stringify(session) %>;
-        var error = <%- JSON.stringify(error) %>;
-        var link = <%- JSON.stringify(link) %>;
-        if (window.opener.superlogin && window.opener.superlogin.oauthSession) {
-            window.opener.superlogin.oauthSession(error, session, link);
-        }
+  const {opener} = window;
+  if (opener) {
+    opener.focus();
+    const err = ${JSON.stringify(err)};
+    const user = ${JSON.stringify(user)};    
+    const info = ${JSON.stringify(info)};
+    if (opener.superlogin && opener.superlogin.oauthSession) {
+      opener.superlogin.oauthSession(err, user, info);
     }
-    window.close();
+  }
+  window.close();
 </script>
 </body>
 </html>`;
+
+  res.write(html);
+  res.end();
+}
 
 module.exports = function (auth) {
   return function (req, res) {
@@ -71,14 +82,6 @@ module.exports = function (auth) {
         if(err) {
           throw err;
         }
-        // if(!user) {
-        //   err = new TypeError(info);
-        //   err.status = 401;
-        //   throw err;
-        // }
-        // res.write(JSON.stringify(user));
-        // res.setHeader('Content-Type', 'application/json');
-        // res.end();
       });
       break;
 
@@ -90,15 +93,9 @@ module.exports = function (auth) {
 
     case 'callback':
       method(req, res, {
-        successRedirect: '/auth/google/success',
-        failureRedirect: '/auth/google/failure'
-      }, (err, user, info) => {
-        if(err) {
-          throw err;
-        }
-        res.write(html);
-        res.end();
-      });
+        successRedirect: `/auth/${paths[1]}/success`,
+        failureRedirect: `/auth/${paths[1]}/failure`
+      }, (err, user, info) => fin(res, err, user, info));
       break;
 
     default:

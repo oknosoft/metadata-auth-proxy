@@ -19,7 +19,7 @@ module.exports = {
     authPrefix: 'Google ',
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3016/auth/google/callback',
+    callbackURL: 'http://localhost:3006/auth/google/callback',
     passReqToCallback   : true,
     scope: ['https://www.googleapis.com/auth/profile.emails.read', 'https://www.googleapis.com/auth/userinfo.profile'],
   },

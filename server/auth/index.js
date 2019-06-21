@@ -62,7 +62,9 @@ module.exports = function ({cat}, log) {
    */
   return async (req, res) => {
 
-    if(req.parsed.paths[0] === 'auth' && req.parsed.paths[1] !== 'ldap') {
+    const {paths} = req.parsed;
+
+    if(paths[0] === 'auth' && !['ldap','couchdb'].includes(paths[1])) {
       return oauth(req, res);
     }
 

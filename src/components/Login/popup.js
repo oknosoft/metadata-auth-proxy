@@ -6,11 +6,11 @@
  * Created by Evgeniy Malyarov on 14.06.2019.
  */
 
-export default function oAuthPopup(url, options) {
+export default function oAuthPopup(url, options = {}) {
   return new Promise((resolve, reject) => {
-    this._oauthComplete = false;
+    let _oauthComplete = false;
     options.windowName = options.windowTitle ||	'Social Login';
-    options.windowOptions = options.windowOptions || 'location=0,status=0'; //,width=800,height=600
+    options.windowOptions = options.windowOptions || 'location=0,status=0,directories=no,width=600,height=400';
     const _oauthWindow = window.open(url, options.windowName, options.windowOptions);
 
     if (!_oauthWindow) {
@@ -20,26 +20,24 @@ export default function oAuthPopup(url, options) {
     const _oauthInterval = setInterval(() => {
       if (_oauthWindow.closed) {
         clearInterval(_oauthInterval);
-        if (!this._oauthComplete) {
-          this.authComplete = true;
+        if (!_oauthComplete) {
           reject({ error: 'Authorization cancelled' });
         }
       }
     }, 500);
 
-    window.superlogin = {};
-    window.superlogin.oauthSession = (error, session, link) => {
-      if (!error && session) {
-        session.serverTimeDiff = session.issued - Date.now();
-        this.setSession(session);
-        this._onLogin(session);
-        return resolve(session);
-      } else if (!error && link) {
-        this._onLink(link);
-        return resolve(`${capitalizeFirstLetter(link)} successfully linked.`);
+    window.superlogin = {
+      oauthSession(err, user, info = {}) {
+        if (!err && user) {
+          info.serverTimeDiff = user.issued - Date.now();
+          return resolve({user, info});
+        }
+        else if (!err && info) {
+          return resolve(info);
+        }
+        _oauthComplete = true;
+        return reject(err);
       }
-      this._oauthComplete = true;
-      return reject(error);
     };
   });
 }
