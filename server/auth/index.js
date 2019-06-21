@@ -26,7 +26,7 @@ function decodeBase64 (str) {
 function extractAuth(req) {
   let {authorization} = req.headers;
   if(authorization) {
-    authorization = authorization.replace('Basic', 'Google');
+    authorization = authorization.replace('Basic', 'LDAP');
     for(const provider in auth.providers) {
       const settings = auth.settings[provider];
       const {authPrefix} = settings;
@@ -62,7 +62,7 @@ module.exports = function ({cat}, log) {
    */
   return async (req, res) => {
 
-    if(req.parsed.paths[0] === 'auth') {
+    if(req.parsed.paths[0] === 'auth' && req.parsed.paths[1] !== 'ldap') {
       return oauth(req, res);
     }
 

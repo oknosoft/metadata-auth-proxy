@@ -7,7 +7,7 @@
  */
 
 module.exports = {
-  providers: ['couchdb','google'],
+  providers: ['couchdb','google','ldap'],
   couchdb: {
     url: 'http://cou221:5984/_session',
     authPrefix: 'Basic ',
@@ -23,8 +23,15 @@ module.exports = {
     passReqToCallback   : true,
     scope: ['https://www.googleapis.com/auth/profile.emails.read', 'https://www.googleapis.com/auth/userinfo.profile'],
   },
-  ldapauth: {
+  ldap: {
     authPrefix: 'LDAP ',
+    server: {
+      url: 'ldap://192.168.9.139:389',
+      bindDN: 'cn=admin,dc=ecookna,dc=ru',
+      bindCredentials: process.env.LDAP_PASSWORD,
+      searchBase: 'dc=ecookna,dc=ru',
+      searchFilter: '(cn={{username}})',
+    }
   },
   vkontakte: {
     authPrefix: 'Vkontakte ',

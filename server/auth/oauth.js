@@ -68,7 +68,17 @@ module.exports = function (auth) {
     case '':
     case undefined:
       method(req, res, (err, user, info) => {
-        err = null;
+        if(err) {
+          throw err;
+        }
+        // if(!user) {
+        //   err = new TypeError(info);
+        //   err.status = 401;
+        //   throw err;
+        // }
+        // res.write(JSON.stringify(user));
+        // res.setHeader('Content-Type', 'application/json');
+        // res.end();
       });
       break;
 
