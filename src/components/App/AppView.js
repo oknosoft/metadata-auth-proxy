@@ -128,6 +128,7 @@ class AppView extends React.Component {
               handleIfaceState={props.handleIfaceState}
               title={title}
               offline={couch_direct && offline}
+              ComponentLogin={FrmLogin}
             />
           </div>
         );

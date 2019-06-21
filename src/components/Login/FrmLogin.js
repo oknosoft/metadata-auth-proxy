@@ -12,7 +12,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Creditales from 'metadata-react/FrmLogin/Creditales';
 
-import {FacebookIcon, GoogleIcon, CouchdbIcon} from './icons';
+import {FacebookIcon, GoogleIcon, CouchdbIcon, OfflineIcon, LdapIcon} from './icons';
 import oAuthPopup from './popup';
 
 class FrmLogin extends React.Component {
@@ -101,13 +101,19 @@ class FrmLogin extends React.Component {
           variant="contained"
           size="small"
           onClick={() => this.setState({provider: 'ldap'})}>
-          LDAP
+          <LdapIcon style={{fontSize: 30}}/> LDAP
         </Button>
         <Button
           variant="contained"
           size="small"
           onClick={() => this.handleLogin('google')}>
           <GoogleIcon style={{fontSize: 30}}/> Google
+        </Button>
+        <Button
+          variant="contained"
+          size="small"
+          onClick={() => this.handleLogin('google')}>
+          <OfflineIcon style={{fontSize: 30}}/> Автономный режим
         </Button>
       </div>;
     }
