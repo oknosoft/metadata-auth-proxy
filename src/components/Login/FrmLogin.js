@@ -11,9 +11,9 @@ import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import Creditales from 'metadata-react/FrmLogin/Creditales';
-
+import {withMeta} from 'metadata-redux';
 import {FacebookIcon, GoogleIcon, CouchdbIcon, OfflineIcon, LdapIcon} from './icons';
-import oAuthPopup from './popup';
+import withStyles from './styles';
 
 class FrmLogin extends React.Component {
 
@@ -39,43 +39,25 @@ class FrmLogin extends React.Component {
   };
 
   handleLogin = (provider) => {
-    const {state} = this;
+    const {props, state} = this;
     const {login, password} = state;
     if(!provider) {
       provider = state.provider;
     }
-    if(['ldap','couchdb'].includes(provider)){
-      if(login && password) {
-        const opts = {
-          method: 'post',
-          credentials: 'include',
-          headers: {
-            Authorization: `Basic ${btoa(unescape(encodeURIComponent(username + ':' + password)))}`,
-            suffix: _suffix || '0'
-          },
-          body: JSON.stringify(selector)
-        };
-        return fetch(`/auth/${provider}`, opts)
-      }
-    }
-    else {
-      oAuthPopup(`/auth/${provider}`)
-        .then((res) => {
 
-        })
-        .catch((err) => {
+    $p.adapters.pouch.props._auth_provider = provider;
+    props.handleLogin(login, password);
 
-        });
-    }
   };
 
   render() {
-    const {fetching, error, provider, login, password, showPassword} = this.state;
+    const {state: {fetching, error, provider, login, password, showPassword}, props: {classes}} = this;
+    let content;
 
     switch (provider) {
     case 'couchdb':
     case 'ldap':
-      return <Creditales
+      content = <Creditales
         login={login}
         password={password}
         showPassword={showPassword}
@@ -85,40 +67,43 @@ class FrmLogin extends React.Component {
         loginChange={({target}) => this.setState({login: target.value})}
         passwordChange={({target}) => this.setState({password: target.value})}
       />;
+      break;
 
     default:
-      return <div>
+      content = <div>
         <Typography variant="subtitle1" color="primary" gutterBottom>
           Войти с помощью:
         </Typography>
         <Button
+          className={classes.button}
           variant="contained"
-          size="small"
           onClick={() => this.setState({provider: 'couchdb'})}>
-          <CouchdbIcon style={{fontSize: 30}}/> Couchdb
+          <CouchdbIcon className={classes.icon}/> Couchdb
         </Button>
         <Button
+          className={classes.button}
           variant="contained"
-          size="small"
           onClick={() => this.setState({provider: 'ldap'})}>
-          <LdapIcon style={{fontSize: 30}}/> LDAP
+          <LdapIcon className={classes.icon}/> LDAP
         </Button>
         <Button
+          className={classes.button}
           variant="contained"
-          size="small"
           onClick={() => this.handleLogin('google')}>
-          <GoogleIcon style={{fontSize: 30}}/> Google
+          <GoogleIcon className={classes.icon}/> Google
         </Button>
         <Button
+          className={classes.button}
           variant="contained"
-          size="small"
           onClick={() => this.handleLogin('google')}>
-          <OfflineIcon style={{fontSize: 30}}/> Автономный режим
+          <OfflineIcon className={classes.icon}/> Автономный режим
         </Button>
       </div>;
     }
+
+    return <div className={classes.root}>{content}</div>;
   }
 
 }
 
-export default FrmLogin;
+export default withMeta(withStyles(FrmLogin));

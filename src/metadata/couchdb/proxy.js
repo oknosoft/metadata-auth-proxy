@@ -10,6 +10,7 @@ import urlJoin from 'url-join';
 import urlParse from 'url-parse';
 import ajaxCore from 'pouchdb-ajax';
 import {toPromise} from 'pouchdb-utils';
+import oAuthPopup from './popup';
 
 class AuthError extends Error {
   constructor(message) {
@@ -34,17 +35,13 @@ function getBaseUrl(db) {
     url = urlParse(prefix + db.name);
   }
 
-  // Compute parent path for databases not hosted on domain root (see #215)
-  let path = url.pathname;
-  path = path.substr(-1, 1) === '/' ? path.substr(0, -1) : path;
-  const parentPath = path.split('/').slice(0, -1).join('/');
-
-  return url.origin + parentPath;
+  return url.origin;
 }
 
 
 function getSessionUrl(db) {
-  return urlJoin(getBaseUrl(db), '/_session');
+  const {_auth_provider} = db.__opts.owner.props;
+  return urlJoin(getBaseUrl(db), `/auth/${_auth_provider || ''}`);
 }
 
 function getBasicAuthHeaders({prefix = 'Basic ', username, password}) {
@@ -75,19 +72,28 @@ const logIn = toPromise(function (username, password, opts, callback) {
     return callback(new AuthError('this plugin only works for the http/https adapter'));
   }
 
-  if (!username) {
-    return callback(new AuthError('you must provide a username'));
-  } else if (!password) {
-    return callback(new AuthError('you must provide a password'));
+  const prefix = this.__opts.owner.auth_prefix();
+  if(['ldap','basic'].includes(prefix.toLowerCase().trim())){
+    if (!username) {
+      return callback(new AuthError('you must provide a username'));
+    } else if (!password) {
+      return callback(new AuthError('you must provide a password'));
+    }
+
+    const ajaxOpts = Object.assign({
+      method: 'POST',
+      url: getSessionUrl(this),
+      headers: Object.assign({'Content-Type': 'application/json'}, getBasicAuthHeaders({prefix, username, password})),
+      body: {name: username, password: password},
+    }, opts.ajax || {});
+    ajaxCore(ajaxOpts, wrapError(callback));
+  }
+  else {
+    oAuthPopup(getSessionUrl(this))
+      .then((res) => callback(null, res))
+      .catch((err) => callback(err));
   }
 
-  const ajaxOpts = Object.assign({
-    method: 'POST',
-    url: getSessionUrl(this),
-    headers: Object.assign({'Content-Type': 'application/json'}, getBasicAuthHeaders({username, password})),
-    body: {name: username, password: password},
-  }, opts.ajax || {});
-  ajaxCore(ajaxOpts, wrapError(callback));
 });
 
 const logOut = toPromise(function (opts, callback) {
@@ -95,10 +101,11 @@ const logOut = toPromise(function (opts, callback) {
     callback = opts;
     opts = {};
   }
+  const {__opts} = this;
   const ajaxOpts = Object.assign({
     method: 'DELETE',
     url: getSessionUrl(this),
-    headers: getBasicAuthHeaders(this.__opts.auth),
+    headers: getBasicAuthHeaders(Object.assign({prefix: __opts.owner.auth_prefix()}, __opts.auth)),
   }, opts.ajax || {});
   ajaxCore(ajaxOpts, wrapError(callback));
 });

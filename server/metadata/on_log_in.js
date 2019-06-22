@@ -42,4 +42,4 @@ module.exports = function on_log_in({pouch, classes, job_prm, cat}) {
           return null;
         });
       });
-}
+};

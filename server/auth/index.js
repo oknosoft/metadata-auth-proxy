@@ -26,7 +26,7 @@ function decodeBase64 (str) {
 function extractAuth(req) {
   let {authorization} = req.headers;
   if(authorization) {
-    authorization = authorization.replace('Basic', 'LDAP');
+    //authorization = authorization.replace('Basic', 'LDAP');
     for(const provider in auth.providers) {
       const settings = auth.settings[provider];
       const {authPrefix} = settings;
@@ -91,6 +91,13 @@ module.exports = function ({cat}, log) {
       throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
     }
 
-    return user;
+    if(paths[0] === 'auth') {
+      res.setHeader('Content-Type', 'application/json');
+      res.write(JSON.stringify(user));
+      res.end();
+    }
+    else {
+      return user;
+    }
   }
 }

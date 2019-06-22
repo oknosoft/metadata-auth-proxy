@@ -919,6 +919,14 @@ set abonent(v){this._setter('abonent',v)}
 $p.CatUsersSubscribersRow = CatUsersSubscribersRow;
 class CatUsersManager extends CatManager {
 
+  constructor(owner, class_name) {
+    super(owner, class_name);
+    const authenticated = (user) => {
+      return this.create(user);
+    }
+    this.adapter.on({authenticated});
+  }
+
   // пользователей не выгружаем
   unload_obj() {	}
 

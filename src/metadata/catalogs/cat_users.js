@@ -9,6 +9,14 @@
 
 exports.CatUsersManager = class CatUsersManager extends Object {
 
+  constructor(owner, class_name) {
+    super(owner, class_name);
+    const authenticated = (user) => {
+      return this.create(user);
+    }
+    this.adapter.on({authenticated});
+  }
+
   // пользователей не выгружаем
   unload_obj() {	}
 
