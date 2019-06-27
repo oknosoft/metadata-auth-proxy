@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React from 'react';
 import SvgIcon from '@material-ui/core/SvgIcon';
 import {blue, red} from '@material-ui/core/colors';

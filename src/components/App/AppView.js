@@ -9,8 +9,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Snack from 'metadata-react/App/Snack';       // сообщения в верхней части страницы (например, обновить после первого запуска)
 import Alert from 'metadata-react/App/Alert';       // диалог сообщения пользователю
 import Confirm from 'metadata-react/App/Confirm';   // диалог вопросов пользователю (да, нет)
-import FrmLogin from '../Login/FrmLogin';     // логин и свойства подключения
-import NeedAuth from 'metadata-react/App/NeedAuth'; // страница "необхлдима авторизация"
+import Auth from '../Login';                        // форма авторизации
 import AppDrawer from 'metadata-react/App/AppDrawer';
 import HeaderButtons from 'metadata-react/Header/HeaderButtons';
 import {withIfaceAndMeta} from 'metadata-redux';
@@ -97,6 +96,7 @@ class AppView extends React.Component {
     />;
   };
 
+
   render() {
     const {props, state} = this;
     const {classes, handleNavigate, location, snack, alert, confirm, doc_ram_loaded, title, sync_started, fetch, user, couch_direct, offline,
@@ -120,18 +120,15 @@ class AppView extends React.Component {
         need_auth = false;
       }
 
+      const authProps = {
+        handleNavigate: handleNavigate,
+        handleIfaceState: props.handleIfaceState,
+        title,
+        offline: couch_direct && offline,
+      };
+
       if(need_auth) {
-        return (
-          <div style={dstyle}>
-            <NeedAuth
-              handleNavigate={handleNavigate}
-              handleIfaceState={props.handleIfaceState}
-              title={title}
-              offline={couch_direct && offline}
-              ComponentLogin={FrmLogin}
-            />
-          </div>
-        );
+        return <Auth dstyle={dstyle} {...authProps}/>;
       }
 
       if(!location.pathname.match(/\/login$/) && ((state.need_meta && !meta_loaded) || (state.need_user && !props.complete_loaded))) {
@@ -154,7 +151,7 @@ class AppView extends React.Component {
           <Switch key="switch">
             <Route exact path="/" render={this.renderHome}/>
             <Route path="/:area(doc|cat|ireg|cch|rep).:name" render={(props) => wraper(DataRoute, props)}/>
-            <Route path="/login" render={(props) => wraper(FrmLogin, props)}/>
+            <Route path="/login" render={() => <Auth {...authProps}/>}/>
             <Route path="/settings" render={(props) => wraper(Settings, props)}/>
             <Route render={(props) => wraper(MarkdownRoute, props)}/>
           </Switch>

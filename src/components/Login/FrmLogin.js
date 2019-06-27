@@ -50,6 +50,10 @@ class FrmLogin extends React.Component {
 
   };
 
+  footer() {
+
+  }
+
   render() {
     const {state: {fetching, error, provider, login, password, showPassword}, props: {classes}} = this;
     let content;
@@ -105,5 +109,9 @@ class FrmLogin extends React.Component {
   }
 
 }
+
+FrmLogin.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
 
 export default withMeta(withStyles(FrmLogin));
