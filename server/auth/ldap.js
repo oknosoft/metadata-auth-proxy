@@ -25,12 +25,13 @@ module.exports = function (req, res) {
     req.query.password = this.password;
     passport.authenticate('ldapauth', {session: false}, (err, user, info) => {
       if(err) {
-        reject(err);
+        return reject(err);
       }
       if(!user) {
-        reject(new TypeError(info.message));
+        return reject(new TypeError(info.message));
       }
-      resolve(user.dn);
+      // убираем ou из идентификатора
+      resolve(user.dn.split(',').filter((part) => part.toLowerCase().startsWith('cn') || part.toLowerCase().startsWith('dc')).join(','));
     })(req, res);
   });
 }

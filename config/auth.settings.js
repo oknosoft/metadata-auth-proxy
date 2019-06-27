@@ -26,8 +26,8 @@ module.exports = {
   ldap: {
     authPrefix: 'LDAP ',
     server: {
-      url: 'ldap://192.168.9.139:389',
-      bindDN: 'cn=admin,dc=ecookna,dc=ru',
+      url: 'ldap://217.197.251.200:65389',
+      bindDN: 'cn=ldap_auth,ou=Service Accounts SCOM,dc=ecookna,dc=ru',
       bindCredentials: process.env.LDAP_PASSWORD,
       searchBase: 'dc=ecookna,dc=ru',
       searchFilter: '(cn={{username}})',

@@ -78,7 +78,7 @@ module.exports = function ({cat}, log) {
     if(!token) {
       token = await authorization.method(req, res);
       if(!token) {
-        throw new TypeError(`Неверный логин/пароль для провайдера ${authorization.provider}`);
+        throw new TypeError(`Неверный логин/пароль '${authorization.username}' для провайдера '${authorization.provider}'`);
       }
       cache.put(authorization.key, token);
     }
@@ -87,7 +87,7 @@ module.exports = function ({cat}, log) {
       throw new TypeError(`Пользователь '${authorization.username}' авторизован провайдером '${authorization.provider
       }', но отсутствует в справочнике 'Пользователи'`);
     }
-    if(!user.roles || !user.roles.includes('ram_reader') || user.invalid) {
+    if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
       throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
     }
 
