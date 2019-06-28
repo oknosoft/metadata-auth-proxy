@@ -84,7 +84,10 @@ module.exports = function ({cat}, log) {
 
     let token = cache.get(authorization.key);
     if(!token) {
-      token = await authorization.method(req, res);
+      try{
+        token = await authorization.method(req, res);
+      }
+      catch (e) {}
       if(!token) {
         throw new TypeError(`Неверный логин/пароль '${authorization.username}' для провайдера '${authorization.provider}'`);
       }

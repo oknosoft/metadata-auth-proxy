@@ -12,10 +12,13 @@ import Button from '@material-ui/core/Button';
 import Divider from '@material-ui/core/Divider';
 import FormGroup from '@material-ui/core/FormGroup';
 import DialogActions from '@material-ui/core/DialogActions';
-import DataField from 'metadata-react/DataField';
 import Typography from '@material-ui/core/Typography';
+import IconError from '@material-ui/icons/ErrorOutline';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import Creditales from 'metadata-react/FrmLogin/Creditales';
+import DataField from 'metadata-react/DataField';
 import {withMeta} from 'metadata-redux';
+import classnames from 'classnames';
 import Provider from './Provider';
 import withStyles from './styles';
 import providers from './providers';
@@ -60,12 +63,26 @@ class FrmLogin extends React.Component {
 
   footer() {
     const {state: {provider}, props: {classes, user, handleLogOut}} = this;
-    return <DialogActions>
-      {user.logged_in &&
-      <Button color="primary" size="small" className={classes.dialogButton} onClick={handleLogOut}>Выйти</Button>}
-      {!user.logged_in && directLogins.includes(provider) &&
-      <Button color="primary" size="small" className={classes.dialogButton} onClick={() => this.handleLogin(provider)}>Войти</Button>}
-    </DialogActions>;
+    return [
+      <DialogActions key="actions">
+        {user.logged_in &&
+        <Button color="primary" size="small" className={classes.dialogButton} onClick={handleLogOut}>Выйти</Button>}
+        {!user.logged_in && directLogins.includes(provider) &&
+        <Button color="primary" size="small" className={classes.dialogButton} onClick={() => this.handleLogin(provider)}>Войти</Button>}
+      </DialogActions>,
+      user.log_error &&
+      <FormGroup key="error" row>
+        <IconError className={classes.error}/>
+        <Typography variant="subtitle1" color="error" gutterBottom className={classes.infoText}>{user.log_error}</Typography>
+      </FormGroup>,
+      !user.log_error && user.try_log_in &&
+      <FormGroup key="info" row>
+        <CircularProgress size={24}/>
+        <Typography variant="subtitle1" color="primary" gutterBottom className={classes.infoText}>
+          {`${$p.msg.login.title}, ${$p.msg.login.wait}...`}
+        </Typography>
+      </FormGroup>,
+    ];
   }
 
   creditales() {
@@ -114,8 +131,11 @@ class FrmLogin extends React.Component {
   }
 
   render() {
-    const {state: {fetching, error}, props: {classes}} = this;
-    return <div className={classes.root}>
+    const {state: {fetching, error}, props: {classes, user}} = this;
+    return <div className={classnames({
+      [classes.root]: true,
+      [classes.disabled]: user.try_log_in,
+    })}>
       {this.creditales()}
       {this.footer()}
     </div>;

@@ -21,7 +21,14 @@ const styles = theme => ({
     fontSize: theme.spacing(3),
   },
   flex: {display: 'flex'},
-
+  infoText: {
+    marginLeft: theme.spacing(),
+    maxWidth: 380,
+  },
+  disabled: {
+    pointerEvents: 'none',
+    opacity: 0.6,
+  },
 });
 
 export default withStyles(styles);
