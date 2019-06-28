@@ -74,6 +74,14 @@ module.exports = function ({cat}, log) {
       throw new TypeError('Отсутствует заголовок авторизации');
     }
 
+    if(req.method === 'DELETE') {
+      cache.del(authorization.key);
+      res.setHeader('Content-Type', 'application/json');
+      res.write(JSON.stringify({ok: true}));
+      res.end();
+      return;
+    }
+
     let token = cache.get(authorization.key);
     if(!token) {
       token = await authorization.method(req, res);
@@ -97,7 +105,7 @@ module.exports = function ({cat}, log) {
       res.end();
     }
     else {
-      return user;
+      return req.user = user;
     }
   }
 }

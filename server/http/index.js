@@ -46,8 +46,8 @@ module.exports = function ($p, log) {
 
         // пытаемся авторизовать пользователя
         return auth(req, res)
-          .then((token) => {
-            if(token) {
+          .then((user) => {
+            if(user) {
               switch (parsed.paths[0]) {
               case 'couchdb':
                 return couchdbProxy(req, res);
@@ -66,11 +66,20 @@ module.exports = function ($p, log) {
 
       })
       .catch((rateLimiterRes) => {
-        end500({res, log, err: {
+        let err;
+        if(rateLimiterRes instanceof Error) {
+          err = rateLimiterRes;
+          err.error = true;
+          err.status = 500;
+        }
+        else {
+          err = {
             error: true,
             status: 429,
             message: `Too many requests`,
-          }});
+          };
+        }
+        end500({res, log, err});
       });
   });
 

@@ -3,8 +3,10 @@
 const http = require('http');
 const httpProxy = require('http-proxy');
 const {createHmac} = require('crypto');
+const encodeurl = require('encodeurl');
+const url = require('url');
 const {name, version} = require('../../package.json');
-const {user_node} = require('../../config/app.settings')();
+const {user_node, zone} = require('../../config/app.settings')();
 const keepAliveAgent = new http.Agent({ keepAlive: true });
 const getBody = require('./raw-body');
 
@@ -23,7 +25,7 @@ const headerFields = {
   }
 };
 
-module.exports = function ($p, log) {
+module.exports = function ({cat}, log) {
 
   //
   // Create a proxy server with custom application logic
@@ -39,20 +41,34 @@ module.exports = function ($p, log) {
     // You can define here your custom logic to handle the request
     // and then proxy the request.
 
-    const {query, path, paths} = req.parsed;
+    const {parsed: {query, path, paths}, headers, user}  = req;
 
     const { username, roles, token } = headerFields;
     headerFields.clear(req);
-    req.headers[username] = 'admin';
-    req.headers[roles] = '_admin';
-    req.headers[token] = sign('admin', user_node.secret);
+    headers[username] = encodeurl(user.id);
+    headers[roles] = user.roles.replace(/\[|\]|"/g, '');
+    headers[token] = sign(headers[username], user_node.secret);
+
+    let {branch} = user;
+    let server;
+    if(branch.empty()) {
+      server = cat.abonents.by_id(zone).server;
+    }
+    else {
+      server = branch.server;
+      while (server.empty()) {
+        branch = branch.parent;
+        server = branch.server;
+      }
+    }
+    server = url.parse(server.http);
 
     if(query && query.includes('feed=longpoll')) {
       const upstreamReq = http.request({
         method: req.method,
-        headers: req.headers,
-        hostname: 'cou221',
-        port: 5984,
+        headers: headers,
+        hostname: server.hostname,
+        port: parseInt(server.port, 10),
         path: path.replace('/couchdb', ''),
         agent: keepAliveAgent,
       }, (upstreamRes) => {
@@ -72,7 +88,7 @@ module.exports = function ($p, log) {
     }
     else {
       proxy.web(req, res, {
-        target: `http://cou221:5984${path.replace('/couchdb', '')}`,
+        target: `${server.href.replace(new RegExp(server.path + '$'), '')}${path.replace('/couchdb', '')}`,
         ignorePath: true,
       });
     }

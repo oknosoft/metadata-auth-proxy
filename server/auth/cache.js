@@ -29,6 +29,9 @@ module.exports = {
   put(key, val) {
     cache[key] = {val, stamp: Date.now()};
   },
+  del(key) {
+    delete cache[key];
+  },
   reset() {
     clearCache(true);
   }

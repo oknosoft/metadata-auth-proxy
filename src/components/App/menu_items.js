@@ -47,17 +47,17 @@ const items = [
     need_user: true,
     icon: <IconPerson/>,
   },
-  {
-    divider: true,
-  },
-  {
-    text: 'Движение денег',
-    id: 'rep_cash_moving',
-    navigate: '/rep.cash_moving/main',
-    need_meta: true,
-    need_user: true,
-    icon: <IconChart/>,
-  },
+  // {
+  //   divider: true,
+  // },
+  // {
+  //   text: 'Движение денег',
+  //   id: 'rep_cash_moving',
+  //   navigate: '/rep.cash_moving/main',
+  //   need_meta: true,
+  //   need_user: true,
+  //   icon: <IconChart/>,
+  // },
   {
     divider: true,
   },
@@ -67,11 +67,11 @@ const items = [
     need_meta: true,
     icon: <IconSettings/>,
   },
-  {
-    text: 'Справка',
-    navigate: '/help',
-    icon: <IconHelp/>
-  },
+  // {
+  //   text: 'Справка',
+  //   navigate: '/help',
+  //   icon: <IconHelp/>
+  // },
   {
     text: 'О программе',
     navigate: '/about',
