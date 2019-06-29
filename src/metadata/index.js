@@ -49,9 +49,6 @@ export function init(store) {
 
   // сообщяем адаптерам пути, суффиксы и префиксы
   const {wsql, job_prm, adapters: {pouch}, classes} = $p;
-  if(wsql.get_user_param('couch_path') !== job_prm.couch_local && process.env.NODE_ENV !== 'development') {
-    wsql.set_user_param('couch_path', job_prm.couch_local);
-  }
 
   classes.PouchDB
     .plugin(adapter_memory)
