@@ -3,7 +3,6 @@
 const http = require('http');
 const httpProxy = require('http-proxy');
 const {createHmac} = require('crypto');
-const encodeurl = require('encodeurl');
 const url = require('url');
 const {name, version} = require('../../package.json');
 const {user_node, zone} = require('../../config/app.settings')();
@@ -45,7 +44,7 @@ module.exports = function ({cat}, log) {
 
     const { username, roles, token } = headerFields;
     headerFields.clear(req);
-    headers[username] = encodeurl(user.id);
+    headers[username] = encodeURI(user.id);
     headers[roles] = user.roles.replace(/\[|\]|"/g, '');
     headers[token] = sign(headers[username], user_node.secret);
 

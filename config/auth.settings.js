@@ -9,7 +9,7 @@
 module.exports = {
   providers: ['couchdb','google','ldap'],
   couchdb: {
-    url: 'http://cou221:5984/_session',
+    url: process.env.COUCHLOCAL ? process.env.COUCHLOCAL.replace('/wb_', '/_session') : 'http://cou221:5984/_session',
     authPrefix: 'Basic ',
   },
   github: {
@@ -19,18 +19,18 @@ module.exports = {
     authPrefix: 'Google ',
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: 'http://localhost:3006/auth/google/callback',
+    callbackURL: process.env.GOOGLE_CALLBACK || 'http://localhost:3006/auth/google/callback',
     passReqToCallback   : true,
-    scope: ['https://www.googleapis.com/auth/profile.emails.read', 'https://www.googleapis.com/auth/userinfo.profile'],
+    scope: ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
   },
   ldap: {
     authPrefix: 'LDAP ',
     server: {
-      url: 'ldap://217.197.251.200:65389',
-      bindDN: 'cn=ldap_auth,ou=Service Accounts SCOM,dc=ecookna,dc=ru',
+      url: process.env.LDAP_URL || 'ldap://217.197.251.200:65389',
+      bindDN: process.env.LDAP_BIND || 'cn=ldap_auth,ou=Service Accounts SCOM,dc=ecookna,dc=ru',
       bindCredentials: process.env.LDAP_PASSWORD,
-      searchBase: 'dc=ecookna,dc=ru',
-      searchFilter: '(cn={{username}})',
+      searchBase: process.env.LDAP_BASE || 'dc=ecookna,dc=ru',
+      searchFilter: process.env.LDAP_SEARCH || '(cn={{username}})',
     }
   },
   vkontakte: {
