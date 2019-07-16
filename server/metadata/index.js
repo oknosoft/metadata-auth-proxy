@@ -3,6 +3,7 @@
 // конструктор MetaEngine
 const MetaEngine = require('metadata-core')
   .plugin(require('metadata-pouchdb'))
+  .plugin(require('metadata-abstract-ui'))
   .plugin(require('./pouch_from_files'));
 
 // функция установки параметров сеанса

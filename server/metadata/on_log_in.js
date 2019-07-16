@@ -40,6 +40,9 @@ module.exports = function on_log_in({pouch, classes, job_prm, cat}) {
             });
           }
         });
+        cat.abonents.forEach((abonent) => {
+          res = res.then(() => pouch.find_rows(cat.scheme_settings, {_top: 10000, user: ''}, abonent.db('doc')));
+        });
         return res.catch((err) => {
           return null;
         });

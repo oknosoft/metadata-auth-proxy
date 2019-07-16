@@ -50,19 +50,6 @@ function getBasicAuthHeaders({prefix = 'Basic ', username, password}) {
   return {Authorization: prefix + token};
 }
 
-function wrapError(callback) {
-  // provide more helpful error message
-  return function (err, res) {
-    if (err) {
-      if (err.name === 'unknown_error') {
-        err.message = (err.message || '') +
-          ' Unknown error!  Did you remember to enable CORS?';
-      }
-    }
-    return callback(err, res);
-  };
-}
-
 const logIn = toPromise(function (username, password, opts, callback) {
   if (typeof callback === 'undefined') {
     callback = opts;
@@ -72,7 +59,8 @@ const logIn = toPromise(function (username, password, opts, callback) {
     return callback(new AuthError('this plugin only works for the http/https adapter'));
   }
 
-  const prefix = this.__opts.owner.auth_prefix();
+  const {owner} = this.__opts;
+  const prefix = owner.auth_prefix();
   if(['ldap','basic'].includes(prefix.toLowerCase().trim())){
     if (!username) {
       return callback(new AuthError('you must provide a username'));
@@ -86,7 +74,17 @@ const logIn = toPromise(function (username, password, opts, callback) {
       headers: Object.assign({'Content-Type': 'application/json'}, getBasicAuthHeaders({prefix, username, password})),
       body: {name: username, password: password},
     }, opts.ajax || {});
-    ajaxCore(ajaxOpts, wrapError(callback));
+    ajaxCore(ajaxOpts, (err, res) => {
+      if(err) {
+        callback(err, res);
+      }
+      else {
+        delete ajaxOpts.method;
+        delete ajaxOpts.body;
+        ajaxOpts.url = this.name.replace(/_.*$/, '_meta');
+        ajaxCore(ajaxOpts, callback);
+      }
+    });
   }
   else {
     oAuthPopup(getSessionUrl(this))
@@ -107,7 +105,7 @@ const logOut = toPromise(function (opts, callback) {
     url: getSessionUrl(this),
     headers: getBasicAuthHeaders(Object.assign({prefix: __opts.owner.auth_prefix()}, __opts.auth)),
   }, opts.ajax || {});
-  ajaxCore(ajaxOpts, wrapError(callback));
+  ajaxCore(ajaxOpts, callback);
 });
 
 export default {

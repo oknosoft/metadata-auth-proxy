@@ -14,7 +14,8 @@ module.exports = function ($p, log) {
 
   // формирует json описания продукции заказа
   async function ram_data(req, res) {
-    const {query, path, paths} = req.parsed;
+    const {user, parsed: {query, path, paths}} = req;
+    const {branch, subscribers} = user;
     switch (paths[3]){
     case 'all':
       const docs = [];
@@ -27,6 +28,7 @@ module.exports = function ($p, log) {
       cat.servers.alatable.forEach(push);
       cat.branches.alatable.forEach(push);
       cat.users.alatable.forEach(push);
+      cat.scheme_settings.alatable.forEach(push);
       res.end(JSON.stringify({
         ok: true,
         docs,
