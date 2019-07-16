@@ -44,21 +44,18 @@ module.exports = function ({cat}, log) {
 
     const { username, roles, token } = headerFields;
     headerFields.clear(req);
-    headers[username] = encodeURI(user.id);
+    headers[username] = user.latin || user.id;
     headers[roles] = user.roles.replace(/\[|\]|"/g, '');
     headers[token] = sign(headers[username], user_node.secret);
 
     let {branch} = user;
-    let server;
-    if(branch.empty()) {
-      server = cat.abonents.by_id(zone).server;
-    }
-    else {
+    let {server} = branch;
+    while (server.empty() && !branch.parent.empty()) {
+      branch = branch.parent;
       server = branch.server;
-      while (server.empty()) {
-        branch = branch.parent;
-        server = branch.server;
-      }
+    }
+    if(server.empty()) {
+      server = cat.abonents.by_id(zone).server;
     }
     server = url.parse(server.http);
 

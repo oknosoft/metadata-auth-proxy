@@ -56,8 +56,11 @@ module.exports = function ($p, log) {
                 return adm(req, res);
 
               default:
-                end404(res, parsed.paths[0]);
+                return end404(res, parsed.paths[0]);
               }
+            }
+            else if(!res.finished) {
+              return end401({res, err: parsed.paths[0], log});
             }
           })
           .catch((err) => {

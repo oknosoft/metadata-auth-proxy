@@ -35,7 +35,7 @@ module.exports = function (runtime) {
 
     process.on('unhandledRejection', error => {
       // Will print "unhandledRejection err is not defined"
-      console.error('unhandledRejection', error.message);
+      log(`unhandledRejection ${error.message}`, 'error');
     });
   }
 
