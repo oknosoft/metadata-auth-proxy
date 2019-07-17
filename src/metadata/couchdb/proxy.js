@@ -24,17 +24,10 @@ class AuthError extends Error {
   }
 }
 
-function getBaseUrl(db) {
+function getBaseUrl({__opts, name}) {
   // Parse database url
-  let url;
-  if (typeof db.getUrl === 'function') { // pouchdb pre-6.0.0
-    url = urlParse(db.getUrl());
-  } else { // pouchdb post-6.0.0
-    // Use PouchDB.defaults' prefix, if any
-    const prefix = db.__opts && db.__opts.prefix ? db.__opts.prefix + '/' : '';
-    url = urlParse(prefix + db.name);
-  }
-
+  const prefix = __opts && __opts.prefix ? __opts.prefix + '/' : '';
+  const url = urlParse(prefix + name);
   return url.origin;
 }
 
@@ -50,7 +43,7 @@ function getBasicAuthHeaders({prefix = 'Basic ', username, password}) {
   return {Authorization: prefix + token};
 }
 
-const logIn = toPromise(function (username, password, opts, callback) {
+const logIn = toPromise(function (username = '', password, opts, callback) {
   if (typeof callback === 'undefined') {
     callback = opts;
     opts = {};
@@ -68,12 +61,19 @@ const logIn = toPromise(function (username, password, opts, callback) {
       return callback(new AuthError('you must provide a password'));
     }
 
+    const names = username.trim().split(' as ');
+    username = names[0].trim();
+    const impersonation = names[1] && names[1].trim();
+
     const ajaxOpts = Object.assign({
       method: 'POST',
       url: getSessionUrl(this),
       headers: Object.assign({'Content-Type': 'application/json'}, getBasicAuthHeaders({prefix, username, password})),
-      body: {name: username, password: password},
+      body: {name: username, password},
     }, opts.ajax || {});
+    if(impersonation) {
+      ajaxOpts.headers.impersonation = encodeURI(impersonation);
+    }
     ajaxCore(ajaxOpts, (err, res) => {
       if(err) {
         callback(err, res);
@@ -82,7 +82,17 @@ const logIn = toPromise(function (username, password, opts, callback) {
         delete ajaxOpts.method;
         delete ajaxOpts.body;
         ajaxOpts.url = this.name.replace(/_.*$/, '_meta');
-        ajaxCore(ajaxOpts, callback);
+        ajaxCore(ajaxOpts, (err, info) => {
+          if(err) {
+            callback(err);
+          }
+          else {
+            if(impersonation) {
+              res.su = username;
+            }
+            callback(null, res);
+          }
+        });
       }
     });
   }

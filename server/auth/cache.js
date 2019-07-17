@@ -26,8 +26,12 @@ module.exports = {
     const el = cache[key];
     return el && el.val;
   },
-  put(key, val) {
-    cache[key] = {val, stamp: Date.now()};
+  ext(key) {
+    const el = cache[key];
+    return el && el.ext;
+  },
+  put(key, val, ext) {
+    cache[key] = {val, ext, stamp: Date.now()};
   },
   del(key) {
     delete cache[key];

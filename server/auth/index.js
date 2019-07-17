@@ -24,7 +24,7 @@ function decodeBase64 (str) {
 }
 
 function extractAuth(req) {
-  let {authorization} = req.headers;
+  let {authorization, impersonation} = req.headers;
   if(authorization) {
     //authorization = authorization.replace('Basic', 'LDAP');
     for(const provider in auth.providers) {
@@ -35,6 +35,9 @@ function extractAuth(req) {
           const key = authorization.substr(authPrefix.length);
           const decoded = user_pass_regexp.exec(decodeBase64(key));
           if(decoded) {
+            if(impersonation) {
+              impersonation = decodeURI(impersonation);
+            }
             return {
               provider,
               settings,
@@ -42,6 +45,7 @@ function extractAuth(req) {
               username: decoded[1],
               password: decoded[2],
               method: auth.providers[provider],
+              impersonation,
             };
           }
         }
@@ -91,15 +95,26 @@ module.exports = function ({cat}, log) {
       if(!token) {
         throw new TypeError(`Неверный логин/пароль '${authorization.username}' для провайдера '${authorization.provider}'`);
       }
-      cache.put(authorization.key, token);
+      cache.put(authorization.key, token, authorization.impersonation);
     }
-    const user = cat.users.by_auth(token);
+    let user = cat.users.by_auth(token);
     if(!user) {
       throw new TypeError(`Пользователь '${authorization.username}' авторизован провайдером '${authorization.provider
       }', но отсутствует в справочнике 'Пользователи'`);
     }
     if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
       throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
+    }
+    // олицетворение - вход от имени другого пользователя
+    const impersonation = authorization.impersonation || cache.ext(authorization.key);
+    if(user.roles.includes('doc_full') && impersonation) {
+      user = cat.users.by_id(impersonation);
+      if(!user) {
+        throw new TypeError(`Пользователь '${impersonation}' отсутствует в справочнике 'Пользователи'`);
+      }
+      if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
+        throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
+      }
     }
 
     if(paths[0] === 'auth') {

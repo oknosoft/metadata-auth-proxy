@@ -14,13 +14,14 @@ const headerFields = {
   roles: 'X-Auth-CouchDB-Roles',
   token: 'X-Auth-CouchDB-Token',
   cookie: 'Cookie',
-  clear(req) {
+  clear(headers) {
     for(const field in this){
       if(typeof this[field] === 'string') {
-        delete req.headers[this[field]];
-        delete req.headers[this[field].toLowerCase()];
+        delete headers[this[field]];
+        delete headers[this[field].toLowerCase()];
       }
     }
+    delete headers.authorization;
   }
 };
 
@@ -43,7 +44,7 @@ module.exports = function ({cat}, log) {
     const {parsed: {query, path, paths}, headers, user}  = req;
 
     const { username, roles, token } = headerFields;
-    headerFields.clear(req);
+    headerFields.clear(headers);
     headers[username] = user.latin || user.id;
     headers[roles] = user.roles.replace(/\[|\]|"/g, '');
     headers[token] = sign(headers[username], user_node.secret);
