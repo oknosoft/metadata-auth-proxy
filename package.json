@@ -31,6 +31,7 @@
     "metadata-pouchdb": "2.0.20-beta.5",
     "metadata-react": "2.0.20-beta.5",
     "metadata-redux": "2.0.20-beta.5",
+    "metadata-superlogin": "2.0.20-beta.5",
     "passport": "^0.4.0",
     "passport-facebook": "^3.0.0",
     "passport-github": "^1.1",

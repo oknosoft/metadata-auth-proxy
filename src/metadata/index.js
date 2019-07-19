@@ -6,7 +6,7 @@ import plugin_ui from 'metadata-abstract-ui';
 import plugin_ui_tabulars from 'metadata-abstract-ui/tabulars';
 import plugin_react from 'metadata-react/plugin';
 import adapter_memory from 'pouchdb-adapter-memory';
-import proxy_login from './couchdb/proxy';
+import proxy_login from 'metadata-superlogin/proxy';
 
 // функция установки параметров сеанса
 import settings from '../../config/app.settings';
@@ -52,7 +52,7 @@ export function init(store) {
 
   classes.PouchDB
     .plugin(adapter_memory)
-    .plugin(proxy_login);
+    .plugin(proxy_login(true));
 
   pouch.init(wsql, job_prm);
 
