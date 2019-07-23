@@ -3,7 +3,7 @@
  *
  */
 
-const liveTime = 300000;
+const liveTime = 400000;
 const cache = Object.create(null);
 
 function clearCache(force) {

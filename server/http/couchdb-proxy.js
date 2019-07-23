@@ -46,7 +46,7 @@ module.exports = function ({cat}, log) {
     const { username, roles, token } = headerFields;
     headerFields.clear(headers);
     headers[username] = user.latin || user.id;
-    headers[roles] = user.roles.replace(/\[|\]|"/g, '');
+    headers[roles] = JSON.parse(user.roles).join(',');
     headers[token] = sign(headers[username], user_node.secret);
 
     let {branch} = user;
