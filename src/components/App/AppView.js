@@ -125,6 +125,8 @@ class AppView extends React.Component {
         handleIfaceState: props.handleIfaceState,
         title,
         offline: couch_direct && offline,
+        disable: ['offline'],
+        user,
       };
 
       if(need_auth) {
