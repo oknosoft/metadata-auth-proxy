@@ -9,7 +9,7 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Snack from 'metadata-react/App/Snack';       // сообщения в верхней части страницы (например, обновить после первого запуска)
 import Alert from 'metadata-react/App/Alert';       // диалог сообщения пользователю
 import Confirm from 'metadata-react/App/Confirm';   // диалог вопросов пользователю (да, нет)
-import Auth from '../Login';                        // форма авторизации
+import Auth from 'metadata-react/FrmLogin/Proxy';   // форма авторизации
 import AppDrawer from 'metadata-react/App/AppDrawer';
 import HeaderButtons from 'metadata-react/Header/HeaderButtons';
 import {withIfaceAndMeta} from 'metadata-redux';

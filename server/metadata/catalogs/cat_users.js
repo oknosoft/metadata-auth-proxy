@@ -18,9 +18,14 @@ function refresh(user) {
   for(const key of del) {
     delete cache[key];
   }
-  user.ids.forEach(({identifier}) => {
-    cache[identifier] = user;
-  });
+  if(user.ids.count()) {
+    user.ids.forEach(({identifier}) => {
+      cache[identifier] = user;
+    });
+  }
+  else if(!user.ancillary && !user.invalid && user.roles.includes('ram_reader') && user.roles.includes('doc_editor')) {
+    cache[`org.couchdb.user:${user.id}`] = user;
+  }
 }
 
 module.exports = function ({cat: {users}, CatUsers, classes: {RefDataManager}}) {
