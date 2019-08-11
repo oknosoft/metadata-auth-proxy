@@ -81,8 +81,7 @@ module.exports = function ({cat}, log) {
     if(req.method === 'DELETE') {
       cache.del(authorization.key);
       res.setHeader('Content-Type', 'application/json');
-      res.write(JSON.stringify({ok: true}));
-      res.end();
+      res.end(JSON.stringify({ok: true}));
       return;
     }
 
