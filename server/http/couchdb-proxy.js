@@ -5,9 +5,10 @@ const httpProxy = require('http-proxy');
 const {createHmac} = require('crypto');
 const url = require('url');
 const {name, version} = require('../../package.json');
-const {user_node, zone} = require('../../config/app.settings')();
+const {user_node, local_storage_prefix} = require('../../config/app.settings')();
 const keepAliveAgent = new http.Agent({ keepAlive: true });
 const getBody = require('./raw-body');
+const {end404} = require('./end');
 
 const headerFields = {
   username: 'X-Auth-CouchDB-UserName',
@@ -49,15 +50,38 @@ module.exports = function ({cat}, log) {
     headers[roles] = JSON.parse(user.roles).join(',');
     headers[token] = sign(headers[username], user_node.secret);
 
+    let parts = new RegExp(`/${local_storage_prefix}(.*?)/`).exec(path);
+    if(parts && parts[1]) {
+      parts = parts[1].split('_');
+    }
+    else {
+      return end404(res, path);
+    }
+    const abonent = cat.abonents.by_id(parts[0]);
+
+
     let {branch} = user;
     let {server} = branch;
-    while (server.empty() && !branch.parent.empty()) {
-      branch = branch.parent;
-      server = branch.server;
+    switch (parts[1]) {
+    case 'doc':
+      while (server.empty() && !branch.parent.empty()) {
+        branch = branch.parent;
+        server = branch.server;
+      }
+      if(server.empty()) {
+        server = abonent.server;
+      }
+      break;
+
+    case 'ram':
+      server = abonent.server;
+      break;
+
+    default:
+      const row = abonent.ex_bases.find({name: parts[1]});
+      server = row ? row.server : abonent.server;
     }
-    if(server.empty()) {
-      server = cat.abonents.by_id(zone).server;
-    }
+
     server = url.parse(server.http);
 
     if(query && query.includes('feed=longpoll')) {
