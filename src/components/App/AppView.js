@@ -15,11 +15,12 @@ import HeaderButtons from 'metadata-react/Header/HeaderButtons';
 import {withIfaceAndMeta} from 'metadata-redux';
 import withWindowSize from 'metadata-react/WindowSize';
 
-import DumbScreen from './DumbScreen';             // заставка "загрузка занных"
-import DataRoute from './DataRoute';               // вложенный маршрутизатор страниц с данными
-import MarkdownRoute from '../Markdown/Route';       // вложенный маршрутизатор страниц с Markdown, 404 живёт внутри Route
-import HomeView from '../Home';            // домашняя страница
-import Settings from '../Settings';                 // страница настроек приложения
+import DumbScreen from './DumbScreen';            // заставка "загрузка занных"
+import DataRoute from './DataRoute';              // вложенный маршрутизатор страниц с данными
+import MarkdownRoute from '../Markdown/Route';    // вложенный маршрутизатор страниц с Markdown, 404 живёт внутри Route
+import HomeView from '../Home';                   // домашняя страница
+import Settings from '../Settings';               // страница настроек приложения
+import Designer from '../MetaDesigner';           // страница настроек приложения
 
 
 import withStyles from './styles';
@@ -80,8 +81,8 @@ class AppView extends React.Component {
     this.setState({mobileOpen: false});
   };
 
-  handlepPermanentClose = () => {
-    this.setState({permanentClose: true, mobileOpen: false});
+  handlepPermanentClose = (cb) => {
+    this.setState({permanentClose: true, mobileOpen: false}, cb);
   };
 
   renderHome = (routeProps) => {
@@ -145,7 +146,12 @@ class AppView extends React.Component {
       const wraper = (Component, routeProps) => {
         /* eslint-disable-next-line */
         const {classes, ...mainProps} = props;
-        return <Component {...mainProps} {...routeProps} disablePermanent={disablePermanent}/>;
+        return <Component
+          {...mainProps}
+          {...routeProps}
+          disablePermanent={disablePermanent}
+          drawerClose={this.handlepPermanentClose}
+        />;
       };
 
       return (
@@ -154,6 +160,7 @@ class AppView extends React.Component {
             <Route exact path="/" render={this.renderHome}/>
             <Route path="/:area(doc|cat|ireg|cch|rep).:name" render={(props) => wraper(DataRoute, props)}/>
             <Route path="/login" render={() => <Auth {...authProps}/>}/>
+            <Route path="/designer" render={(props) => wraper(Designer, props)}/>
             <Route path="/settings" render={(props) => wraper(Settings, props)}/>
             <Route render={(props) => wraper(MarkdownRoute, props)}/>
           </Switch>

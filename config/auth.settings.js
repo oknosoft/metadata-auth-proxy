@@ -20,7 +20,7 @@ module.exports = {
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     callbackURL: process.env.GOOGLE_CALLBACK || 'http://localhost:3006/auth/google/callback',
-    passReqToCallback   : true,
+    passReqToCallback: true,
     scope: ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
   },
   ldap: {

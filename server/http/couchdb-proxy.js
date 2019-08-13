@@ -5,7 +5,7 @@ const httpProxy = require('http-proxy');
 const {createHmac} = require('crypto');
 const url = require('url');
 const {name, version} = require('../../package.json');
-const {user_node, local_storage_prefix} = require('../../config/app.settings')();
+const {user_node, zone, local_storage_prefix} = require('../../config/app.settings')();
 const keepAliveAgent = new http.Agent({ keepAlive: true });
 const getBody = require('./raw-body');
 const {end404} = require('./end');
@@ -51,14 +51,16 @@ module.exports = function ({cat}, log) {
     headers[token] = sign(headers[username], user_node.secret);
 
     let parts = new RegExp(`/${local_storage_prefix}(.*?)/`).exec(path);
-    if(parts && parts[1]) {
+    if((parts && parts[0] === 'meta') || path.includes(`/${local_storage_prefix}meta`)) {
+      parts = [zone, 'ram'];
+    }
+    else if(parts && parts[1]) {
       parts = parts[1].split('_');
     }
     else {
       return end404(res, path);
     }
     const abonent = cat.abonents.by_id(parts[0]);
-
 
     let {branch} = user;
     let {server} = branch;

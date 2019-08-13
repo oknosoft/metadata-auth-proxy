@@ -39,7 +39,9 @@
     "passport-ldapauth": "^2.1.3",
     "passport-vkontakte": "^0.3",
     "passport-yandex": "0.0.3",
-    "rate-limiter-flexible": "^1.1.1"
+    "rate-limiter-flexible": "^1.1.1",
+    "react-grid-layout": "^0.16.6",
+    "react-treebeard": "^3.2.4"
   },
   "devDependencies": {
     "@babel/core": "7.4.3",

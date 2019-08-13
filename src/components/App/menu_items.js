@@ -1,6 +1,8 @@
 import React from 'react';
-import IconChart from '@material-ui/icons/InsertChart';
+//import IconChart from '@material-ui/icons/InsertChart';
+import IconBuild from '@material-ui/icons/Build';
 //import IconDoc from '@material-ui/icons/EventNote';
+import IconColor from '@material-ui/icons/ColorLens';
 import IconInfo from '@material-ui/icons/Info';
 import IconHelp from '@material-ui/icons/Help';
 import IconPerson from '@material-ui/icons/Person';
@@ -8,6 +10,9 @@ import IconSettings from '@material-ui/icons/Settings';
 import IconBusiness from '@material-ui/icons/Business';
 import IconPeople from '@material-ui/icons/People';
 import IconRouter from '@material-ui/icons/Router';
+import IconBusinessCenter from '@material-ui/icons/BusinessCenter';
+import IconDeviceHub from '@material-ui/icons/DeviceHub';
+import IconContactPhone from '@material-ui/icons/ContactPhone';
 
 export const stitle = 'auth-proxy';
 export const htitle = 'Администрирование пользователей';
@@ -47,6 +52,49 @@ const items = [
     need_user: true,
     icon: <IconPerson/>,
   },
+  {
+    text: 'Организации',
+    id: 'cat_organizations',
+    navigate: '/cat.organizations/list',
+    need_meta: true,
+    need_user: true,
+    icon: <IconBusinessCenter/>,
+  },
+  {
+    text: 'Подразделения',
+    id: 'cat_divisions',
+    navigate: '/cat.divisions/list',
+    need_meta: true,
+    need_user: true,
+    icon: <IconDeviceHub/>,
+  },
+  {
+    text: 'Контрагенты',
+    id: 'cat_partners',
+    navigate: '/cat.partners/list',
+    need_meta: true,
+    need_user: true,
+    icon: <IconContactPhone/>,
+  },
+  {
+    text: 'Цвета',
+    id: 'cat_clrs',
+    navigate: '/cat.clrs/list',
+    need_meta: true,
+    need_user: true,
+    icon: <IconColor/>,
+  },
+  {
+    divider: true,
+  },
+  {
+    text: 'Метаданные',
+    id: 'designer',
+    navigate: '/designer',
+    need_meta: true,
+    need_user: true,
+    icon: <IconBuild/>,
+  },
   // {
   //   divider: true,
   // },
@@ -67,11 +115,6 @@ const items = [
     need_meta: true,
     icon: <IconSettings/>,
   },
-  // {
-  //   text: 'Справка',
-  //   navigate: '/help',
-  //   icon: <IconHelp/>
-  // },
   {
     text: 'О программе',
     navigate: '/about',

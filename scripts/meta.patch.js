@@ -32,6 +32,7 @@ const include = [
   'cat.property_values',
   'cat.meta_ids',
   'cat.cashboxes',
+  'cat.clrs',
   'cat.partners',
   'cat.organizations',
   'cat.parameters_keys',
@@ -54,7 +55,6 @@ const exclude = [];
 const minimal = [
   'cat.delivery_areas',
   'cat.delivery_directions',
-  'cat.formulas',
   'cat.furns',
   'cat.inserts',
   'cat.production_params',
