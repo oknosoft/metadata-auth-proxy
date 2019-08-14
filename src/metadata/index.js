@@ -48,7 +48,7 @@ export function init(store) {
   addMiddleware(metaMiddleware($p));
 
   // сообщяем адаптерам пути, суффиксы и префиксы
-  const {wsql, job_prm, adapters: {pouch}, classes} = $p;
+  const {wsql, job_prm, adapters: {pouch}, classes, cat} = $p;
 
   classes.PouchDB
     .plugin(adapter_memory)
@@ -59,9 +59,7 @@ export function init(store) {
   pouch.on({
     on_log_in() {
       return on_log_in({pouch, classes})
-        .then(() => {
-          load_ram({pouch, job_prm});
-        });
+        .then(() => load_ram({pouch, job_prm, cat}));
     },
     pouch_doc_ram_loaded() {
       pouch.emit('pouch_complete_loaded');

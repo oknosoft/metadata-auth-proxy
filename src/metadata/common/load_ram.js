@@ -6,7 +6,7 @@
  * Created by Evgeniy Malyarov on 02.06.2019.
  */
 
-export default function load_ram({pouch, job_prm}) {
+export default function load_ram({pouch, job_prm, cat}) {
   const {auth} = pouch.remote.ram.__opts;
 
   return fetch(`${job_prm.server.prefix}/ram/all`, {
@@ -16,5 +16,6 @@ export default function load_ram({pouch, job_prm}) {
     .then((res) => res.json())
     .then((res) => {
       pouch.load_changes(res);
+      return cat.clrs.find_rows_remote({});
     });
 }
