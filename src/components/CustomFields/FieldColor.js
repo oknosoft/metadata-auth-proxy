@@ -29,7 +29,7 @@ class FieldColor extends AbstractField {
     if(this._ctimer) {
       clearTimeout(this._ctimer);
     }
-    this._ctimer = setTimeout(this.setClr.bind(this, color.hex.substr(1)), 100);
+    this._ctimer = setTimeout(this.setClr.bind(this, color.hex.substr(1)), 50);
   };
 
   setClr(v) {
@@ -61,9 +61,19 @@ class FieldColor extends AbstractField {
     }
     other.inputProps = Object.assign({style: {cursor: 'pointer'}}, other.inputProps);
     if(hex) {
+      let back = hex.toString(16);
+      while (back.length < 6) {
+        back = '0' + back;
+      }
+      back = '#' + back;
+      let clr = (0xafafaf ^ hex).toString(16);
+      while (clr.length < 6) {
+        clr = '0' + clr;
+      }
+      clr = '#' + clr;
       Object.assign(other.inputProps.style, {
-        backgroundColor: `#${hex.toString(16)}`,
-        color: `#${(0xffffff ^ hex).toString(16)}`
+        backgroundColor: back,
+        color: clr
       });
     }
     if(_meta.mandatory) {
@@ -98,7 +108,7 @@ class FieldColor extends AbstractField {
         }}
       >
         <ChromePicker
-          color={{hex: `#${hex.toString(16)}`}}
+          color={{hex: other.inputProps.style.backgroundColor}}
           disableAlpha
           onChange={this.handleChange}
         />
