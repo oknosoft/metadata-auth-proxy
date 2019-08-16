@@ -20,42 +20,48 @@ const conf = require('../../config/app.settings')();
 const {end401, end404, end500} = require('../http/end');
 const getBody = require('../http/raw-body');
 const common = require('./common');
+const metadata = require('../metadata');
+const local_couchdb = require('./couchdb');
 
-require('./couchdb')({log, conf})
-  .then((dbs) => {
-    const server = http.createServer(function(req, res) {
+// MetaEngine
+metadata(log)
+  .then(($p) => {
+    local_couchdb({log, $p})
+      .then(() => {
 
-      const start = (req.method === 'POST' || req.method === 'PUT') ? getBody(req) : Promise.resolve();
+        const server = http.createServer(function(req, res) {
 
-      return start.then((body) => {
-        const {remotePort, remoteAddress} = res.socket;
-        const parsed = req.parsed = url.parse(req.url);
-        parsed.paths = parsed.pathname.replace('/', '').split('/');
-        req.query = qs.parse(parsed.query);
-        if(body) {
-          req.body = JSON.parse(body);
-        }
+          const start = (req.method === 'POST' || req.method === 'PUT') ? getBody(req) : Promise.resolve();
 
-        switch (parsed.paths[0]) {
-        case 'common':
-          return common({req, res, ...dbs});
+          return start.then((body) => {
+            const {remotePort, remoteAddress} = res.socket;
+            const parsed = req.parsed = url.parse(req.url);
+            parsed.paths = parsed.pathname.replace('/', '').split('/');
+            req.query = qs.parse(parsed.query);
+            if(body) {
+              req.body = JSON.parse(body);
+            }
+            if(parsed.paths[0] === 'couchdb') {
+              parsed.paths = parsed.paths.splice(1);
+            }
+            return parsed.paths[0] === 'common' ? common({req, res, $p}) : end404(res, parsed.paths[0]);
+          })
+            .catch((err) => {
+              if(!err.status) {
+                err.status = 500;
+              }
+              err.error = true;
+              end500({res, log, err});
+            });
 
-        default:
-          return end404(res, parsed.paths[0]);
-        }
-      })
-        .catch((err) => {
-          if(!err.status) {
-            err.status = 500;
-          }
-          err.error = true;
-          end500({res, log, err});
         });
 
-    });
-
-    server.listen(conf.server.ram_port);
+        server.listen(conf.server.ram_port);
+      });
   });
+
+
+
 
 process.on('unhandledRejection', error => {
   // Will print "unhandledRejection err is not defined"

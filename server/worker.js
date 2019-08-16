@@ -17,8 +17,8 @@ module.exports = function (runtime) {
   // Logger
   const log = require('./logger')(runtime);
 
-  // MetaEngine
-  const $p = metadata(runtime);
+  // Создаём MetaEngine и следом, http сервер
+  metadata(log).then(($p) => http($p, log));
 
   // Cluster
   if(runtime && runtime.cluster) {
@@ -38,7 +38,5 @@ module.exports = function (runtime) {
       log(`unhandledRejection ${error.message}`, 'error');
     });
   }
-
-  http($p, log);
 
 }

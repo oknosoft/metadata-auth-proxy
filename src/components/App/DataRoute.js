@@ -8,6 +8,8 @@ import NeedAuth from 'metadata-react/App/NeedAuth'; // страница "нео�
 
 import NotFound from '../Markdown/NotFound';
 
+import customComponents from '../CustomFields';
+
 const stub = () => null;
 const lazy = {
   DataList: stub,
@@ -15,10 +17,21 @@ const lazy = {
   DataObj: stub,
   FrmReport: stub,
 };
-import(/* webpackChunkName: "metadata-react" */ 'metadata-react/DynList').then(module => lazy.DataList = module.default);
-import(/* webpackChunkName: "metadata-react" */ 'metadata-react/DataTree').then(module => lazy.DataTree = module.default);
-import(/* webpackChunkName: "metadata-react" */ 'metadata-react/FrmObj').then(module => lazy.DataObj = module.default);
-import(/* webpackChunkName: "metadata-react" */ 'metadata-react/FrmReport').then(module => lazy.FrmReport = module.default);
+import(/* webpackChunkName: "metadata-react" */ 'metadata-react/DynList')
+  .then(module => {
+    lazy.DataList = module.default;
+    return import(/* webpackChunkName: "metadata-react" */ 'metadata-react/DataTree');
+  })
+  .then(module => {
+    lazy.DataTree = module.default;
+    return import(/* webpackChunkName: "metadata-react" */ 'metadata-react/FrmObj');
+  })
+  .then(module => {
+    lazy.DataObj = module.default;
+    return import(/* webpackChunkName: "metadata-react" */ 'metadata-react/FrmReport');
+  })
+  .then(module => lazy.FrmReport = module.default);
+
 
 class DataRoute extends Component {
 
@@ -80,14 +93,15 @@ class DataRoute extends Component {
     }
 
     return <Switch>
-      <Route path={`${match.url}/:ref([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})`} render={(props) => wraper(lazy.DataObj, props, 'obj')}/>
+      <Route path={`${match.url}/:ref([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})`}
+                                        render={(props) => wraper(lazy.DataObj, props, 'obj')}/>
       <Route path={`${match.url}/list`} render={(props) => wraper(lazy.DataList, props, 'list')}/>
       <Route component={NotFound}/>
     </Switch>;
   }
 
   getChildContext() {
-    return {components: lazy};
+    return {components: lazy, customComponents};
   }
 }
 
@@ -104,6 +118,7 @@ DataRoute.propTypes = {
 
 DataRoute.childContextTypes = {
   components: PropTypes.object,
+  customComponents: PropTypes.object,
 };
 
 export default withObj(DataRoute);

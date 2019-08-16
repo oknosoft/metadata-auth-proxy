@@ -36,7 +36,7 @@ function extractAuth(req) {
           const decoded = user_pass_regexp.exec(decodeBase64(key));
           if(decoded) {
             if(impersonation) {
-              impersonation = decodeURI(impersonation);
+              impersonation = decodeURIComponent(impersonation);
             }
             return {
               provider,

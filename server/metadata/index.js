@@ -15,10 +15,7 @@ const on_log_in = require('./on_log_in');
 const ram_changes = require('./ram_changes');
 const modifiers = require('./modifiers');
 
-module.exports = function (runtime) {
-
-  // Logger
-  const log = require('../logger')(runtime);
+module.exports = function (log) {
 
   // создаём контекст MetaEngine
   const $p = new MetaEngine();
@@ -74,11 +71,10 @@ module.exports = function (runtime) {
 
   // инициализируем метаданные
   // загружаем кешируемые справочники в ram и начинаем следить за изменениями ram
-  pouch
+  return pouch
     .log_in(user_node.username, user_node.password)
-    .then(() => pouch.load_data(pouch.remote.ram));
-
-  return $p;
+    .then(() => pouch.load_data(pouch.remote.ram))
+    .then(() => $p);
 }
 
 

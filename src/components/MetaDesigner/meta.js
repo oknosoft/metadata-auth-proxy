@@ -59,9 +59,9 @@ export default async function meta() {
     startkey: 'meta',
     endkey: 'meta\ufff0',
   })
-    .then((res) => {
+    .then(({rows}) => {
       const _m = {};
-      for(const {doc} of res.rows) {
+      for(const {doc} of rows) {
         utils._patch(_m, doc);
       }
 

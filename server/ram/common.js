@@ -8,8 +8,9 @@
  */
 
 
-module.exports = async function common({req, res, local, remote}) {
+module.exports = async function common({req, res, $p}) {
   const {parsed, query} = req;
+  const {common} = $p.adapters.pouch.local;
   for(const fld in query) {
     if(query[fld] === 'true') {
       query[fld] = true;
@@ -37,18 +38,22 @@ module.exports = async function common({req, res, local, remote}) {
   switch (parsed.paths[1]) {
   case '':
   case undefined:
-    local.info().then(end);
+    common.info().then(end);
     break;
 
   case '_changes':
-    local.changes(query).then(end);
+    common.changes(query).then(end);
     break;
 
   case '_bulk_get':
     if(req.body && req.body.docs) {
       query.docs = req.body.docs;
     }
-    local.bulkGet(query).then(end);
+    common.bulkGet(query).then(end);
+    break;
+
+  case '_save':
+
     break;
 
   case '_local':
@@ -56,10 +61,10 @@ module.exports = async function common({req, res, local, remote}) {
 
   default:
     if(req.method === 'GET') {
-      local.get(parsed.paths[1], query).then(end).catch(end);
+      common.get(parsed.paths[1], query).then(end).catch(end);
     }
     else if(req.method === 'PUT') {
-      local.put(req.body, query).then(end).catch(end);
+      common.put(req.body, query).then(end).catch(end);
     }
   }
 
