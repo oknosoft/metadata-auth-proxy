@@ -62,8 +62,9 @@ const minimal = [
 ];
 const writable = [
   'cat.abonents',
-  'cat.servers',
   'cat.branches',
+  'cat.clrs',
+  'cat.servers',
   'cat.users',
 ];
 const read_only = [];
@@ -98,10 +99,9 @@ module.exports = function(meta) {
           mgrs[name].cachable = 'ram';
         }
 
-        delete mgrs[name].form;
-
         if(!writable.includes('*') && !writable.includes(`${cls}.${name}`)) {
           mgrs[name].read_only = true;
+          delete mgrs[name].form;
         }
         else if(read_only.includes(`${cls}.${name}`)) {
           mgrs[name].read_only = true;
