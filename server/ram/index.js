@@ -22,12 +22,15 @@ const getBody = require('../http/raw-body');
 const common = require('./common');
 const metadata = require('../metadata');
 const local_couchdb = require('./couchdb');
+const Polling = require('./polling');
 
 // MetaEngine
 metadata(log)
   .then(($p) => {
     local_couchdb({log, $p})
-      .then(() => {
+      .then((db) => {
+
+        const polling = new Polling(db, log);
 
         const server = http.createServer(function(req, res) {
 
@@ -44,7 +47,7 @@ metadata(log)
             if(parsed.paths[0] === 'couchdb') {
               parsed.paths = parsed.paths.splice(1);
             }
-            return parsed.paths[0] === 'common' ? common({req, res, $p}) : end404(res, parsed.paths[0]);
+            return parsed.paths[0] === 'common' ? common({req, res, $p, polling}) : end404(res, parsed.paths[0]);
           })
             .catch((err) => {
               if(!err.status) {
