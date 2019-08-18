@@ -8,9 +8,9 @@
  */
 
 
-module.exports = async function common({req, res, $p}) {
+module.exports = async function common({req, res, $p, polling}) {
   const {parsed, query} = req;
-  const {common} = $p.adapters.pouch.local;
+  const {db} = polling;
   for(const fld in query) {
     if(query[fld] === 'true') {
       query[fld] = true;
@@ -38,22 +38,36 @@ module.exports = async function common({req, res, $p}) {
   switch (parsed.paths[1]) {
   case '':
   case undefined:
-    common.info().then(end);
+    db.info().then(end);
     break;
 
   case '_changes':
-    common.changes(query).then(end);
+    if(query.feed === 'longpoll') {
+      polling.add(res);
+    }
+    else {
+      db.changes(query).then(end);
+    }
     break;
 
   case '_bulk_get':
     if(req.body && req.body.docs) {
       query.docs = req.body.docs;
     }
-    common.bulkGet(query).then(end);
+    db.bulkGet(query).then(end);
     break;
 
   case '_save':
-
+    const parts = parsed.paths[2] && parsed.paths[2].split('.');
+    const mgrs = parts && $p[parts[0]];
+    const mgr = mgrs && mgrs[parts[1]];
+    mgr && mgr.create(req.body)
+      .then((doc) => {
+        doc._mixin(req.body);
+        return doc.save();
+      })
+      .then(end)
+      .catch(end);
     break;
 
   case '_local':
@@ -61,10 +75,13 @@ module.exports = async function common({req, res, $p}) {
 
   default:
     if(req.method === 'GET') {
-      common.get(parsed.paths[1], query).then(end).catch(end);
+      db.get(parsed.paths[1], query).then(end).catch(end);
     }
-    else if(req.method === 'PUT') {
-      common.put(req.body, query).then(end).catch(end);
+    else if(req.method === 'PUT' && parsed.paths[1].startsWith('_local')) {
+      db.put(req.body, query).then(end).catch(end);
+    }
+    else {
+
     }
   }
 

@@ -845,18 +845,9 @@ set parent(v){this._setter('parent',v)}
     if(!_manager.metadata().common) {
       return super.save(post, operational, attachments, attr);
     }
-    const {job_prm, adapters: {pouch: {remote: {ram}, props}}} = _manager._owner.$p;
+    const {job_prm, adapters: {pouch: {remote: {ram}, local: {common}, props}}} = _manager._owner.$p;
     if(job_prm.is_node) {
-      const t = this;
-      const db = {
-        get(_id) {
-          return Promise.resolve(t._obj);
-        },
-        put(doc) {
-          return Promise.resolve(doc);
-        }
-      }
-      return super.save(false, false, null, {db});
+      return super.save(false, false, null, {db: common});
     }
     else {
       const authHeader = ram.getBasicAuthHeaders({prefix: props._auth_provider.toUpperCase() + ' ', ...ram.__opts.auth});
