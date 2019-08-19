@@ -12,19 +12,22 @@ const {ldap} = require('../../config/auth.settings');
 
 
 passport.use(new LdapStrategy(
+  // {
+  //   server: Object.assign({
+  //     log: {
+  //       trace(...args) {
+  //         console.log(...args);
+  //       },
+  //       debug(...args) {
+  //         console.log(...args);
+  //       },
+  //       child(...args) {
+  //         return this;
+  //       }
+  //     }}, ldap.server)
+  // },
   {
-    server: Object.assign({
-      log: {
-        trace(...args) {
-          console.log(...args);
-        },
-        debug(...args) {
-          console.log(...args);
-        },
-        child(...args) {
-          return this;
-        }
-      }}, ldap.server)
+    server: ldap.server
   },
   function(profile, done) {
     // asynchronous verification, for effect...
