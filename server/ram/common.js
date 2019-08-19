@@ -73,6 +73,15 @@ module.exports = async function common({req, res, $p, polling}) {
   case '_local':
     parsed.paths[1] += `/${decodeURIComponent(parsed.paths[2])}`
 
+  case 'cat.clrs':
+    if(parsed.paths[2] === 'composite' && req.body) {
+      $p.cat.clrs.create_composite(req.body).then(end).catch(end);
+    }
+    else {
+      end({status: 404, error: true, message: `path '${parsed.paths[1]}/${parsed.paths[2]}' not available`});
+    }
+    break;
+
   default:
     if(req.method === 'GET') {
       db.get(parsed.paths[1], query).then(end).catch(end);
@@ -81,7 +90,7 @@ module.exports = async function common({req, res, $p, polling}) {
       db.put(req.body, query).then(end).catch(end);
     }
     else {
-
+      end({status: 404, error: true, message: `path '${parsed.paths[1]}' not available`});
     }
   }
 

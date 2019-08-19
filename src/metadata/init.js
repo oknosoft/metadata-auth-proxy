@@ -36,25 +36,78 @@ $p.enm.create('individual_legal');
 * @constructor 
 */
 class CchPredefined_elmnts extends CatObj{
-get value(){return this._getter('value')}
-set value(v){this._setter('value',v)}
-get definition(){return this._getter('definition')}
-set definition(v){this._setter('definition',v)}
-get synonym(){return this._getter('synonym')}
-set synonym(v){this._setter('synonym',v)}
-get list(){return this._getter('list')}
-set list(v){this._setter('list',v)}
-get zone(){return this._getter('zone')}
-set zone(v){this._setter('zone',v)}
-get predefined_name(){return this._getter('predefined_name')}
-set predefined_name(v){this._setter('predefined_name',v)}
-get parent(){return this._getter('parent')}
-set parent(v){this._setter('parent',v)}
-get type(){const {type} = this._obj; return typeof type === 'object' ? type : {types: []}}
-        set type(v){this._obj.type = typeof v === 'object' ? v : {types: []}}
-get elmnts(){return this._getter_ts('elmnts')}
-set elmnts(v){this._setter_ts('elmnts',v)}
-}
+
+  get value() {
+    const {_obj, type, _manager} = this;
+    const {utils, record_log} = _manager._owner.$p;
+    const res = _obj ? _obj.value : '';
+
+    if(_obj.is_folder) {
+      return '';
+    }
+    if(typeof res == 'object') {
+      return res;
+    }
+    else if(type.is_ref) {
+      if(type.digits && typeof res === 'number') {
+        return res;
+      }
+      if(type.hasOwnProperty('str_len') && !utils.is_guid(res)) {
+        return res;
+      }
+      const mgr = _manager.value_mgr(_obj, 'value', type);
+      if(mgr) {
+        if(utils.is_data_mgr(mgr)) {
+          return mgr.get(res, false);
+        }
+        else {
+          return utils.fetch_type(res, mgr);
+        }
+      }
+      if(res) {
+        record_log(['value', type, _obj]);
+        return null;
+      }
+    }
+    else if(type.date_part) {
+      return utils.fix_date(_obj.value, true);
+    }
+    else if(type.digits) {
+      return utils.fix_number(_obj.value, !type.hasOwnProperty('str_len'));
+    }
+    else if(type.types[0] == 'boolean') {
+      return utils.fix_boolean(_obj.value);
+    }
+    else {
+      return _obj.value || '';
+    }
+
+    return this.characteristic.clr;
+  }
+  set value(v) {
+    const {_obj, _data, _manager} = this;
+    if(_obj.value !== v) {
+      _manager.emit_async('update', this, {value: _obj.value});
+      _obj.value = v.valueOf();
+      _data._modified = true;
+    }
+  }
+  get definition(){return this._getter('definition')}
+  set definition(v){this._setter('definition',v)}
+  get synonym(){return this._getter('synonym')}
+  set synonym(v){this._setter('synonym',v)}
+  get list(){return this._getter('list')}
+  set list(v){this._setter('list',v)}
+  get zone(){return this._getter('zone')}
+  set zone(v){this._setter('zone',v)}
+  get predefined_name(){return this._getter('predefined_name')}
+  set predefined_name(v){this._setter('predefined_name',v)}
+  get parent(){return this._getter('parent')}
+  set parent(v){this._setter('parent',v)}
+  get type(){const {type} = this._obj; return typeof type === 'object' ? type : {types: []}}
+  set type(v){this._obj.type = typeof v === 'object' ? v : {types: []}}
+  get elmnts(){return this._getter_ts('elmnts')}
+  set elmnts(v){this._setter_ts('elmnts',v)}}
 $p.CchPredefined_elmnts = CchPredefined_elmnts;
 class CchPredefined_elmntsElmntsRow extends TabularSectionRow{
 get value(){return this._getter('value')}
@@ -63,7 +116,135 @@ get elm(){return this._getter('elm')}
 set elm(v){this._setter('elm',v)}
 }
 $p.CchPredefined_elmntsElmntsRow = CchPredefined_elmntsElmntsRow;
-$p.cch.create('predefined_elmnts');
+class CchPredefined_elmntsManager extends ChartOfCharacteristicManager {
+
+  constructor(owner, class_name) {
+    super(owner, class_name);
+    Object.defineProperty(this, 'parents', {
+      value: {}
+    });
+
+    const {md, doc, adapters} = this._owner.$p;
+
+    adapters.pouch.once('pouch_doc_ram_loaded', () => {
+      // загружаем предопределенные элементы
+      this.job_prms();
+      // рассчеты, помеченные, как шаблоны, загрузим в память заранее
+      doc.calc_order.load_templates && setTimeout(doc.calc_order.load_templates.bind(doc.calc_order), 1000);
+      // даём возможность завершиться другим обработчикам, подписанным на _pouch_load_data_loaded_
+      setTimeout(() => md.emit('predefined_elmnts_inited'), 100);
+    });
+  }
+
+  // этот метод адаптер вызывает перед загрузкой doc_ram
+  job_prms() {
+
+    // создаём константы из alatable
+    this.forEach((row) => this.job_prm(row));
+
+    // дополним автовычисляемыми свойствами, если им не назначены формулы
+    const {job_prm: {properties}} = this._owner.$p;
+    if(properties) {
+      const {calculated, width, length} = properties;
+      if(width && !width.is_calculated) {
+        calculated.push(width);
+        width._calculated_value = {execute: (obj) => obj && obj.calc_order_row && obj.calc_order_row.width || 0};
+      }
+      if(length && !length.is_calculated) {
+        calculated.push(length);
+        length._calculated_value = {execute: (obj) => obj && obj.calc_order_row && obj.calc_order_row.len || 0};
+      }
+    }
+  }
+
+  // создаёт константу
+  job_prm(row) {
+    const {job_prm, md, utils, record_log} = this._owner.$p;
+    const {parents} = this;
+    const parent = job_prm[parents[row.parent.valueOf()]];
+    const _mgr = row.type.is_ref && md.mgr_by_class_name(row.type.types[0]);
+
+    if(parent) {
+      if(parent.hasOwnProperty(row.synonym)) {
+        delete parent[row.synonym];
+      }
+
+      if(row.list == -1) {
+        parent.__define(row.synonym, {
+          value: (() => {
+            const res = {};
+            row.elmnts.forEach((row) => {
+              res[row.elm.valueOf()] = _mgr ? _mgr.get(row.value, false, false) : row.value;
+            });
+            return res;
+          })(),
+          configurable: true,
+          enumerable: true
+        });
+      }
+      else if(row.list) {
+        parent.__define(row.synonym, {
+          value: (row.elmnts._obj || row.elmnts).map((row) => {
+            if(_mgr) {
+              const value = _mgr.get(row.value, false, false);
+              if(!utils.is_empty_guid(row.elm)) {
+                value._formula = row.elm;
+              }
+              return value;
+            }
+            else {
+              return row.value;
+            }
+          }),
+          configurable: true,
+          enumerable: true
+        });
+      }
+      else {
+        parent.__define(row.synonym, {
+          value: _mgr ? _mgr.get(row.value, false, false) : row.value,
+          configurable: true,
+          enumerable: true
+        });
+      }
+    }
+    else {
+      record_log({
+        class: 'error',
+        note: `no parent for ${row.synonym}`,
+      });
+    }
+  }
+
+  // переопределяем load_array
+  load_array(aattr, forse) {
+    const {job_prm} = this._owner.$p;
+    const {parents} = this;
+    const elmnts = [];
+    for (const row of aattr) {
+      // если элемент является папкой, создаём раздел в job_prm
+      if(row.is_folder && row.synonym) {
+        parents[row.ref] = row.synonym;
+        !job_prm[row.synonym] && job_prm.__define(row.synonym, {value: {}});
+      }
+      // если не задан синоним - пропускаем
+      else if(row.synonym) {
+        // если есть подходящая папка, стразу делаем константу
+        if(parents[row.parent]) {
+          !job_prm[parents[row.parent]][row.synonym] && this.job_prm(row);
+        }
+        // если папки нет - сохраним элемент в alatable
+        else {
+          elmnts.push(row);
+        }
+      }
+    }
+    // метод по умолчанию
+    elmnts.length && super.load_array(elmnts, forse);
+  }
+
+}
+$p.cch.create('predefined_elmnts', CchPredefined_elmntsManager, false);
 
 /**
 * ### План видов характеристик ДополнительныеРеквизитыИСведения
@@ -107,9 +288,343 @@ get predefined_name(){return this._getter('predefined_name')}
 set predefined_name(v){this._setter('predefined_name',v)}
 get type(){const {type} = this._obj; return typeof type === 'object' ? type : {types: []}}
         set type(v){this._obj.type = typeof v === 'object' ? v : {types: []}}
-}
+
+
+  /**
+   * ### Является ли значение параметра вычисляемым
+   *
+   * @property is_calculated
+   * @type Boolean
+   */
+  get is_calculated() {
+    return (this._owner.$p.job_prm.properties.calculated || []).includes(this) || !this.calculated.empty();
+  }
+
+  get show_calculated() {
+    return (this._owner.$p.job_prm.properties.show_calculated || []).includes(this) || this.showcalc;
+  }
+
+  /**
+   * ### Рассчитывает значение вычисляемого параметра
+   * @param obj {Object}
+   * @param [obj.row]
+   * @param [obj.elm]
+   * @param [obj.ox]
+   */
+  calculated_value(obj) {
+    if(!this._calculated_value) {
+      if(this._formula) {
+        this._calculated_value = this._owner.$p.cat.formulas.get(this._formula);
+      }
+      else if(!this.calculated.empty()) {
+        this._calculated_value = this.calculated;
+      }
+      else {
+        return;
+      }
+    }
+    return this._calculated_value.execute(obj);
+  }
+
+  /**
+   * ### Проверяет условие в строке отбора
+   */
+  check_condition({row_spec, prm_row, elm, cnstr, origin, ox, calc_order}) {
+
+    const {is_calculated} = this;
+    const {utils, enm: {comparison_types}} = this._owner.$p;
+
+    // значение параметра
+    const val = is_calculated ? this.calculated_value({
+      row: row_spec,
+      cnstr: cnstr || 0,
+      elm,
+      ox,
+      calc_order
+    }) : this.extract_value(prm_row);
+
+    let ok = false;
+
+    // если сравнение на равенство - решаем в лоб, если вычисляемый параметр типа массив - выясняем вхождение значения в параметр
+    if(ox && !Array.isArray(val) && (prm_row.comparison_type.empty() || prm_row.comparison_type == comparison_types.eq)) {
+      if(is_calculated) {
+        ok = val == prm_row.value;
+      }
+      else {
+        if(ox.params) {
+          let prow;
+          ox.params.find_rows({
+            param: this,
+            cnstr: cnstr || (elm._row ? {in: [0, -elm._row.row]} : 0),
+            inset: (typeof origin !== 'number' && origin) || utils.blank.guid,
+          }, (row) => {
+            if(!prow || row.cnstr) {
+              prow = row;
+            }
+          });
+          ok = prow && prow.value == val;
+        }
+        else if(ox.product_params) {
+          ox.product_params.find_rows({
+            elm: elm.elm || 0,
+            param: this,
+            value: val
+          }, () => {
+            ok = true;
+            return false;
+          });
+        }
+      }
+    }
+    // вычисляемый параметр - его значение уже рассчитано формулой (val) - сравниваем со значением в строке ограничений
+    else if(is_calculated) {
+      const value = this.extract_value(prm_row);
+      ok = utils.check_compare(val, value, prm_row.comparison_type, comparison_types);
+    }
+    // параметр явно указан в табчасти параметров изделия
+    else {
+      if(ox.params) {
+        let prow;
+        ox.params.find_rows({
+          param: this,
+          cnstr: cnstr || (elm._row ? {in: [0, -elm._row.row]} : 0),
+          inset: (typeof origin !== 'number' && origin) || utils.blank.guid,
+        }, (row) => {
+          if(!prow || row.cnstr) {
+            prow = row;
+          }
+        });
+        // value - значение из строки параметра текущей продукции, val - знаяение из параметров отбора
+        ok = prow && utils.check_compare(prow.value, val, prm_row.comparison_type, comparison_types);
+      }
+      else if(ox.product_params) {
+        ox.product_params.find_rows({
+          elm: elm.elm || 0,
+          param: this
+        }, ({value}) => {
+          // value - значение из строки параметра текущей продукции, val - знаяение из параметров отбора
+          ok = utils.check_compare(value, val, prm_row.comparison_type, comparison_types);
+          return false;
+        });
+      }
+    }
+    return ok;
+  }
+
+  /**
+   * Извлекает значение параметра с учетом вычисляемости
+   */
+  extract_value({comparison_type, txt_row, value}) {
+
+    const {enm: {comparison_types}, md} = this._owner.$p;
+    switch (comparison_type) {
+
+    case comparison_types.in:
+    case comparison_types.nin:
+
+      if(!txt_row) {
+        return value;
+      }
+      try {
+        const arr = JSON.parse(txt_row);
+        const {types} = this.type;
+        if(types && types.length == 1) {
+          const mgr = md.mgr_by_class_name(types[0]);
+          return arr.map((ref) => mgr.get(ref, false));
+        }
+        return arr;
+      }
+      catch (err) {
+        return value;
+      }
+
+    default:
+      return value;
+    }
+  }
+
+  /**
+   * Возвращает массив связей текущего параметра
+   */
+  params_links(attr) {
+
+    // первым делом, выясняем, есть ли ограничитель на текущий параметр
+    if(!this.hasOwnProperty('_params_links')) {
+      this._params_links = this._owner.$p.cat.params_links.find_rows({slave: this});
+    }
+
+    return this._params_links.filter((link) => {
+      //use_master бывает 0 - один ведущий, 1 - несколько ведущих через И, 2 - несколько ведущих через ИЛИ
+      const use_master = link.use_master || 0;
+      let ok = true && use_master < 2;
+      //в зависимости от use_master у нас массив либо из одного, либо из нескольких ключей ведущиъ для проверки
+      const arr = !use_master ? [{key:link.master}] : link.leadings;
+
+      arr.forEach((row_key) => {
+        let ok_key = true;
+        // для всех записей ключа параметров
+        row_key.key.params.forEach((row) => {
+          // выполнение условия рассчитывает объект CchProperties
+          ok_key = row.property.check_condition({
+            cnstr: attr.grid.selection.cnstr,
+            ox: attr.obj._owner._owner,
+            prm_row: row,
+            elm: attr.obj,
+          });
+          //Если строка условия в ключе не выполняется, то дальше проверять его условия смысла нет
+          if (!ok_key) {
+            return false;
+          }
+        });
+        //Для проверки через ИЛИ логика накопительная - надо проверить все ключи до единого
+        if (use_master == 2){
+          ok = ok || ok_key;
+        }
+        //Для проверки через И достаточно найти один неподходящий ключ, чтобы остановиться и признать связь неподходящей
+        else if (!ok_key){
+          ok = false;
+          return false;
+        }
+      });
+      //Конечный возврат в функцию фильтрации массива связей
+      return ok;
+    });
+  }
+
+  /**
+   * Проверяет и при необходимости перезаполняет или устанваливает умолчание value в prow
+   */
+  linked_values(links, prow) {
+    const values = [];
+    let changed;
+    // собираем все доступные значения в одном массиве
+    links.forEach((link) => link.values.forEach((row) => values.push(row)));
+    // если значение доступно в списке - спокойно уходим
+    if(values.some((row) => row._obj.value == prow.value)) {
+      return;
+    }
+    // если есть явный default - устанавливаем
+    if(values.some((row) => {
+      if(row.forcibly) {
+        prow.value = row._obj.value;
+        return true;
+      }
+      if(row.by_default && (!prow.value || prow.value.empty && prow.value.empty())) {
+        prow.value = row._obj.value;
+        changed = true;
+      }
+    })) {
+      return true;
+    }
+    // если не нашли лучшего, установим первый попавшийся
+    if(changed) {
+      return true;
+    }
+    if(values.length) {
+      prow.value = values[0]._obj.value;
+      return true;
+    }
+  }
+
+  /**
+   * ### Дополняет отбор фильтром по параметрам выбора
+   * Используется в полях ввода экранных форм
+   * @param filter {Object} - дополняемый фильтр
+   * @param attr {Object} - атрибуты OCombo
+   */
+  filter_params_links(filter, attr, links) {
+    // для всех отфильтрованных связей параметров
+    if(!links) {
+      links = this.params_links(attr);
+    }
+    links.forEach((link) => {
+      // если ключ найден в параметрах, добавляем фильтр
+      if(!filter.ref) {
+        filter.ref = {in: []};
+      }
+      if(filter.ref.in) {
+        link.values._obj.forEach((row) => {
+          if(filter.ref.in.indexOf(row.value) == -1) {
+            filter.ref.in.push(row.value);
+          }
+        });
+      }
+    });
+  }}
 $p.CchProperties = CchProperties;
-$p.cch.create('properties');
+class CchPropertiesManager extends ChartOfCharacteristicManager {
+
+  /**
+   * ### Проверяет заполненность обязательных полей
+   *
+   * @method check_mandatory
+   * @override
+   * @param prms {Array}
+   * @param title {String}
+   * @return {Boolean}
+   */
+  check_mandatory(prms, title) {
+
+    let t, row;
+    const {msg} = this._owner.$p;
+
+    // проверяем заполненность полей
+    for (t in prms) {
+      row = prms[t];
+      if(row.param.mandatory && (!row.value || row.value.empty())) {
+        msg.show_msg({
+          type: 'alert-error',
+          text: msg.bld_empty_param + row.param.presentation,
+          title: title || msg.bld_title
+        });
+        return true;
+      }
+    }
+  }
+
+  /**
+   * ### Возвращает массив доступных для данного свойства значений
+   *
+   * @method slist
+   * @override
+   * @param prop {CatObj} - планвидовхарактеристик ссылка или объект
+   * @param ret_mgr {Object} - установить в этом объекте указатель на менеджера объекта
+   * @return {Array}
+   */
+  slist(prop, ret_mgr) {
+
+    let res = [], rt, at, pmgr, op = this.get(prop);
+    const {$p} = this._owner;
+
+    if(op && op.type.is_ref) {
+      // параметры получаем из локального кеша
+      for (rt in op.type.types)
+        if(op.type.types[rt].indexOf('.') > -1) {
+          at = op.type.types[rt].split('.');
+          pmgr = $p[at[0]][at[1]];
+          if(pmgr) {
+
+            if(ret_mgr) {
+              ret_mgr.mgr = pmgr;
+            }
+
+            if(pmgr.class_name == 'enm.open_directions') {
+              pmgr.get_option_list().forEach((v) => v.value && v.value != $p.enm.tso.folding && res.push(v));
+            }
+            else if(pmgr.class_name.indexOf('enm.') != -1 || !pmgr.metadata().has_owners) {
+              res = pmgr.get_option_list();
+            }
+            else {
+              pmgr.find_rows({owner: prop}, (v) => res.push({value: v.ref, text: v.presentation}));
+            }
+          }
+        }
+    }
+    return res;
+  }
+
+}
+$p.cch.create('properties', CchPropertiesManager, false);
 
 /**
 * ### Справочник СвязиПараметров
@@ -868,10 +1383,10 @@ class CatClrsManager extends CatManager {
 
   // ищет по цветам снаружи-изнутри
   by_in_out({clr_in, clr_out}) {
-    const {wsql: alasql, utils: {blank}} = this._owner.$p;
+    const {wsql, utils: {blank}} = this._owner.$p;
     // скомпилированный запрос
     if(!this._by_in_out) {
-      this._by_in_out = alasql.compile('select top 1 ref from ? where clr_in = ? and clr_out = ? and (not ref = ?)');
+      this._by_in_out = wsql.alasql.compile('select top 1 ref from ? where clr_in = ? and clr_out = ? and (not ref = ?)');
     }
     // ищем в справочнике цветов
     return this._by_in_out([this.alatable, clr_in.valueOf(), clr_out.valueOf(), blank.guid]);
@@ -895,17 +1410,19 @@ class CatClrsManager extends CatManager {
     clr_in = this.get(clr_in);
     clr_out = this.get(clr_out);
     const ares = this.by_in_out({clr_in, clr_out});
-    if(ares.length) {
-      return Promise.resolve(this.get(ares[0]));
-    }
-    const clr = this.create({
-      clr_in,
-      clr_out,
-      name: `${clr_in.name} \\ ${clr_out.name}`,
-      parent: job_prm.builder.composite_clr_folder
-    });
-    return (with_inverted ? create_composite({clr_in: clr_out, clr_out: clr_in, with_inverted: false}) : Promise.resolve())
-      .then(() => clr.save());
+    const res = with_inverted ? this.create_composite({clr_in: clr_out, clr_out: clr_in, with_inverted: false}) : Promise.resolve();
+    return res.then(() => (
+      ares.length ?
+        Promise.resolve(this.get(ares[0])) :
+        this.create({
+          clr_in,
+          clr_out,
+          name: `${clr_in.name} \\ ${clr_out.name}`,
+          parent: job_prm.builder.composite_clr_folder
+        })
+    ))
+      .then((clr) => clr._modified ? clr.save() : clr)
+      .then((clr) => (with_inverted ? {clr, inverted: this.inverted(clr)} : clr));
   }
 }
 $p.cat.create('clrs', CatClrsManager, false);

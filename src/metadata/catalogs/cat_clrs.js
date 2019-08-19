@@ -38,10 +38,10 @@ exports.CatClrsManager = class CatClrsManager extends Object {
 
   // ищет по цветам снаружи-изнутри
   by_in_out({clr_in, clr_out}) {
-    const {wsql: alasql, utils: {blank}} = this._owner.$p;
+    const {wsql, utils: {blank}} = this._owner.$p;
     // скомпилированный запрос
     if(!this._by_in_out) {
-      this._by_in_out = alasql.compile('select top 1 ref from ? where clr_in = ? and clr_out = ? and (not ref = ?)');
+      this._by_in_out = wsql.alasql.compile('select top 1 ref from ? where clr_in = ? and clr_out = ? and (not ref = ?)');
     }
     // ищем в справочнике цветов
     return this._by_in_out([this.alatable, clr_in.valueOf(), clr_out.valueOf(), blank.guid]);
@@ -65,16 +65,18 @@ exports.CatClrsManager = class CatClrsManager extends Object {
     clr_in = this.get(clr_in);
     clr_out = this.get(clr_out);
     const ares = this.by_in_out({clr_in, clr_out});
-    if(ares.length) {
-      return Promise.resolve(this.get(ares[0]));
-    }
-    const clr = this.create({
-      clr_in,
-      clr_out,
-      name: `${clr_in.name} \\ ${clr_out.name}`,
-      parent: job_prm.builder.composite_clr_folder
-    });
-    return (with_inverted ? create_composite({clr_in: clr_out, clr_out: clr_in, with_inverted: false}) : Promise.resolve())
-      .then(() => clr.save());
+    const res = with_inverted ? this.create_composite({clr_in: clr_out, clr_out: clr_in, with_inverted: false}) : Promise.resolve();
+    return res.then(() => (
+      ares.length ?
+        Promise.resolve(this.get(ares[0])) :
+        this.create({
+          clr_in,
+          clr_out,
+          name: `${clr_in.name} \\ ${clr_out.name}`,
+          parent: job_prm.builder.composite_clr_folder
+        })
+    ))
+      .then((clr) => clr._modified ? clr.save() : clr)
+      .then((clr) => (with_inverted ? {clr, inverted: this.inverted(clr)} : clr));
   }
 }
