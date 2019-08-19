@@ -19,11 +19,14 @@ export default function load_ram({pouch, classes, job_prm, cat}) {
 
       local.ram.allDocs({include_docs: true}).then((res) => pouch.load_changes(res, {}));
 
-      local.ram.replicate.from(common, {
+      local.sync.common = local.ram.replicate.from(common, {
         live: true,
         retry: true,
         since: 'now'
       })
+        .on('change', (res) => {
+          pouch.load_changes(res);
+        })
         .on('error', (err) => {
           console.log(err);
         });
