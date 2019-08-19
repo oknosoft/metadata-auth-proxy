@@ -43,7 +43,7 @@ module.exports = async function common({req, res, $p, polling}) {
 
   case '_changes':
     if(query.feed === 'longpoll') {
-      polling.add(res);
+      polling.add({query, res});
     }
     else {
       db.changes(query).then(end);

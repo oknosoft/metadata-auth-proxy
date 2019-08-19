@@ -19,14 +19,14 @@ export default function load_ram({pouch, classes, job_prm, cat}) {
 
       local.ram.allDocs({include_docs: true}).then((res) => pouch.load_changes(res, {}));
 
-      // local.ram.replicate.from(common, {
-      //   live: true,
-      //   retry: true,
-      //   since: 'now'
-      // })
-      //   .on('error', (err) => {
-      //     console.log(err);
-      //   });
+      local.ram.replicate.from(common, {
+        live: true,
+        retry: true,
+        since: 'now'
+      })
+        .on('error', (err) => {
+          console.log(err);
+        });
 
       return fetch(`${job_prm.server.prefix}/ram/all`, {
         headers: ram.getBasicAuthHeaders({prefix: props._auth_provider.toUpperCase() + ' ', ...ram.__opts.auth}),

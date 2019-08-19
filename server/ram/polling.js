@@ -1,5 +1,5 @@
 /**
- *
+ * node-реализация couchdb-longpoll
  *
  * @module polling
  *
@@ -30,28 +30,45 @@ module.exports = class Polling {
    * Пишет пустую строку во все активные ответы, чтобы освежить соединение
    */
   heartbeat() {
-    for (const res in this.responses) {
-      res.write('\n');
+    for (const el of this.responses) {
+      const {res} = el;
+      if(res.finished || !res.socket.writable) {
+        this.responses.delete(el);
+      }
+      else {
+        res.write('\n');
+      }
     }
-    setTimeout(this.heartbeat, 30000);
+    setTimeout(this.heartbeat, 20000);
   }
 
   /**
    * Добавляет response в очередь
    */
-  add(res) {
-    res.setHeader('Content-Type', 'application/json');
-    this.responses.add(res);
+  add(el) {
+    const {res} = el;
+    res.setHeader('Cache-Control', 'must-revalidate');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Server', 'metadata-common-catalogs');
+    res.setHeader('X-Powered-By', 'metadata-auth-proxy');
+    res.write('{"results":[');
+    this.responses.add(el);
   }
 
   /**
    * Оповещает всех подписчиков об изменениях
    */
-  handleChange(change) {
-    const responses = Array.from(this.responses);
-    this.responses.clear();
-    const data = JSON.stringify(change);
-    for(const res of responses) {
+  handleChange({doc, ...change}) {
+    const data = `${JSON.stringify(change)}], "last_seq": ${change.seq}}\n`;
+    for(const el of this.responses) {
+      const {query, res} = el;
+
+      // а надо ли информировать данного подписчика
+      if(!true) {
+        continue;
+      }
+
+      this.responses.delete(el);
       try{
         res.end(data);
       }

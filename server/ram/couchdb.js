@@ -16,7 +16,7 @@ module.exports = function common({log, $p}) {
       log(`Подключение к ${info.host}`);
       return local.replicate.from(remote, {selector});
     })
-    .then(() => {
+    .then((info) => {
       log(`Загружен образ в ram`);
       pouch.local.common = local;
       pouch.local.sync.common = local.replicate.to(remote, {
