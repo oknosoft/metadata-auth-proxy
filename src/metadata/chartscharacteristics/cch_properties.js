@@ -87,11 +87,11 @@ exports.CchProperties = class CchProperties extends Object {
    * @type Boolean
    */
   get is_calculated() {
-    return (this._owner.$p.job_prm.properties.calculated || []).includes(this) || !this.calculated.empty();
+    return (this._manager._owner.$p.job_prm.properties.calculated || []).includes(this) || !this.calculated.empty();
   }
 
   get show_calculated() {
-    return (this._owner.$p.job_prm.properties.show_calculated || []).includes(this) || this.showcalc;
+    return (this._manager._owner.$p.job_prm.properties.show_calculated || []).includes(this) || this.showcalc;
   }
 
   /**
@@ -104,7 +104,7 @@ exports.CchProperties = class CchProperties extends Object {
   calculated_value(obj) {
     if(!this._calculated_value) {
       if(this._formula) {
-        this._calculated_value = this._owner.$p.cat.formulas.get(this._formula);
+        this._calculated_value = this._manager._owner.$p.cat.formulas.get(this._formula);
       }
       else if(!this.calculated.empty()) {
         this._calculated_value = this.calculated;
@@ -121,8 +121,8 @@ exports.CchProperties = class CchProperties extends Object {
    */
   check_condition({row_spec, prm_row, elm, cnstr, origin, ox, calc_order}) {
 
-    const {is_calculated} = this;
-    const {utils, enm: {comparison_types}} = this._owner.$p;
+    const {is_calculated, _manager} = this;
+    const {utils, enm: {comparison_types}} = _manager._owner.$p;
 
     // значение параметра
     const val = is_calculated ? this.calculated_value({
@@ -206,7 +206,7 @@ exports.CchProperties = class CchProperties extends Object {
    */
   extract_value({comparison_type, txt_row, value}) {
 
-    const {enm: {comparison_types}, md} = this._owner.$p;
+    const {enm: {comparison_types}, md} = this._manager._owner.$p;
     switch (comparison_type) {
 
     case comparison_types.in:
@@ -240,7 +240,7 @@ exports.CchProperties = class CchProperties extends Object {
 
     // первым делом, выясняем, есть ли ограничитель на текущий параметр
     if(!this.hasOwnProperty('_params_links')) {
-      this._params_links = this._owner.$p.cat.params_links.find_rows({slave: this});
+      this._params_links = this._manager._owner.$p.cat.params_links.find_rows({slave: this});
     }
 
     return this._params_links.filter((link) => {
