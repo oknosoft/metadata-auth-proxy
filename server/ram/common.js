@@ -70,9 +70,6 @@ module.exports = async function common({req, res, $p, polling}) {
       .catch(end);
     break;
 
-  case '_local':
-    parsed.paths[1] += `/${decodeURIComponent(parsed.paths[2])}`
-
   case 'cat.clrs':
     if(parsed.paths[2] === 'composite' && req.body) {
       $p.cat.clrs.create_composite(req.body).then(end).catch(end);
@@ -83,6 +80,9 @@ module.exports = async function common({req, res, $p, polling}) {
     break;
 
   default:
+    if(parsed.paths[1].startsWith('_local')) {
+      parsed.paths[1] += `/${decodeURIComponent(parsed.paths[2])}`;
+    }
     if(req.method === 'GET') {
       db.get(parsed.paths[1], query).then(end).catch(end);
     }

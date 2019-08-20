@@ -46,7 +46,7 @@ module.exports = function ({cat}, log) {
 
     const { username, roles, token } = headerFields;
     headerFields.clear(headers);
-    headers[username] = user.latin || user.id;
+    headers[username] = user.latin || encodeURIComponent(user.id);
     headers[roles] = JSON.parse(user.roles).join(',');
     headers[token] = sign(headers[username], user_node.secret);
 
@@ -56,6 +56,9 @@ module.exports = function ({cat}, log) {
     }
     else if(parts && parts[1]) {
       parts = parts[1].split('_');
+    }
+    else if(path === '/couchdb/') {
+      parts = [zone, ''];
     }
     else {
       return end404(res, path);
@@ -76,6 +79,7 @@ module.exports = function ({cat}, log) {
       break;
 
     case 'ram':
+    case '':
       server = abonent.server;
       break;
 

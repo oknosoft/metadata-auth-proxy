@@ -7,7 +7,7 @@
  */
 
 module.exports = {
-  providers: ['couchdb','google','ldap'],
+  providers: ['couchdb','ldap'],
   couchdb: {
     url: process.env.COUCHLOCAL ? process.env.COUCHLOCAL.replace('/wb_', '/_session') : 'http://cou221:5984/_session',
     authPrefix: 'Basic ',
