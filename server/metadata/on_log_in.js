@@ -8,7 +8,7 @@
 
 module.exports = function on_log_in({pouch, classes, job_prm, cat}) {
   const {auth} = pouch.remote.ram.__opts;
-  const opts = {skip_setup: true, auth};
+  const opts = {skip_setup: true, auth, owner: pouch};
   if(!pouch.local.meta) {
     pouch.remote.meta = new classes.PouchDB(pouch.props.path + 'meta', opts);
     Object.defineProperty(pouch.local, 'meta', {get(){ return pouch.remote.meta;}});
