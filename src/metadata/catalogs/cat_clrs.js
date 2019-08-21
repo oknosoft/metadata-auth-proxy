@@ -14,12 +14,13 @@ exports.CatClrs = class CatClrs extends Object {
     if(!_manager.metadata().common) {
       return super.save(post, operational, attachments, attr);
     }
-    const {job_prm, adapters: {pouch: {remote: {ram}, local: {common}, props}}} = _manager._owner.$p;
+    const {job_prm, adapters: {pouch}} = _manager._owner.$p;
+    const {remote: {ram}, local: {common}, props} = pouch;
     if(job_prm.is_node) {
       return super.save(false, false, null, {db: common});
     }
     else {
-      const authHeader = ram.getBasicAuthHeaders({prefix: props._auth_provider.toUpperCase() + ' ', ...ram.__opts.auth});
+      const authHeader = ram.getBasicAuthHeaders({prefix: pouch.auth_prefix(), ...ram.__opts.auth});
       return fetch(props.path.replace(job_prm.local_storage_prefix, `common/_save/cat.clrs`), {
         method: 'POST',
         headers: Object.assign({'Content-Type': 'application/json'}, authHeader),

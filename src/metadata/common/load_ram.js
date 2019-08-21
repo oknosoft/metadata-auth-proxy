@@ -32,7 +32,7 @@ export default function load_ram({pouch, classes, job_prm, cat}) {
         });
 
       return fetch(`${job_prm.server.prefix}/ram/all`, {
-        headers: ram.getBasicAuthHeaders({prefix: props._auth_provider.toUpperCase() + ' ', ...ram.__opts.auth}),
+        headers: ram.getBasicAuthHeaders({prefix: pouch.auth_prefix(), ...ram.__opts.auth}),
       })
         .then((res) => res.json())
         .then((res) => {

@@ -16,10 +16,10 @@ passport.use(new LdapStrategy(
   //   server: Object.assign({
   //     log: {
   //       trace(...args) {
-  //         console.log(...args);
+  //         args.length && console.log(...args);
   //       },
   //       debug(...args) {
-  //         console.log(...args);
+  //         args.length && console.log(...args);
   //       },
   //       child(...args) {
   //         return this;

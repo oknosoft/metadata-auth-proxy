@@ -5,6 +5,7 @@
 // node_modules/pouchdb-adapter-http/lib/index.js
 var ourFetch = function (url, options) {
   //...
-  var prefix = opts.owner && opts.owner.props._auth_provider === 'ldap' ? 'LDAP ' : 'Basic ';
+  var prefix = opts.owner ? opts.owner.auth_prefix() : 'Basic ';
+  options.headers.set('Authorization', prefix + token);
 }
 ````
