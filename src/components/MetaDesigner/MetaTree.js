@@ -3,13 +3,26 @@ import PropTypes from 'prop-types';
 import {Treebeard, decorators} from '../react-treebeard';
 import * as filters from './filter';
 import Draggable from './Draggable';
-import {Div} from '../react-treebeard/components/common';
+import Menu from './MetaTreeMenu';
 
 export default class MetaTree extends React.Component {
 
   constructor(props, context) {
     super(props, context);
-    this.state = {data: props.data, current: null};
+    this.state = {
+      data: props.data,
+      current: null,
+      anchorEl: null,
+      menuItem: null,
+    };
+  }
+
+  handleMenuOpen = (node, {currentTarget}) => {
+    this.setState({menuItem: node, anchorEl: currentTarget});
+  }
+
+  handleMenuClose = () => {
+    this.handleMenuOpen(null, {currentTarget: null});
   }
 
   onToggle = (node, toggled) => {
@@ -52,24 +65,23 @@ export default class MetaTree extends React.Component {
   };
 
   render() {
+    const {anchorEl, menuItem, data} = this.state;
     return (
       <Draggable title="Метаданные">
         <div className="dsn-search-box">
-          <input type="text"
-                 className="dsn-input"
-                 placeholder="Поиск в метаданных..."
-                 onKeyUp={this.onFilterMouseUp}
-          />
+          <input type="text" className="dsn-input" placeholder="Поиск в метаданных..." onKeyUp={this.onFilterMouseUp}/>
         </div>
-        <div className="dsn-tree">
+        <div className="dsn-tree" ref={node => this.node = node}>
           <Treebeard
-            data={this.state.data}
+            data={data}
             decorators={decorators}
             separateToggleEvent={true}
             onToggle={this.onToggle}
             onClickHeader={this.onClickHeader}
+            onRightClickHeader={this.handleMenuOpen}
           />
         </div>
+        <Menu item={menuItem} anchorEl={anchorEl} handleClick={this.handleMenuClose} handleClose={this.handleMenuClose} />
       </Draggable>
     );
   }

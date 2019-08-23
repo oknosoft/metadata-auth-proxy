@@ -1,28 +1,28 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import {Div} from '../common';
-
+function prevent(e) {
+  e.preventDefault();
+}
 
 const Header = ({node, style, onClick, onRightClick}) => (
-  <Div
+  <div
     style={node.children ? style.base : Object.assign({marginLeft: 16}, style.base)}
     onClick={onClick}
     onContextMenu={(e) => {
-      if (onRightClick) {
-        e.preventDefault();
-      }
-    }}
-    onMouseDown={(e) => {
       if (onRightClick && e.button === 2) {
+        prevent(e);
         onRightClick(node, e);
       }
-    }}>
-    <Div style={style.title}>
+    }}
+    // onMouseUp={prevent}
+    // onMouseDown={prevent}
+  >
+    <div style={style.title} className={`dsn-hover`}>
       <div className={`dsn-treeview-icon ${node.icon}`}/>
       {node.name}
-    </Div>
-  </Div>
+    </div>
+  </div>
 );
 
 Header.propTypes = {

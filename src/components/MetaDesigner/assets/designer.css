@@ -3,6 +3,10 @@
   float: left;
 }
 
+.dsn-hover:hover {
+  background-color: #eeeeee;
+}
+
 .dsn-search-box {
   padding: 8px;
 }

@@ -14,7 +14,6 @@ export default {
         position: 'relative'
       },
       link: {
-        cursor: 'pointer',
         position: 'relative',
         padding: '0px 5px',
         display: 'block',
@@ -62,8 +61,9 @@ export default {
           left: '-21px'
         },
         title: {
+          cursor: 'pointer',
           lineHeight: '24px',
-          verticalAlign: 'middle'
+          verticalAlign: 'middle',
         }
       },
       subtree: {
