@@ -3,6 +3,7 @@
  */
 
 // global $p
+//import {classes} from 'metadata-core';
 
 const struct = {
   cat: {
@@ -14,43 +15,157 @@ const struct = {
   enm: {
     icon: 'icon_1c_enm'
   }
+};
+
+class BaseItem {
+  constructor(name, key, icon, _owner, children = []) {
+    this.key = key;
+    this.icon = icon;
+    this._owner = _owner;
+    this.children = children;
+    this.name = name || this.meta.name;
+  }
+
+  get meta() {
+    return this._owner.meta[this.key];
+  }
 }
 
-export default async function meta() {
-
-  const {adapters: {pouch}, md, utils} = $p;
-  const meta = {
-    name: 'Метаданные',
-    icon: 'icon_1c_root',
-    toggled: true,
-    children: []
+class MetaDescription extends BaseItem {
+  constructor(meta) {
+    super('Метаданные', 'root', 'icon_1c_root', meta);
+    for(const key in struct) {
+      this.children.push(new MetaCollection(key, this));
+    }
+    this.children.push(new BaseItem('Схемы компоновки', 'schamas', 'icon_1c_tsk', this));
+    this.toggled = true;
   }
 
-  function syns(name) {
-    if(name === 'parent') return 'Родитель';
-    if(name === 'owner') return 'Владелец';
-    return md.syns_1с(name);
+  get meta() {
+    return this._owner;
+  }
+}
+
+class MetaCollection extends BaseItem {
+  constructor(key, _owner) {
+    super($p[key].toString(), key, struct[key].icon, _owner);
+    for(const name in this.meta) {
+      if (key == 'enm') {
+        this.children.push(new MetaEnmObj(name, this));
+      }
+      else if (key.includes('reg')) {
+
+      }
+      else {
+        this.children.push(new MetaObj(name, this));
+      }
+    }
+  }
+}
+
+class MetaEnmObj extends BaseItem {
+  constructor(key, _owner) {
+    super(syns(key), key, struct[_owner.key].icon, _owner);
+    this.children.push(new MetaEnmValues(this));
+  }
+}
+
+class MetaEnmValues extends BaseItem {
+  constructor(_owner) {
+    super('Значения', 'values', 'icon_1c_props', _owner);
+    for(const val of this.meta) {
+      this.children.push(new BaseItem(val.synonym, val.name, 'icon_1c_props', this, null));
+    }
   }
 
-  function add_fields(elm, direct) {
-    const children = Object.keys(elm.meta.fields)
-      .filter(name => name !== 'predefined_name')
-      .map(name => ({
-        _id: name,
-        _owner: elm,
-        name: syns(name),
-        icon: 'icon_1c_props',
-      }));
-    if(direct) {
-      elm.children = children;
+  get meta() {
+    return this._owner.meta;
+  }
+}
+
+class MetaTabularObj extends BaseItem {
+  constructor(key, _owner) {
+    super(syns(key), key, 'icon_1c_tabular', _owner);
+    this.children.push(new MetaFields(this));
+  }
+}
+
+class MetaTabulars extends BaseItem {
+  constructor(_owner) {
+    super('Табличные части', 'tabs', 'icon_1c_tabular', _owner);
+    for(const key in this.meta) {
+      this.children.push(new MetaTabularObj(key, this));
     }
-    else {
-      elm.children.push({
-        name: 'Реквизиты',
-        icon: 'icon_1c_props',
-        children,
-      });
+  }
+
+  get meta() {
+    return this._owner.meta.tabular_sections;
+  }
+}
+
+class MetaFieldObj extends BaseItem {
+  constructor(key, _owner) {
+    super(syns(key), key, 'icon_1c_props', _owner, null);
+  }
+}
+
+class MetaFields extends BaseItem {
+  constructor(_owner) {
+    super('Реквизиты', 'fields', 'icon_1c_props', _owner);
+    for(const key in this.meta.fields) {
+      if(key !== 'predefined_name') {
+        this.children.push(new MetaFieldObj(key, this));
+      }
     }
+  }
+
+  get meta() {
+    return this._owner.meta;
+  }
+}
+
+class MetaForms extends BaseItem {
+  constructor(_owner) {
+    super('Формы', 'frms', 'icon_1c_frm', _owner);
+  }
+
+  get meta() {
+    return this._owner.meta;
+  }
+}
+
+class MetaObj extends BaseItem {
+  constructor(key, _owner) {
+    super(null, key, struct[_owner.key].icon, _owner);
+    this.children.push(new MetaFields(this));
+    this.children.push(new MetaTabulars(this));
+    this.children.push(new MetaForms(this));
+  }
+}
+
+function syns(name) {
+  if(name === 'parent') return 'Родитель';
+  if(name === 'owner') return 'Владелец';
+  return $p.md.syns_1с(name);
+}
+
+async function get_meta() {
+
+  const {adapters: {pouch}, utils} = $p;
+
+  if(!pouch.remote.meta) {
+    return new Promise((resolve, reject) => {
+      if(get_meta.attempts > 3) {
+        return reject(new TypeError('Нет базы meta'));
+      }
+      setTimeout(() => {
+        if(!get_meta.attempts) {
+          get_meta.attempts = 0;
+        }
+        get_meta.attempts++;
+        return get_meta();
+      }, 1000);
+    });
   }
 
   return pouch.remote.meta.allDocs({
@@ -64,78 +179,11 @@ export default async function meta() {
       for(const {doc} of rows) {
         utils._patch(_m, doc);
       }
-
-      for (let key in struct) {
-        const keys = Object.keys(_m[key]);
-        meta.children.push({
-          name: $p[key].toString(),
-          icon: struct[key].icon,
-          children: keys.map(name => ({
-            meta: _m[key][name],
-            get name() {
-              return this.meta.name || syns(name)
-            },
-            icon: struct[key].icon,
-            children: []
-          }))
-        });
-        meta.children[meta.children.length - 1].children.forEach(elm => {
-          if (key == 'enm') {
-            elm.children.push({
-              name: 'Значения',
-              icon: 'icon_1c_props',
-              children: elm.meta.map(v => Object.assign({
-                icon: 'icon_1c_props',
-                _owner: elm,
-              }, v))
-            });
-          }
-          else if (key.includes('reg')) {
-
-          }
-          else {
-            add_fields(elm);
-
-            const tabs = {
-              name: 'Табличные части',
-              icon: 'icon_1c_tabular',
-              children: []
-            };
-            elm.children.push(tabs);
-            for(const name in elm.meta.tabular_sections) {
-              const ts = elm.meta.tabular_sections[name];
-              const tab = {
-                _id: name,
-                _owner: tabs,
-                meta: ts,
-                name: syns(name),
-                icon: 'icon_1c_tabular',
-                children: []
-              }
-              add_fields(tab, true);
-              tabs.children.push(tab);
-            }
-
-            const frms = {
-              name: 'Формы',
-              icon: 'icon_1c_frm',
-              children: []
-            };
-            elm.children.push(frms);
-
-          }
-        })
-      };
-
-      const schamas = {
-        name: 'Схемы компоновки',
-        icon: 'icon_1c_tsk',
-        children: []
-      }
-
-      meta.children.push(schamas);
+      const meta = new MetaDescription(_m);
 
       return meta;
 
     });
-};
+}
+
+export default get_meta;

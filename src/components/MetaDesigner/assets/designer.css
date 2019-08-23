@@ -1,22 +1,22 @@
 
-.designer-span {
+.dsn-span {
   float: left;
 }
 
-.designer-search-box {
+.dsn-search-box {
   padding: 8px;
 }
 
-.designer-tree {
+.dsn-tree {
   height: calc(100% - 37px);
   overflow: auto;
 }
 
-.designer-input {
+.dsn-input {
   width: 100%;
 }
 
-.designer-component {
+.dsn-component {
   width: 100%;
   height: 100%;
   display: block;
@@ -25,14 +25,14 @@
   border: 1px gray solid;
 }
 
-.designer-content {
+.dsn-content {
   width: 100%;
   height: calc(100% - 24px);
   display: block;
   vertical-align: top;
 }
 
-.designer-draggable-handle {
+.dsn-draggable-handle {
   width: 100%;
   height: 24px;
   background-color: gray;
@@ -40,6 +40,18 @@
   color: white;
   font-weight: 500;
   padding: 2px 8px;
+}
+
+.dsn-treeview-icon {
+  float: left;
+  width: 20px;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-position: left center;
+}
+
+.dsn-space {
+  width: 8px;
 }
 
 /* иконы классов 1С */
