@@ -1,4 +1,3 @@
-
 export default {
   tree: {
     base: {
@@ -28,7 +27,6 @@ export default {
         base: {
           position: 'relative',
           display: 'inline-block',
-          //display: 'none',
           verticalAlign: 'top',
           marginLeft: '-5px',
           height: '24px',
