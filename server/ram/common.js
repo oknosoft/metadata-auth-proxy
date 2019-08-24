@@ -7,6 +7,7 @@
  * Created by Evgeniy Malyarov on 14.08.2019.
  */
 
+const check_auth = require('../auth/check_auth');
 
 module.exports = async function common({req, res, $p, polling}) {
   const {parsed, query} = req;
@@ -58,10 +59,16 @@ module.exports = async function common({req, res, $p, polling}) {
     break;
 
   case '_save':
-    const parts = parsed.paths[2] && parsed.paths[2].split('.');
-    const mgrs = parts && $p[parts[0]];
-    const mgr = mgrs && mgrs[parts[1]];
-    mgr && mgr.create(req.body)
+    check_auth(req)
+      .then((user) => {
+        const parts = parsed.paths[2] && parsed.paths[2].split('.');
+        const mgrs = parts && $p[parts[0]];
+        const mgr = mgrs && mgrs[parts[1]];
+        if(!mgr || mgr.class_name !== 'cat.clrs') {
+          throw {status: 404, error: true, message: `path '${parsed.paths[1]}/${parsed.paths[2]}' not available`};
+        }
+        return mgr.create(req.body);
+      })
       .then((doc) => {
         doc._mixin(req.body);
         return doc.save();
