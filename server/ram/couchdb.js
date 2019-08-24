@@ -19,7 +19,7 @@ module.exports = function common({log, $p}) {
     .then((info) => {
       log(`Загружен образ в ram`);
       pouch.local.common = local;
-      pouch.local.sync.common = local.replicate.to(remote, {
+      pouch.local.sync.common = local.replicate.from(remote, {
         selector,
         live: true,
         retry: true,

@@ -1361,9 +1361,9 @@ set parent(v){this._setter('parent',v)}
       return super.save(post, operational, attachments, attr);
     }
     const {job_prm, adapters: {pouch}} = _manager._owner.$p;
-    const {remote: {ram}, local: {common}, props} = pouch;
+    const {remote: {ram, meta}, props} = pouch;
     if(job_prm.is_node) {
-      return super.save(false, false, null, {db: common});
+      return super.save(false, false, null, {db: meta});
     }
     else {
       const authHeader = ram.getBasicAuthHeaders({prefix: pouch.auth_prefix(), ...ram.__opts.auth});
@@ -1377,7 +1377,10 @@ set parent(v){this._setter('parent',v)}
           return this;
         });
     }
+  }
 
+  new_number_doc() {
+    return super.new_number_doc('00');
   }}
 $p.CatClrs = CatClrs;
 class CatClrsManager extends CatManager {
