@@ -18,9 +18,7 @@ module.exports = class Polling {
       style: 'main_only'
     })
       .on('change', this.handleChange.bind(this))
-      .on('error', (err) => {
-        log(err);
-      });
+      .on('error', log);
     this.responses = new Set();
     this.heartbeat = this.heartbeat.bind(this);
     this.heartbeat();
