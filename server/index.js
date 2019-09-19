@@ -7,6 +7,8 @@
  */
 
 const worker = require('./worker'),
+  child_process = require('child_process'),
+  fs = require('fs'),
   runtime = {
     cluster: require('cluster'),
     root: __dirname
@@ -17,8 +19,10 @@ const worker = require('./worker'),
 
 if (runtime.cluster.isMaster) {
 
+  // если отладка отключена, запускаем дочерний процесс ram
+  const common = !process._preload_modules && child_process.spawn('node', ['server/ram/index'], {env: process.env});
+
   let cpus = conf.workers.count || require('os').cpus().length,
-    fs = require('fs'),
     workers = [];
 
   // On worker die
@@ -30,6 +34,13 @@ if (runtime.cluster.isMaster) {
     }
     workers = workers.filter((v) => v);
     workers.push(runtime.cluster.fork());
+  });
+
+  runtime.cluster.on('message', function (msg) {
+    if(msg && common && msg.event == 'shutdown' ) {
+      common.kill();
+      common = null;
+    }
   });
 
   fs.watch(require.resolve('../config/app.settings'), (event, filename) => {

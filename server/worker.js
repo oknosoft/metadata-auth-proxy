@@ -27,7 +27,7 @@ module.exports = function (runtime) {
     process.on('message', function (msg) {
       if(msg.event) {
         log(`Worker received ${msg.event} event`);
-        if(msg && msg.event == 'shutdown') {
+        if(msg.event == 'shutdown') {
           runtime.cluster.worker.kill();
         }
       }
