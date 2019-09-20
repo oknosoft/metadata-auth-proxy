@@ -7,11 +7,10 @@
  */
 
 const worker = require('./worker'),
-  child_process = require('child_process'),
   fs = require('fs'),
   runtime = {
     cluster: require('cluster'),
-    root: __dirname
+    root: __dirname,
   },
   {RateLimiterClusterMaster} = require('rate-limiter-flexible'),
   conf = require('../config/app.settings')(),
@@ -19,11 +18,9 @@ const worker = require('./worker'),
 
 if (runtime.cluster.isMaster) {
 
-  // если отладка отключена, запускаем дочерний процесс ram
-  const common = !process._preload_modules && child_process.spawn('node', ['server/ram/index'], {env: process.env});
-
-  let cpus = conf.workers.count || require('os').cpus().length,
-    workers = [];
+  const cpus = conf.workers.count || require('os').cpus().length;
+  const common = conf.server.start_common && require('child_process').fork('server/ram/index', {env: process.env});
+  let workers = [];
 
   // On worker die
   runtime.cluster.on('exit', function (worker) {
@@ -36,11 +33,8 @@ if (runtime.cluster.isMaster) {
     workers.push(runtime.cluster.fork());
   });
 
-  runtime.cluster.on('message', function (msg) {
-    if(msg && common && msg.event == 'shutdown' ) {
-      common.kill();
-      common = null;
-    }
+  process.on('exit', (code) => {
+    common && common.kill();
   });
 
   fs.watch(require.resolve('../config/app.settings'), (event, filename) => {

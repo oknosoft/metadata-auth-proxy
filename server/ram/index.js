@@ -32,21 +32,22 @@ metadata(log)
 
         const polling = new Polling(db, log);
 
-        const server = http.createServer(function(req, res) {
+        function execute(req, res) {
 
           const start = (req.method === 'POST' || req.method === 'PUT') ? getBody(req) : Promise.resolve();
 
           return start.then((body) => {
             const {remotePort, remoteAddress} = res.socket;
             const parsed = req.parsed = url.parse(req.url);
-            parsed.paths = parsed.pathname.replace('/', '').split('/');
-            req.query = qs.parse(parsed.query);
+            parsed.paths = parsed.pathname.replace('/', '').split('/').map(decodeURIComponent);
+            req.query = qs.parse(decodeURIComponent(parsed.query));
             if(body) {
               req.body = JSON.parse(body);
             }
             if(parsed.paths[0] === 'couchdb') {
               parsed.paths = parsed.paths.splice(1);
             }
+            //console.log(`${req.method} ${req.url}`, req.body || '');
             return parsed.paths[0] === 'common' ? common({req, res, $p, polling}) : end404(res, parsed.paths[0]);
           })
             .catch((err) => {
@@ -57,9 +58,17 @@ metadata(log)
               end500({res, log, err});
             });
 
+        }
+
+        process.on('message', function (msg) {
+          if(msg && msg.event == 'execute') {
+            execute(msg.req, msg.res);
+          }
         });
 
-        server.listen(conf.server.ram_port);
+        const server = http.createServer(execute);
+        const server_url = url.parse(conf.server.common_url);
+        server.listen(parseInt(server_url.port, 10));
       });
   });
 

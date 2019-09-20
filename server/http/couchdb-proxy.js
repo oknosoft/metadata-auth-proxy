@@ -26,17 +26,15 @@ const headerFields = {
   }
 };
 
+// Create a proxy server with custom application logic
+const proxy = httpProxy.createProxyServer({
+  xfwd: true,
+  agent: keepAliveAgent,
+});
+
+proxy.on('proxyRes', setVia);
+
 module.exports = function ({cat}, log) {
-
-  //
-  // Create a proxy server with custom application logic
-  //
-  const proxy = httpProxy.createProxyServer({
-    xfwd: true,
-    agent: keepAliveAgent,
-  });
-
-  proxy.on('proxyRes', setVia);
 
   return async function couchdbProxy(req, res) {
     // You can define here your custom logic to handle the request

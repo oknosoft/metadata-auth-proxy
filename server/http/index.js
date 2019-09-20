@@ -13,9 +13,11 @@ const {RateLimiterCluster} = require('rate-limiter-flexible');
 
 const {end401, end404, end500} = require('./end');
 
-module.exports = function ($p, log) {
+module.exports = function ($p, log, worker) {
 
   const couchdbProxy = require('./couchdb-proxy')($p, log);
+  const commonProxy = require('./common-proxy');
+  const staticProxy = require('./static');
   const adm = require('./adm')($p, log);
   const auth = require('../auth')($p, log);
   const conf = require('../../config/app.settings')();
@@ -42,22 +44,28 @@ module.exports = function ($p, log) {
 
         const parsed = req.parsed = url.parse(req.url);
         parsed.paths = parsed.pathname.replace('/', '').split('/');
+        parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
+        parsed.is_static = parsed.paths[0] === 'favicon.ico';
         req.query = qs.parse(parsed.query);
+
+        if(parsed.is_static) {
+          return staticProxy(req, res, conf);
+        }
 
         // пытаемся авторизовать пользователя
         return auth(req, res)
           .then((user) => {
             if(user) {
-              switch (parsed.paths[0]) {
-              case 'couchdb':
-                return couchdbProxy(req, res);
-
-              case 'adm':
-                return adm(req, res);
-
-              default:
-                return end404(res, parsed.paths[0]);
+              if(parsed.is_common) {
+                return commonProxy(req, res, conf);
               }
+              else if(parsed.paths[0] === 'couchdb') {
+                return couchdbProxy(req, res);
+              }
+              else if(parsed.paths[0] === 'adm') {
+                return adm(req, res);
+              }
+              return end404(res, parsed.paths[0]);
             }
             else if(!res.finished) {
               return end401({res, err: parsed.paths[0], log});

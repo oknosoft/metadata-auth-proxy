@@ -66,7 +66,7 @@ module.exports = function ({cat}, log) {
    */
   return async (req, res) => {
 
-    const {paths} = req.parsed;
+    const {paths, is_common} = req.parsed;
 
     if(paths[0] === 'auth' && !['ldap','couchdb'].includes(paths[1])) {
       return oauth(req, res);
@@ -75,6 +75,9 @@ module.exports = function ({cat}, log) {
     // проверяем авторизацию
     const authorization = extractAuth(req);
     if(!authorization) {
+      if(is_common) {
+        return {};
+      }
       throw new TypeError('Отсутствует заголовок авторизации');
     }
 
@@ -98,6 +101,9 @@ module.exports = function ({cat}, log) {
     }
     let user = cat.users.by_auth(token);
     if(!user) {
+      if(is_common) {
+        return {};
+      }
       throw new TypeError(`Пользователь '${authorization.username}' авторизован провайдером '${authorization.provider
       }', но отсутствует в справочнике 'Пользователи'`);
     }

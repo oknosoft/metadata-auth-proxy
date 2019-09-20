@@ -57,7 +57,8 @@ module.exports = function settings(prm = {}) {
     server: {
       prefix: '/adm/api',             // Mount path, no trailing slash
       port: process.env.PORT || 3016, // Port
-      ram_port: process.env.RAMPORT || 3026, // Port сервиса ram
+      start_common: process.env.START_COMMON,
+      common_url: process.env.RAMURL || 'http://localhost:3026',
       maxpost: 40 * 1024 * 1024,      // Max size of POST request
 
       rater: {                        // Request rate locker

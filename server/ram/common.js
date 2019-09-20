@@ -29,25 +29,84 @@ module.exports = async function common({req, res, $p, polling}) {
   }
 
   function end(result) {
+    let body;
+    res.setHeader('Server', 'metadata-common-catalogs');
+    if(req.headers.accept === 'multipart/mixed') {
+      const boundary = $p.utils.generate_guid().replace(/-/g, '');
+      if(Array.isArray(result) && result.length === 1 && result[0].ok) {
+        res.removeHeader('Connection');
+        res.setHeader('Content-Type', `multipart/mixed; boundary=${boundary}`);
+        const CRLF = '\r\n';
+        const body = `--${boundary}${CRLF}Content-Type: application/json${CRLF}${CRLF}${JSON.stringify(Object.assign({_id: '', _rev: ''}, result[0].ok))}${CRLF}--${boundary}--`;
+        res.write(body);
+        res.end();
+        //console.log(body.substr(0,220));
+      }
+      else {
+        throw {status: 404, error: true, message: `path '${parsed.paths[1]}/${parsed.paths[2]}' multipart/mixed`};
+      }
+    }
+    else {
+      res.setHeader('Content-Type', 'application/json');
+      const body = JSON.stringify(result);
+      res.end(body);
+      //console.log(body.substr(0,220));
+    }
+  }
+
+  function continuous(changes) {
+    res.setHeader('Server', 'metadata-common-catalogs');
     res.setHeader('Content-Type', 'application/json');
+    for(const ch of changes.results) {
+      ch.id !== 'fake_seq' && res.write(`${JSON.stringify(ch)}\r\n`);
+    }
+    res.write(JSON.stringify({last_seq: changes.last_seq}));
+    res.end();
+    //console.log(JSON.stringify({last_seq: changes.last_seq}));
+  }
+
+  function err(result) {
     if(result.status) {
       res.statusCode = result.status;
     }
-    res.end(JSON.stringify(result));
+    if(!result.reason && result.message) {
+      result.reason = result.message;
+      delete result.message;
+    }
+    if(result.error && typeof result.error !== 'string' && result.name) {
+      result.error = result.name;
+      delete result.name;
+    }
+    return end(result);
   }
 
   switch (parsed.paths[1]) {
   case '':
   case undefined:
-    db.info().then(end);
+    db.info().then((info) => end(Object.assign({instance_start_time: "0"}, info)));
     break;
 
   case '_changes':
     if(query.feed === 'longpoll') {
       polling.add({query, res});
     }
+    else if(query.feed === 'continuous') {
+      db.changes(query).then((changes) => {
+        if(changes.results.length) {
+          continuous(changes);
+        }
+        else {
+          let timeout = parseInt(query.timeout);
+          if(!timeout || timeout < 15000) {
+            timeout = 15000;
+          }
+          setTimeout(() => continuous(changes), timeout);
+        }
+      })
+        .catch(err);
+    }
     else {
-      db.changes(query).then(end);
+      db.changes(query).then(end).catch(err);
     }
     break;
 
@@ -55,7 +114,15 @@ module.exports = async function common({req, res, $p, polling}) {
     if(req.body && req.body.docs) {
       query.docs = req.body.docs;
     }
-    db.bulkGet(query).then(end);
+    db.bulkGet(query).then(end).catch(err);
+    break;
+
+  case '_revs_diff':
+    err({status: 404, error: true, message: `path '${parsed.paths[1]}/${parsed.paths[2]}' not available`});
+    break;
+
+  case '_ensure_full_commit':
+    err({status: 201, instance_start_time: "0", ok: true});
     break;
 
   case '_save':
@@ -74,31 +141,31 @@ module.exports = async function common({req, res, $p, polling}) {
         return doc.save();
       })
       .then(end)
-      .catch(end);
+      .catch(err);
     break;
 
   case 'cat.clrs':
     if(parsed.paths[2] === 'composite' && req.body) {
-      $p.cat.clrs.create_composite(req.body).then(end).catch(end);
+      $p.cat.clrs.create_composite(req.body).then(end).catch(err);
     }
     else {
-      end({status: 404, error: true, message: `path '${parsed.paths[1]}/${parsed.paths[2]}' not available`});
+      err({status: 404, error: true, message: `path '${parsed.paths[1]}/${parsed.paths[2]}' not available`});
     }
     break;
 
   default:
     if(parsed.paths[1].startsWith('_local')) {
-      parsed.paths[1] += `/${decodeURIComponent(parsed.paths[2])}`;
+      parsed.paths[1] += `/${parsed.paths[2]}`;
     }
     if(req.method === 'GET') {
-      db.get(parsed.paths[1], query).then(end).catch(end);
+      db.get(parsed.paths[1], query).then(end).catch(err);
     }
     else if(req.method === 'PUT' && parsed.paths[1].startsWith('_local')) {
-      db.put(req.body, query).then(end).catch(end);
+      db.put(req.body, query).then(end).catch(err);
     }
     else {
-      end({status: 404, error: true, message: `path '${parsed.paths[1]}' not available`});
+      err({status: 404, error: true, message: `path '${parsed.paths[1]}' not available`});
     }
   }
 
-}
+};

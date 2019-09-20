@@ -1,25 +1,10 @@
-/**
- *
- *
- * @module static
- *
- * Created by Evgeniy Malyarov on 06.02.2019.
- */
 
-const srv = require('koa-static');
-const mount = require('koa-mount');
-const paths = require('../config/paths');
-const serve = mount('/quick', srv(paths.appBuild));
-const send = require('koa-send');
+const handler = require('serve-handler');
+const paths = require('../../config/paths');
 
-module.exports = async function (ctx, next) {
-  try {
-    await serve(ctx, next);
-    if (ctx.status === 404) {
-      await send(ctx, 'index.html', { root: paths.appBuild });
-      // do somthing here
-    }
-  } catch (err) {
-    // handle error
-  }
-}
+module.exports = async (req, res) => {
+  await handler(req, res, {
+    cleanUrls: true,
+    "public": paths.appBuild
+  });
+};

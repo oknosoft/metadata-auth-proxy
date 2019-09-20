@@ -25,7 +25,7 @@
   "homepage": "https://adm.oknosoft.ru",
   "proxy": "http://localhost:3016/",
   "dependencies": {
-    "http-proxy": "^1.17.0",
+    "http-proxy": "^1.18.0",
     "metadata-abstract-ui": "2.0.20-beta.7",
     "metadata-core": "2.0.20-beta.7",
     "metadata-pouchdb": "2.0.20-beta.7",
@@ -43,7 +43,8 @@
     "react-ace": "^7.0.4",
     "react-color": "^2.17.3",
     "react-grid-layout": "^0.16.6",
-    "react-treebeard": "^3.2.4"
+    "react-treebeard": "^3.2.4",
+    "serve-handler": "^6.1.1"
   },
   "devDependencies": {
     "@babel/core": "7.4.3",
@@ -53,8 +54,8 @@
     "babel-eslint": "10.0.1",
     "babel-jest": "^24.9.0",
     "babel-loader": "8.0.5",
-    "babel-plugin-named-asset-import": "^0.3.3",
-    "babel-preset-react-app": "^9.0.1",
+    "babel-plugin-named-asset-import": "^0.3.4",
+    "babel-preset-react-app": "^9.0.2",
     "camelcase": "^5.2.0",
     "case-sensitive-paths-webpack-plugin": "2.2.0",
     "css-loader": "2.1.1",
@@ -89,8 +90,8 @@
     "postcss-safe-parser": "4.0.1",
     "raw-loader": "^3.1.0",
     "react": "^16.9.0",
-    "react-app-polyfill": "^1.0.2",
-    "react-dev-utils": "^9.0.3",
+    "react-app-polyfill": "^1.0.3",
+    "react-dev-utils": "^9.0.4",
     "react-dom": "^16.9.0",
     "resolve": "1.10.0",
     "sass-loader": "7.1.0",
