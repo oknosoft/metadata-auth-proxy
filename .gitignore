@@ -12,11 +12,10 @@
 # Exclude compiled files
 build/
 coverage/
-/lib
 /.eslintcache
-/tmp
 /scripts/stats.json
 src/public/data/
+server/mdm/*.json
 
 # Private config files
 

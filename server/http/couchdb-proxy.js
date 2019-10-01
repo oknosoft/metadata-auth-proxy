@@ -86,6 +86,9 @@ module.exports = function ({cat}, log) {
       server = row ? row.server : abonent.server;
     }
 
+    if(server.empty()) {
+      throw new TypeError(`Не найден сервер для зоны '${parts[0]}'`);
+    }
     server = url.parse(server.http);
 
     if(query && query.includes('feed=longpoll')) {

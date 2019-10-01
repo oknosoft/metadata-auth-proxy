@@ -2,11 +2,10 @@
 .idea
 build
 config
-src/public/data
-/scripts/stats.json
 node_modules
-src/public
 scripts
+src/public
+server/mdm/*.json
 
 /package-lock.json
 *.log

@@ -19,6 +19,7 @@ module.exports = function ($p, log, worker) {
   const commonProxy = require('./common-proxy');
   const staticProxy = require('./static');
   const adm = require('./adm')($p, log);
+  const mdm = require('../mdm')($p, log);
   const auth = require('../auth')($p, log);
   const conf = require('../../config/app.settings')();
 
@@ -44,7 +45,11 @@ module.exports = function ($p, log, worker) {
 
         const parsed = req.parsed = url.parse(req.url);
         parsed.paths = parsed.pathname.replace('/', '').split('/');
+
+        parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
+
         parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
+
         parsed.is_static = parsed.paths[0] === 'favicon.ico';
         req.query = qs.parse(parsed.query);
 
@@ -58,6 +63,9 @@ module.exports = function ($p, log, worker) {
             if(user) {
               if(parsed.is_common) {
                 return commonProxy(req, res, conf);
+              }
+              if(parsed.is_mdm) {
+                return mdm(req, res, conf);
               }
               else if(parsed.paths[0] === 'couchdb') {
                 return couchdbProxy(req, res);
