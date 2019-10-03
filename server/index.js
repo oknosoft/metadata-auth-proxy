@@ -19,7 +19,7 @@ const worker = require('./worker'),
 if (runtime.cluster.isMaster) {
 
   const cpus = conf.workers.count || require('os').cpus().length;
-  //const common = conf.server.start_common && require('child_process').fork('server/ram/index', {env: process.env});
+  const common = conf.server.start_common && require('child_process').fork('server/ram/index', {env: process.env});
   let workers = [];
 
   // On worker die
