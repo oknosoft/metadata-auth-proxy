@@ -21,11 +21,14 @@ module.exports = function on_log_in({pouch, classes, job_prm, cat}) {
     meta
       .then(() => {
 
-        // грузим из meta
+        // грузим из meta или doc
         let res = Promise.resolve();
         cat.forEach((mgr) => {
           if(mgr.cachable === 'meta') {
             res = res.then(() => mgr.find_rows_remote({_top: 1000}));
+          }
+          else if(mgr.cachable === 'doc' || mgr.original_cachable === 'doc') {
+            res = res.then(() => mgr.adapter.find_rows(mgr, {_top: 100000}, pouch.remote.doc));
           }
         });
         return res;
