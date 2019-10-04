@@ -12,9 +12,21 @@ const fs = require('fs');
 const {resolve} = require('path');
 const merge2 = require('merge2');
 
+// эти режем по отделу
+const by_branch = [
+  'cat.partners',
+  'cat.contracts',
+  'cat.branches',
+  'cat.divisions',
+  'cat.users',
+  'cat.individuals',
+  'cat.organizations',
+];
+
 module.exports = function ($p, log) {
 
   const {md, cat: {branches}, utils} = $p;
+  // порядок загрузки, чтобы при загрузке меньше оборванных ссылок
   const load_order = order(md);
 
   return async (req, res) => {
@@ -54,12 +66,18 @@ module.exports = function ($p, log) {
         for(const name of names) {
           const mgr = md.mgr_by_class_name(name);
           if(mgr) {
-            const fname = resolve(__dirname, `./cache/${zone}/${suffix}/${name}.json`);
+            const fname = resolve(__dirname, `./cache/${zone}/${by_branch.includes(name) ? suffix : '0000'}/${name}.json`);
             if(query.includes('file=true')) {
+
+              // в папках отделов держим только фильтруемые по отделу файлы
+              if(!branch.empty() && !by_branch.includes(name)){
+                continue;
+              }
+
               const rows = [];
               mgr.forEach((o) => {
-                if(check_mdm(o, zone, branch)) {
-                  rows.push(o);
+                if(check_mdm(o, name, zone, branch)) {
+                  rows.push(patch(o, name));
                 }
               });
               const text = JSON.stringify({name, rows});
@@ -92,8 +110,52 @@ module.exports = function ($p, log) {
   };
 };
 
-function check_mdm(o, zone, branch) {
+function check_mdm(o, name, zone, branch) {
+  const zones = o._obj.direct_zones || o._obj.zones;
+  if(typeof zones === 'string' && !zones.includes(`'${zone}'`)) {
+    return false;
+  }
+  if(name === 'cat.characteristics') {
+    return o.calc_order.empty();
+  }
+  if(!branch.empty()) {
+    if(name === 'cat.users') {
+      return o.branch.empty() || o.branch == branch;
+    }
+    else if(name === 'cat.branches') {
+      return o == branch || branch._parents().includes(o);
+    }
+    else if(name === 'cat.partners') {
+      return branch.partners.find({acl_obj: o});
+    }
+    else if(name === 'cat.organizations') {
+      return branch.organizations.find({acl_obj: o});
+    }
+    else if(name === 'cat.contracts') {
+      return branch.partners.find({acl_obj: o.owner}) && branch.organizations.find({acl_obj: o.organization});
+    }
+    else if(name === 'cat.divisions') {
+      const rows = o._children().concat(o);
+      return rows.some((o) => branch.divisions.find({acl_obj: o}));
+    }
+
+  }
   return true;
+}
+
+function patch(o, name, cat) {
+  const v = o.toJSON();
+  // единицы измерения храним внутри номенклатуры
+  if(name === 'cat.nom') {
+    v.units = o.units;
+  }
+  // физлиц храним внутри пользователей
+  else if(name === 'cat.users') {
+    if(!o.individual_person.empty()) {
+      v.person = o.individual_person.toJSON();
+    }
+  }
+  return v;
 }
 
 function order (md) {
@@ -108,7 +170,7 @@ function order (md) {
   ];
 
   for(const class_name of md.classes().cat) {
-    if(['abonents', 'characteristics', 'servers'].includes(class_name)) {
+    if(['abonents', 'servers', 'nom_units', 'meta_fields', 'meta_objs'].includes(class_name)) {
       continue;
     }
     else if(class_name === 'property_values' || class_name === 'contact_information_kinds') {
