@@ -15,7 +15,7 @@ coverage/
 /.eslintcache
 /scripts/stats.json
 src/public/data/
-server/mdm/*.json
+server/mdm/cache/
 
 # Private config files
 
