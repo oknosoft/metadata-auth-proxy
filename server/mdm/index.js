@@ -11,6 +11,9 @@ const {end404, end500} = require('../http/end');
 const fs = require('fs');
 const {resolve} = require('path');
 const merge2 = require('merge2');
+const check_mdm = require('./check_mdm');
+const load_predefined = require('./load_predefined');
+const manifest = require('./manifest');
 
 // эти режем по отделу
 const by_branch = [
@@ -40,48 +43,9 @@ const common = [
 
 module.exports = function ($p, log) {
 
-  const {md, cat: {branches}, utils, job_prm} = $p;
+  const {md, cat: {branches}, utils, job_prm, adapters: {pouch}} = $p;
   // порядок загрузки, чтобы при загрузке меньше оборванных ссылок
   const load_order = order(md);
-
-  function check_mdm(o, name, zone, branch) {
-    const zones = o._obj.direct_zones || o._obj.zones;
-    if(typeof zones === 'string' && !zones.includes(`'${zone}'`)) {
-      if(zones) {
-        return false;
-      }
-      else if(zone !== job_prm.zone) {
-        return false;
-      }
-    }
-    if(name === 'cat.characteristics') {
-      return o.calc_order.empty();
-    }
-    if(!branch.empty()) {
-      if(name === 'cat.users') {
-        return o.branch.empty() || o.branch == branch;
-      }
-      else if(name === 'cat.branches') {
-        return o == branch || branch._parents().includes(o);
-      }
-      else if(name === 'cat.partners') {
-        const rows = o._children().concat(o);
-        return rows.some((o) => branch.partners.find({acl_obj: o}));
-      }
-      else if(name === 'cat.organizations') {
-        return branch.organizations.find({acl_obj: o});
-      }
-      else if(name === 'cat.contracts') {
-        return branch.partners.find({acl_obj: o.owner}) && branch.organizations.find({acl_obj: o.organization});
-      }
-      else if(name === 'cat.divisions') {
-        const rows = o._children().concat(o);
-        return rows.some((o) => branch.divisions.find({acl_obj: o}));
-      }
-
-    }
-    return true;
-  }
 
   return async (req, res) => {
     const {query, path, paths} = req.parsed;
@@ -107,7 +71,7 @@ module.exports = function ($p, log) {
 
       // если данные не общие, проверяем пользователя
       if(suffix !== 'common' && !user) {
-        //end500({res, {status: 403, message: 'Пользователь не авторизован'}, log});
+        //return end500({res, {status: 403, message: 'Пользователь не авторизован'}, log});
       }
 
       if(query && query.includes('file=true')) {
@@ -121,8 +85,9 @@ module.exports = function ($p, log) {
       }
       else {
         if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
-          end404(res, path);
+          return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
         }
+        manifest({res, zone, suffix, by_branch, common});
       }
 
       const tags = {};
@@ -144,8 +109,8 @@ module.exports = function ($p, log) {
               }
 
               const rows = [];
-              mgr.forEach((o) => {
-                if(check_mdm(o, name, zone, branch)) {
+              (name === 'cch.predefined_elmnts' ? await load_predefined(pouch.remote.ram) : mgr).forEach((o) => {
+                if(check_mdm({o, name, zone, branch, job_prm})) {
                   rows.push(patch(o, name));
                 }
               });
@@ -191,6 +156,9 @@ module.exports = function ($p, log) {
 
 
 function patch(o, name, cat) {
+  if(!o.toJSON) {
+    return o;
+  }
   const v = o.toJSON();
   // единицы измерения храним внутри номенклатуры
   if(name === 'cat.nom') {
