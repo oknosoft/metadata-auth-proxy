@@ -22,12 +22,66 @@ const by_branch = [
   'cat.individuals',
   'cat.organizations',
 ];
+// эти общие - их не режем
+const common = [
+  'cch.properties',
+  'cat.contact_information_kinds',
+  'cat.clrs',
+  'cat.elm_visualization',
+  'cat.units',
+  'cat.countries',
+  'cat.currencies',
+  'cat.scheme_settings',
+  'cat.meta_ids',
+  'cat.destinations',
+  'cat.nom_groups',
+  'cat.nom_kinds',
+];
 
 module.exports = function ($p, log) {
 
-  const {md, cat: {branches}, utils} = $p;
+  const {md, cat: {branches}, utils, job_prm} = $p;
   // порядок загрузки, чтобы при загрузке меньше оборванных ссылок
   const load_order = order(md);
+
+  function check_mdm(o, name, zone, branch) {
+    const zones = o._obj.direct_zones || o._obj.zones;
+    if(typeof zones === 'string' && !zones.includes(`'${zone}'`)) {
+      if(zones) {
+        return false;
+      }
+      else if(zone !== job_prm.zone) {
+        return false;
+      }
+    }
+    if(name === 'cat.characteristics') {
+      return o.calc_order.empty();
+    }
+    if(!branch.empty()) {
+      if(name === 'cat.users') {
+        return o.branch.empty() || o.branch == branch;
+      }
+      else if(name === 'cat.branches') {
+        return o == branch || branch._parents().includes(o);
+      }
+      else if(name === 'cat.partners') {
+        const rows = o._children().concat(o);
+        return rows.some((o) => branch.partners.find({acl_obj: o}));
+      }
+      else if(name === 'cat.organizations') {
+        return branch.organizations.find({acl_obj: o});
+      }
+      else if(name === 'cat.contracts') {
+        return branch.partners.find({acl_obj: o.owner}) && branch.organizations.find({acl_obj: o.organization});
+      }
+      else if(name === 'cat.divisions') {
+        const rows = o._children().concat(o);
+        return rows.some((o) => branch.divisions.find({acl_obj: o}));
+      }
+
+    }
+    return true;
+  }
 
   return async (req, res) => {
     const {query, path, paths} = req.parsed;
@@ -38,16 +92,22 @@ module.exports = function ($p, log) {
       const zone = paths[2];
       let suffix = paths[3];
       let branch = user && user.branch;
-      if(branch && !branch.empty()) {
+      if(branch && !branch.empty() && suffix !== 'common') {
         suffix = branch.suffix;
       }
-      else if(suffix) {
-        branches.find_rows({suffix}, (o) => {
-          branch = o;
-        })
+      else if(suffix && (!branch || branch.empty())) {
+        branches.find_rows({suffix}, (o) => {branch = o;});
       }
       if(!suffix) {
         suffix = '0000';
+      }
+      if(!branch) {
+        branch = branches.get();
+      }
+
+      // если данные не общие, проверяем пользователя
+      if(suffix !== 'common' && !user) {
+        //end500({res, {status: 403, message: 'Пользователь не авторизован'}, log});
       }
 
       if(query && query.includes('file=true')) {
@@ -59,6 +119,11 @@ module.exports = function ($p, log) {
           fs.mkdirSync(resolve(__dirname, `./cache/${zone}/${suffix}`));
         }
       }
+      else {
+        if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
+          end404(res, path);
+        }
+      }
 
       const tags = {};
       const stream = merge2();
@@ -66,8 +131,12 @@ module.exports = function ($p, log) {
         for(const name of names) {
           const mgr = md.mgr_by_class_name(name);
           if(mgr) {
-            const fname = resolve(__dirname, `./cache/${zone}/${by_branch.includes(name) ? suffix : '0000'}/${name}.json`);
-            if(query.includes('file=true')) {
+            const fname = suffix === 'common' ?
+              resolve(__dirname, `./cache/${zone}/0000/${name}.json`)
+              :
+              resolve(__dirname, `./cache/${zone}/${by_branch.includes(name) ? suffix : '0000'}/${name}.json`);
+
+            if(query && query.includes('file=true')) {
 
               // в папках отделов держим только фильтруемые по отделу файлы
               if(!branch.empty() && !by_branch.includes(name)){
@@ -80,20 +149,30 @@ module.exports = function ($p, log) {
                   rows.push(patch(o, name));
                 }
               });
-              const text = JSON.stringify({name, rows});
+              const text = JSON.stringify({name, rows}) + '\r\n';
               fs.writeFileSync(fname, text, 'utf8');
               res.write(`${name}\r\n`);
-              tags[name] = utils.crc32(text);
+              tags[name] = {
+                count: rows.length,
+                size: text.length,
+                crc32: utils.crc32(text),
+              };
             }
             else {
+              if(suffix === 'common' && !common.includes(name)) {
+                continue;
+              }
+              if(suffix !== 'common' && common.includes(name)) {
+                continue;
+              }
               stream.add(fs.createReadStream(fname));
             }
           }
         }
       }
-      if(query.includes('file=true')) {
+      if(query && query.includes('file=true')) {
         res.end();
-        const fname = resolve(__dirname, `./cache/${zone}/${suffix}/${manifest}.json`);
+        const fname = resolve(__dirname, `./cache/${zone}/${suffix}/manifest.json`);
         fs.writeFileSync(fname, JSON.stringify(tags), 'utf8');
       }
       else {
@@ -110,38 +189,6 @@ module.exports = function ($p, log) {
   };
 };
 
-function check_mdm(o, name, zone, branch) {
-  const zones = o._obj.direct_zones || o._obj.zones;
-  if(typeof zones === 'string' && !zones.includes(`'${zone}'`)) {
-    return false;
-  }
-  if(name === 'cat.characteristics') {
-    return o.calc_order.empty();
-  }
-  if(!branch.empty()) {
-    if(name === 'cat.users') {
-      return o.branch.empty() || o.branch == branch;
-    }
-    else if(name === 'cat.branches') {
-      return o == branch || branch._parents().includes(o);
-    }
-    else if(name === 'cat.partners') {
-      return branch.partners.find({acl_obj: o});
-    }
-    else if(name === 'cat.organizations') {
-      return branch.organizations.find({acl_obj: o});
-    }
-    else if(name === 'cat.contracts') {
-      return branch.partners.find({acl_obj: o.owner}) && branch.organizations.find({acl_obj: o.organization});
-    }
-    else if(name === 'cat.divisions') {
-      const rows = o._children().concat(o);
-      return rows.some((o) => branch.divisions.find({acl_obj: o}));
-    }
-
-  }
-  return true;
-}
 
 function patch(o, name, cat) {
   const v = o.toJSON();
@@ -170,7 +217,7 @@ function order (md) {
   ];
 
   for(const class_name of md.classes().cat) {
-    if(['abonents', 'servers', 'nom_units', 'meta_fields', 'meta_objs'].includes(class_name)) {
+    if(['abonents', 'servers', 'nom_units', 'individuals', 'meta_fields', 'meta_objs', 'property_values_hierarchy'].includes(class_name)) {
       continue;
     }
     else if(class_name === 'property_values' || class_name === 'contact_information_kinds') {
