@@ -28,6 +28,7 @@ const by_branch = [
 // эти общие - их не режем
 const common = [
   'cch.properties',
+  'cat.property_values',
   'cat.contact_information_kinds',
   'cat.clrs',
   'cat.elm_visualization',

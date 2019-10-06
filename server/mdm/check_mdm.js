@@ -1,6 +1,16 @@
 
 module.exports = function check_mdm({o, name, zone, branch, job_prm}) {
-  const zones = o._obj && (o._obj.direct_zones || o._obj.zones);
+  const {_obj} = o;
+  let zones = _obj && _obj.zones;
+  if(_obj && _obj.direct_zones) {
+    if(typeof zones !== 'string') {
+      zones = '';
+    }
+    if(!zones.includes(_obj.direct_zones)) {
+      zones += _obj.direct_zones;
+      zones = zones.replace(/''/g, `'`);
+    }
+  }
   if(typeof zones === 'string' && !zones.includes(`'${zone}'`)) {
     if(zones) {
       return false;

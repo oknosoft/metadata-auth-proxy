@@ -6,7 +6,7 @@
  * Created by Evgeniy Malyarov on 02.06.2019.
  */
 
-module.exports = function on_log_in({pouch, classes, job_prm, cat}) {
+module.exports = function on_log_in({pouch, classes, job_prm, cat, abonents}) {
   const {auth} = pouch.remote.ram.__opts;
   const opts = {skip_setup: true, auth, owner: pouch};
   if(!pouch.local.meta) {
@@ -35,16 +35,22 @@ module.exports = function on_log_in({pouch, classes, job_prm, cat}) {
         let res = Promise.resolve();
         cat.forEach((mgr) => {
           if(/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
-            if(mgr.class_name === 'cat.characteristics') {
+            const filter = {_top: 100000};
+            if([
+              'cat.branches',
+              'cat.divisions',
+              'cat.characteristics'].includes(mgr.class_name)) {
               return;
             }
+            else if(mgr.class_name === 'cat.scheme_settings') {
+              filter.user = '';
+            }
             cat.abonents.forEach((abonent) => {
-              res = res.then(() => pouch.find_rows(mgr, {_top: 100000}, abonent.db('doc')));
+              if(abonents.includes(abonent.id)) {
+                res = res.then(() => pouch.find_rows(mgr, filter, abonent.db('doc')));
+              }
             });
           }
-        });
-        cat.abonents.forEach((abonent) => {
-          res = res.then(() => pouch.find_rows(cat.scheme_settings, {_top: 10000, user: ''}, abonent.db('doc')));
         });
         return res.catch((err) => {
           return null;

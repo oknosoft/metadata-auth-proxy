@@ -50,7 +50,7 @@ module.exports = function (log) {
       log(`logged in ${job_prm.couch_local}, user:${name}, zone:${job_prm.zone}`);
     },
     on_log_in() {
-      return on_log_in({pouch, classes, job_prm, cat});
+      return on_log_in({pouch, classes, job_prm, cat, abonents: server.abonents});
     },
     user_log_fault(err) {
       log(`login error ${err}`);
