@@ -47,7 +47,7 @@ module.exports = function ($p, log, worker) {
         parsed.paths = parsed.pathname.replace('/', '').split('/');
 
         parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
-
+        parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
         parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
 
         parsed.is_static = parsed.paths[0] === 'favicon.ico';

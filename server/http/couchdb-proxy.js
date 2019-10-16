@@ -44,9 +44,11 @@ module.exports = function ({cat}, log) {
 
     const { username, roles, token } = headerFields;
     headerFields.clear(headers);
-    headers[username] = user.latin || encodeURIComponent(user.id);
-    headers[roles] = JSON.parse(user.roles).join(',');
-    headers[token] = sign(headers[username], user_node.secret);
+    if(user) {
+      headers[username] = user.latin || encodeURIComponent(user.id);
+      headers[roles] = JSON.parse(user.roles).join(',');
+      headers[token] = sign(headers[username], user_node.secret);
+    }
 
     let parts = new RegExp(`/${local_storage_prefix}(.*?)/`).exec(path);
     if((parts && parts[0] === 'meta') || path.includes(`/${local_storage_prefix}meta`)) {
@@ -63,8 +65,8 @@ module.exports = function ({cat}, log) {
     }
     const abonent = cat.abonents.by_id(parts[0]);
 
-    let {branch} = user;
-    let {server} = branch;
+    let {branch} = user || {};
+    let {server} = branch || {};
     switch (parts[1]) {
     case 'doc':
       while (server.empty() && !branch.parent.empty()) {
@@ -84,6 +86,10 @@ module.exports = function ({cat}, log) {
     default:
       const row = abonent.ex_bases.find({name: parts[1]});
       server = row ? row.server : abonent.server;
+    }
+
+    if(!server && abonent) {
+      server = abonent.server;
     }
 
     if(server.empty()) {

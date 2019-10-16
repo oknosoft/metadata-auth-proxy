@@ -66,7 +66,7 @@ module.exports = function ({cat}, log) {
    */
   return async (req, res) => {
 
-    const {paths, is_common, is_mdm} = req.parsed;
+    const {paths, is_common, is_mdm, is_log} = req.parsed;
 
     if(paths[0] === 'auth' && !['ldap','couchdb'].includes(paths[1])) {
       return oauth(req, res);
@@ -75,7 +75,7 @@ module.exports = function ({cat}, log) {
     // проверяем авторизацию
     const authorization = extractAuth(req);
     if(!authorization) {
-      if(is_common || is_mdm) {
+      if(is_common || is_mdm || is_log) {
         return {};
       }
       throw new TypeError('Отсутствует заголовок авторизации');
