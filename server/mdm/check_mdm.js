@@ -21,7 +21,7 @@ module.exports = function check_mdm({o, name, zone, branch, job_prm}) {
   }
 
   if(name === 'cat.characteristics') {
-    return o.calc_order.empty();
+    return check_characteristics(o);
   }
   else if(name === 'cch.predefined_elmnts') {
     return o.is_folder || o.zone === 0 || o.zone == zone;
@@ -54,4 +54,17 @@ module.exports = function check_mdm({o, name, zone, branch, job_prm}) {
 
   }
   return true;
+}
+
+function check_characteristics(o) {
+  if(o.calc_order.empty()) return true;
+  if(!check_characteristics.cache) {
+    check_characteristics.cache = new Set();
+    o._manager._owner.templates.forEach((template) => {
+      template.templates.forEach(({template}) => {
+        check_characteristics.cache.add(template);
+      });
+    });
+  }
+  return check_characteristics.cache.has(o);
 }

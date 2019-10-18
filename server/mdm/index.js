@@ -14,6 +14,7 @@ const merge2 = require('merge2');
 const check_mdm = require('./check_mdm');
 const load_predefined = require('./load_predefined');
 const manifest = require('./manifest');
+const prices = require('./prices');
 
 // эти режем по отделу
 const by_branch = [
@@ -40,6 +41,8 @@ const common = [
   'cat.destinations',
   'cat.nom_groups',
   'cat.nom_kinds',
+  'cat.templates',
+  'cat.nom',
 ];
 
 module.exports = function ($p, log) {
@@ -73,6 +76,11 @@ module.exports = function ($p, log) {
       // если данные не общие, проверяем пользователя
       if(suffix !== 'common' && !user) {
         //return end500({res, {status: 403, message: 'Пользователь не авторизован'}, log});
+      }
+
+      // дополнительные маршруты
+      if(paths[4] === 'prices') {
+        return prices({res, zone, suffix});
       }
 
       if(query && query.includes('file=true')) {

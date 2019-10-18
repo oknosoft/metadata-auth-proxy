@@ -80,11 +80,6 @@ const exclude = [
   'rep.goods',
 ];
 const minimal = [
-  'cat.delivery_areas',
-  'cat.delivery_directions',
-  'cat.furns',
-  'cat.inserts',
-  'cat.production_params',
   'doc.calc_order',
 ];
 const writable = [

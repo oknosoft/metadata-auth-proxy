@@ -64,13 +64,13 @@ $p.wsql.init((prm) => {
   debug(`Читаем описание метаданных из CouchDB ${config.couch_local}`);
   return db.info()
     .then((info) => {
-    debug(`Подключение к ${info.host}`);
-    return db.allDocs({
-      include_docs: true,
-      attachments: true,
-      startkey: 'meta',
-      endkey: 'meta\ufff0',
-    });
+      debug(`Подключение к ${info.host}`);
+      return db.allDocs({
+        include_docs: true,
+        attachments: true,
+        startkey: 'meta',
+        endkey: 'meta\ufff0',
+      });
   })
     .catch((err) => {
       debug('Не удалось получить объект meta из CouchDB\nПроверьте логин, пароль и строку подключения');
