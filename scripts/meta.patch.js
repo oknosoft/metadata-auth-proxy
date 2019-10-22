@@ -80,7 +80,7 @@ const exclude = [
   'rep.goods',
 ];
 const minimal = [
-  'doc.calc_order',
+
 ];
 const writable = [
   'cat.abonents',
