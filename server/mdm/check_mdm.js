@@ -23,6 +23,9 @@ module.exports = function check_mdm({o, name, zone, branch, job_prm}) {
   if(name === 'cat.characteristics') {
     return check_characteristics(o);
   }
+  else if(name === 'doc.calc_order') {
+    return check_calc_order(o);
+  }
   else if(name === 'cch.predefined_elmnts') {
     return o.is_folder || o.zone === 0 || o.zone == zone;
   }
@@ -67,4 +70,17 @@ function check_characteristics(o) {
     });
   }
   return check_characteristics.cache.has(o);
+}
+
+function check_calc_order(o) {
+  if(o.obj_delivery_state != 'Шаблон') return false;
+  if(!check_calc_order.cache) {
+    check_calc_order.cache = new Set();
+    o._manager._owner.$p.cat.templates.forEach((template) => {
+      template.templates.forEach(({template}) => {
+        check_calc_order.cache.add(template.calc_order);
+      });
+    });
+  }
+  return check_calc_order.cache.has(o);
 }

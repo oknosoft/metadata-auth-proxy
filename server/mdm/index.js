@@ -26,7 +26,7 @@ const by_branch = [
   'cat.individuals',
   'cat.organizations',
 ];
-// эти общие - их не режем
+// эти общие - их не режем и грузим сразу
 const common = [
   'cch.properties',
   'cat.property_values',
@@ -190,7 +190,7 @@ function order (md) {
     new Set(),
     new Set(),
     new Set(),
-    new Set(['cch.predefined_elmnts'])
+    new Set(['cch.predefined_elmnts', 'doc.calc_order'])
   ];
 
   for(const class_name of md.classes().cat) {
