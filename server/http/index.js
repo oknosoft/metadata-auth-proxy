@@ -50,7 +50,7 @@ module.exports = function ($p, log, worker) {
         parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
         parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
 
-        parsed.is_static = parsed.paths[0] === 'favicon.ico';
+        parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(static|imgs|index|builder|about|login|settings|b|o)$/.test(parsed.paths[0]);
         req.query = qs.parse(parsed.query);
 
         if(parsed.is_static) {
