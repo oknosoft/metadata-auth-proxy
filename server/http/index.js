@@ -103,5 +103,5 @@ module.exports = function ($p, log, worker) {
   });
 
   server.listen(conf.server.port);
-  log(`ready to receive queries, listen on port: ${conf.server.port}`);
+  log(`PROXY listen on port: ${conf.server.port}`);
 };

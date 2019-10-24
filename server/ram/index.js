@@ -68,7 +68,7 @@ metadata(log)
         const server = http.createServer(execute);
         const server_url = url.parse(conf.server.common_url);
         server.listen(parseInt(server_url.port, 10));
-        log(`MDM ready to receive queries, listen on port: ${server_url.port}`);
+        log(`COMMON DATA listen on port: ${server_url.port}`);
       });
   });
 
