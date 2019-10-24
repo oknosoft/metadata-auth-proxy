@@ -57,7 +57,6 @@ metadata(log)
               err.error = true;
               end500({res, log, err});
             });
-
         }
 
         process.on('message', function (msg) {
@@ -69,6 +68,7 @@ metadata(log)
         const server = http.createServer(execute);
         const server_url = url.parse(conf.server.common_url);
         server.listen(parseInt(server_url.port, 10));
+        log(`MDM ready to receive queries, listen on port: ${server_url.port}`);
       });
   });
 

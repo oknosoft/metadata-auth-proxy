@@ -20,7 +20,8 @@ module.exports = function(runtime) {
 				logObject.args = Object.clone(args.toString(), true);
 			}
 		}
-		console.log(
+
+		console[logObject.type === 'error' ? 'error' : 'log'](
 				time.toISOString() +
 				workerKey +
 				"[" + logObject.type + "]: "+

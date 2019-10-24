@@ -19,6 +19,5 @@ module.exports = function ram_changes({pouch, log}) {
     .on('error', (err) => {
       log(`change error ${err}`);
     });
-  log(`loadind to ram: READY`);
   pouch.emit('pouch_complete_loaded');
 }

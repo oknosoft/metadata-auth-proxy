@@ -75,7 +75,7 @@ module.exports = function ($p, log) {
 
       // если данные не общие, проверяем пользователя
       if(suffix !== 'common' && !user) {
-        //return end500({res, {status: 403, message: 'Пользователь не авторизован'}, log});
+        return end500({res, err: {status: 403, message: 'Пользователь не авторизован'}, log});
       }
 
       // дополнительные маршруты

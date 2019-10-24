@@ -10,7 +10,7 @@ const MetaEngine = require('metadata-core')
 const settings = require('../../config/app.settings');
 
 // функция инициализации структуры метаданных
-const meta_init = require('./init');
+const meta_init = require('../../src/metadata/init');
 const on_log_in = require('./on_log_in');
 const ram_changes = require('./ram_changes');
 const linked_templates = require('./linked_templates');
@@ -63,7 +63,7 @@ module.exports = function (log) {
       log(`loadind to ram: page №${page.page} (${page.page * page.limit} from ${page.total_rows})`);
     },
     pouch_complete_loaded(page) {
-      log(`ready to receive queries, listen on port: ${server.port}`);
+      log(`loadind to ram: complete`);
     },
     pouch_doc_ram_loaded() {
       linked_templates($p)
