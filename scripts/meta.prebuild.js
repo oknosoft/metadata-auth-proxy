@@ -108,28 +108,14 @@ module.exports = function meta_init($p) {
   ${text}};`;
 
         debug('Записываем результат');
-        let fname = path.resolve(__dirname, '../server/metadata/init.js');
+        let fname = path.resolve(__dirname, '../src/metadata/init.js');
         fs.writeFile(fname, text, 'utf8', (err) => {
           if (err) {
             debug(err);
             process.exit(1);
-          } else {
-            debug(`Успешно записан > ${fname}`);
-            fname = path.resolve(__dirname, '../src/metadata/init.js');
-            fs.writeFile(fname, text.replace('module.exports =', 'export default'), 'utf8', (err) => {
-              if (err) {
-                debug(err);
-                process.exit(1);
-              } else {
-                debug(`Успешно записан > ${fname}`);
-                process.exit(0);
-              }
-            });
           }
+          process.exit(0);
         });
-
-        $p = null;
-
       });
 
     })
