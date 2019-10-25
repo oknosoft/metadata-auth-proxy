@@ -16,7 +16,7 @@ const ram_changes = require('./ram_changes');
 const linked_templates = require('./linked_templates');
 const modifiers = require('./modifiers');
 
-module.exports = function (log) {
+module.exports = function (log, is_common) {
 
   // создаём контекст MetaEngine
   const $p = new MetaEngine();
@@ -66,8 +66,10 @@ module.exports = function (log) {
       log(`loadind to ram: complete`);
     },
     pouch_doc_ram_loaded() {
-      linked_templates($p)
-        .then(() => ram_changes({pouch, log}));
+      const prepare = is_common ? Promise.resolve() :
+        linked_templates($p)
+          .then(() => $p.pricing.load_prices());
+      prepare.then(() => ram_changes({pouch, log}));
     },
   });
 

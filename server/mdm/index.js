@@ -190,14 +190,14 @@ function order (md) {
     new Set(),
     new Set(),
     new Set(),
-    new Set(['cch.predefined_elmnts', 'doc.calc_order'])
+    new Set(['cch.predefined_elmnts', 'ireg.currency_courses', 'ireg.margin_coefficients', 'doc.calc_order'])
   ];
 
   for(const class_name of md.classes().cat) {
     if(['abonents', 'servers', 'nom_units', 'individuals', 'meta_fields', 'meta_objs', 'property_values_hierarchy'].includes(class_name)) {
       continue;
     }
-    else if(class_name === 'property_values' || class_name === 'contact_information_kinds') {
+    else if(['property_values', 'contact_information_kinds', 'currencies'].includes(class_name)) {
       res[1].add(`cat.${class_name}`);
     }
     else if(class_name === 'users') {

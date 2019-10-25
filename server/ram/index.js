@@ -25,7 +25,7 @@ const local_couchdb = require('./couchdb');
 const Polling = require('./polling');
 
 // MetaEngine
-metadata(log)
+metadata(log, true)
   .then(($p) => {
     local_couchdb({log, $p})
       .then((db) => {
