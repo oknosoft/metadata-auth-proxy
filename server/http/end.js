@@ -8,9 +8,16 @@
 
 function end(res, body) {
   if(!res.finished) {
-    res.statusCode = body.status;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(body));
+    if(res.headersSent) {
+      res.statusCode = body.status;
+      res.write(JSON.stringify(body));
+      res.end();
+    }
+    else {
+      res.statusCode = body.status;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(body));
+    }
   }
 }
 
