@@ -85,7 +85,7 @@ module.exports = function ($p, log) {
       }
 
       if(req.method === 'HEAD') {
-        return head({res, zone, suffix, by_branch, common});
+        return await head({res, zone, suffix, by_branch, common});
       }
 
       if(query && query.includes('file=true')) {
@@ -101,7 +101,7 @@ module.exports = function ($p, log) {
         if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
           return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
         }
-        manifest({res, zone, suffix, by_branch, common});
+        await manifest({res, zone, suffix, by_branch, common});
       }
 
       const tags = {};

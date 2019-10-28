@@ -27,5 +27,5 @@ module.exports = async function manifest({res, zone, suffix, by_branch, common})
         return {[name]: by_branch.includes(name) ? m1[name].count : m2[name].count};
       });
   }
-  res.setHeader('mdm-manifest', JSON.stringify(m));
+  res.setHeader('ETag', JSON.stringify(m));
 };
