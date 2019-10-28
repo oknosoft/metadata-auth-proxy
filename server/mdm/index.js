@@ -14,6 +14,7 @@ const merge2 = require('merge2');
 const check_mdm = require('./check_mdm');
 const load_predefined = require('./load_predefined');
 const manifest = require('./manifest');
+const head = require('./head');
 const prices = require('./prices');
 
 // эти режем по отделу
@@ -83,6 +84,10 @@ module.exports = function ($p, log) {
         return prices({res, zone, suffix});
       }
 
+      if(req.method === 'HEAD') {
+        return head({res, zone, suffix, by_branch, common});
+      }
+
       if(query && query.includes('file=true')) {
         // путь настроек приложения
         if(!fs.existsSync(resolve(__dirname, `./cache/${zone}`))) {
@@ -124,7 +129,7 @@ module.exports = function ($p, log) {
                 }
               });
               const text = JSON.stringify({name, rows}) + '\r\n';
-              fs.writeFileSync(fname, text, 'utf8');
+              await fs.writeFileAsync(fname, text, 'utf8');
               res.write(`${name}\r\n`);
               tags[name] = {
                 count: rows.length,
@@ -147,7 +152,7 @@ module.exports = function ($p, log) {
       if(query && query.includes('file=true')) {
         res.end();
         const fname = resolve(__dirname, `./cache/${zone}/${suffix}/manifest.json`);
-        fs.writeFileSync(fname, JSON.stringify(tags), 'utf8');
+        await fs.writeFileAsync(fname, JSON.stringify(tags), 'utf8');
       }
       else {
         stream.pipe(res);

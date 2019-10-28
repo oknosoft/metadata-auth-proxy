@@ -9,6 +9,7 @@
 const http = require('http');
 const url = require('url');
 const qs = require('qs');
+require('./promisify');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
 
 const {end401, end404, end500} = require('./end');
@@ -50,7 +51,7 @@ module.exports = function ($p, log, worker) {
         parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
         parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
 
-        parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(static|imgs|index|builder|about|login|settings|b|o)$/.test(parsed.paths[0]);
+        parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|static|imgs|index|builder|about|login|settings|b|o)$/.test(parsed.paths[0]);
         req.query = qs.parse(parsed.query);
 
         if(parsed.is_static) {
