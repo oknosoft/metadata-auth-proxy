@@ -16,6 +16,7 @@ const load_predefined = require('./load_predefined');
 const manifest = require('./manifest');
 const head = require('./head');
 const prices = require('./prices');
+const dyn_mdm = require('./dyn_mdm');
 
 // эти режем по отделу
 const by_branch = [
@@ -48,7 +49,7 @@ const common = [
 
 module.exports = function ($p, log) {
 
-  const {md, cat: {branches}, utils, job_prm, adapters: {pouch}} = $p;
+  const {md, cat: {branches, templates}, utils, job_prm, adapters: {pouch}} = $p;
   // порядок загрузки, чтобы при загрузке меньше оборванных ссылок
   const load_order = order(md);
 
@@ -89,6 +90,9 @@ module.exports = function ($p, log) {
       }
 
       if(query && query.includes('file=true')) {
+        // рассчитаем динамический mdm
+        dyn_mdm.prepare(templates.by_ref);
+
         // путь настроек приложения
         if(!fs.existsSync(resolve(__dirname, `./cache/${zone}`))) {
           fs.mkdirSync(resolve(__dirname, `./cache/${zone}`));

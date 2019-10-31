@@ -1,3 +1,4 @@
+const dyn_mdm = require('./dyn_mdm');
 
 module.exports = function check_mdm({o, name, zone, branch, job_prm}) {
   const {_obj} = o;
@@ -56,8 +57,10 @@ module.exports = function check_mdm({o, name, zone, branch, job_prm}) {
     }
 
   }
-  return true;
+  return dyn_mdm.check(o);
 }
+
+
 
 function check_characteristics(o) {
   if(o.calc_order.empty()) return true;

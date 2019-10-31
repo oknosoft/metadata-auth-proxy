@@ -231,7 +231,7 @@ module.exports = function(webpackEnv) {
               //keep_fnames: true,
             },
             mangle: {
-              safari10: true,
+              safari10: false,
             },
             // Added for profiling in devtools
             keep_classnames: isEnvProductionProfile,
