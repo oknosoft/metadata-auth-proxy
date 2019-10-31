@@ -113,8 +113,10 @@ module.exports = function meta_init($p) {
           if (err) {
             debug(err);
             process.exit(1);
+          } else {
+            debug(`Успешно записан > ${fname}`);
+            process.exit(0);
           }
-          process.exit(0);
         });
       });
 
@@ -186,7 +188,7 @@ function obj_constructor_text(_m, category, name, categoties) {
       extModule = require(filename);
     }
     catch(err) {
-      debug(err);
+      !err.message.includes('token') && debug(err);
     }
   };
 

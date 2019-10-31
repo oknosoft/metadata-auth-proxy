@@ -4,12 +4,8 @@ import PropTypes from 'prop-types';
 import {render} from 'react-dom';
 import {Provider} from 'react-redux';
 
-
 // метод инициализации хранилища состояния приложения
-import configureStore, {history} from './redux';
-
-// диспетчер состояния интерфейса
-import {dispatchIface} from 'metadata-redux';
+import {history, store} from './redux';
 
 // метод для вычисления need_meta, need_user для location.pathname
 import {item_props} from './components/App/menu_items';
@@ -28,13 +24,6 @@ import RootView from 'metadata-react/App/RootView';
 
 // sw для оффлайна и прочих дел
 import * as serviceWorker from './serviceWorker';
-//import {ifaceActions} from 'metadata-redux';
-
-// создаём redux-store
-export const store = configureStore();
-
-export const {handleIfaceState} = dispatchIface(store.dispatch);
-
 
 class RootProvider extends React.Component {
 
