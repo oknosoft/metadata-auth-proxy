@@ -27,6 +27,6 @@ module.exports = async function head({res, zone, suffix, by_branch, common}) {
         crc32 += by_branch.includes(name) ? m1[name].crc32 : m2[name].crc32;
       });
   }
-  res.setHeader('ETag', crc32);
+  res.setHeader('manifest', crc32);
   res.end();
 };
