@@ -69,7 +69,7 @@ module.exports = function (log, is_common) {
       const prepare = is_common ? Promise.resolve() :
         linked_templates($p)
           .then(() => $p.pricing.load_prices());
-      prepare.then(() => ram_changes({pouch, log}));
+      prepare.then(() => ram_changes($p, log));
     },
   });
 

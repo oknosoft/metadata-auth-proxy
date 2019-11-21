@@ -58,7 +58,7 @@ module.exports = {
       if(!this.dedup.has(cnn)) {
         cnn.cnn_elmnts.forEach((row) => {
           if(this.dedup.has(row.nom1) || this.dedup.has(row.nom2)) {
-            this.dedup.add(cnn);
+            this.links(cnn);
             return false;
           }
         });
@@ -74,7 +74,7 @@ module.exports = {
     for(const obj of objs) {
       this.links(obj);
     }
-    objs.length && this.cnns(objs[0]._manager._owner);
+    objs.length && this.cnns(objs[0]._manager._owner.$p.cat);
   },
 
 };

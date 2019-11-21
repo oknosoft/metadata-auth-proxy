@@ -1,24 +1,11 @@
 const dyn_mdm = require('./dyn_mdm');
 
-module.exports = function check_mdm({o, name, zone, branch, job_prm}) {
+module.exports = function check_mdm({o, name, abonent, branch, abranches, job_prm}) {
+  const zone = abonent.id;
   const {_obj} = o;
-  let zones = _obj && _obj.zones;
-  if(_obj && _obj.direct_zones) {
-    if(typeof zones !== 'string') {
-      zones = '';
-    }
-    if(!zones.includes(_obj.direct_zones)) {
-      zones += _obj.direct_zones;
-      zones = zones.replace(/''/g, `'`);
-    }
-  }
-  if(typeof zones === 'string' && !zones.includes(`'${zone}'`)) {
-    if(zones) {
-      return false;
-    }
-    else if(zone !== job_prm.zone) {
-      return false;
-    }
+  // из старого mdm, учитываем только direct_zones
+  if(_obj && _obj.direct_zones && _obj.direct_zones.includes(`'${zone}'`)) {
+    return true;
   }
 
   if(name === 'cat.characteristics') {
@@ -27,22 +14,22 @@ module.exports = function check_mdm({o, name, zone, branch, job_prm}) {
   else if(name === 'doc.calc_order') {
     return check_calc_order(o);
   }
-  else if(name === 'cch.predefined_elmnts') {
-    return o.is_folder || o.zone === 0 || o.zone == zone;
-  }
-  else if(name === 'cat.formulas') {
+  else if(name === 'cch.predefined_elmnts' || name === 'cat.formulas') {
     return o.is_folder || o.zone === 0 || o.zone == zone;
   }
 
+  // cat.cashboxes
+  // cat.clrs
+
   if(!branch.empty()) {
     if(name === 'cat.users') {
-      return o.branch.empty() || o.branch == branch;
+      return o.branch.empty() ? o.subscribers.find(abonent, 'abonent') : (o.branch == branch || o.branch.parent == branch);
     }
     else if(name === 'cat.branches') {
       return o == branch || branch._parents().includes(o);
     }
     else if(name === 'cat.partners') {
-      const rows = o._children().concat(o);
+      const rows = o.is_folder ? o._children().concat(o) : [o];
       return rows.some((o) => branch.partners.find({acl_obj: o}));
     }
     else if(name === 'cat.organizations') {
@@ -55,7 +42,28 @@ module.exports = function check_mdm({o, name, zone, branch, job_prm}) {
       const rows = o._children().concat(o);
       return rows.some((o) => branch.divisions.find({acl_obj: o}));
     }
-
+  }
+  else {
+    if(name === 'cat.users') {
+      return o.subscribers.find(abonent, 'abonent');
+    }
+    else if(name === 'cat.branches') {
+      return o.owner == abonent;
+    }
+    else if(name === 'cat.partners') {
+      const rows = o.is_folder ? o._children().concat(o) : [o];
+      return rows.some((o) => abranches.some((branch) => branch.partners.find({acl_obj: o})));
+    }
+    else if(name === 'cat.organizations') {
+      return abranches.some((branch) => branch.organizations.find({acl_obj: o}));
+    }
+    else if(name === 'cat.contracts') {
+      return abranches.some((branch) => branch.partners.find({acl_obj: o.owner}) && branch.organizations.find({acl_obj: o.organization}));
+    }
+    else if(name === 'cat.divisions') {
+      const rows = o._children().concat(o);
+      return rows.some((o) => abranches.some((branch) => branch.divisions.find({acl_obj: o})));
+    }
   }
   return dyn_mdm.check(o);
 }

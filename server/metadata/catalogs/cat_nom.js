@@ -37,6 +37,7 @@ module.exports = function ($p) {
             }).on('change', (change) => {
               // формируем новый
               this.by_doc(change.doc);
+              pouch.emit('nom_price');
             });
           }
         });

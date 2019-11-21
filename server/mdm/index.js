@@ -11,12 +11,8 @@ const {end404, end500} = require('../http/end');
 const fs = require('fs');
 const {resolve} = require('path');
 const merge2 = require('merge2');
-const check_mdm = require('./check_mdm');
-const load_predefined = require('./load_predefined');
 const manifest = require('./manifest');
 const head = require('./head');
-const prices = require('./prices');
-const dyn_mdm = require('./dyn_mdm');
 
 // эти режем по отделу
 const by_branch = [
@@ -47,7 +43,7 @@ const common = [
   'cat.nom',
 ];
 
-module.exports = function ($p, log) {
+function mdm ($p, log) {
 
   const {md, cat: {branches, templates}, utils, job_prm, adapters: {pouch}} = $p;
   // порядок загрузки, чтобы при загрузке меньше оборванных ссылок
@@ -66,7 +62,10 @@ module.exports = function ($p, log) {
         suffix = branch.suffix;
       }
       else if(suffix && (!branch || branch.empty())) {
-        branches.find_rows({suffix}, (o) => {branch = o;});
+        branches.find_rows({suffix}, (o) => {
+          branch = o;
+          return false;
+        });
       }
       if(!suffix) {
         suffix = '0000';
@@ -82,31 +81,17 @@ module.exports = function ($p, log) {
 
       // дополнительные маршруты
       if(paths[4] === 'prices') {
-        return prices({res, zone, suffix});
+
       }
 
       if(req.method === 'HEAD') {
         return await head({res, zone, suffix, by_branch, common});
       }
 
-      if(query && query.includes('file=true')) {
-        // рассчитаем динамический mdm
-        dyn_mdm.prepare(templates.by_ref);
-
-        // путь настроек приложения
-        if(!fs.existsSync(resolve(__dirname, `./cache/${zone}`))) {
-          fs.mkdirSync(resolve(__dirname, `./cache/${zone}`));
-        }
-        if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix}`))) {
-          fs.mkdirSync(resolve(__dirname, `./cache/${zone}/${suffix}`));
-        }
+      if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
+        return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
       }
-      else {
-        if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
-          return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
-        }
-        await manifest({res, zone, suffix, by_branch, common});
-      }
+      await manifest({res, zone, suffix, by_branch, common});
 
       const tags = {};
       const stream = merge2();
@@ -119,76 +104,26 @@ module.exports = function ($p, log) {
               :
               resolve(__dirname, `./cache/${zone}/${by_branch.includes(name) ? suffix : '0000'}/${name}.json`);
 
-            if(query && query.includes('file=true')) {
-
-              // в папках отделов держим только фильтруемые по отделу файлы
-              if(!branch.empty() && !by_branch.includes(name)){
-                continue;
-              }
-
-              const rows = [];
-              (name === 'cch.predefined_elmnts' ? await load_predefined(pouch.remote.ram) : mgr).forEach((o) => {
-                if(check_mdm({o, name, zone, branch, job_prm})) {
-                  rows.push(patch(o, name));
-                }
-              });
-              const text = JSON.stringify({name, rows}) + '\r\n';
-              await fs.writeFileAsync(fname, text, 'utf8');
-              res.write(`${name}\r\n`);
-              tags[name] = {
-                count: rows.length,
-                size: text.length,
-                crc32: utils.crc32(text),
-              };
+            if(suffix === 'common' && !common.includes(name)) {
+              continue;
             }
-            else {
-              if(suffix === 'common' && !common.includes(name)) {
-                continue;
-              }
-              if(suffix !== 'common' && common.includes(name)) {
-                continue;
-              }
-              stream.add(fs.createReadStream(fname));
+            if(suffix !== 'common' && common.includes(name)) {
+              continue;
             }
+            stream.add(fs.createReadStream(fname));
           }
         }
       }
-      if(query && query.includes('file=true')) {
-        res.end();
-        const fname = resolve(__dirname, `./cache/${zone}/${suffix}/manifest.json`);
-        await fs.writeFileAsync(fname, JSON.stringify(tags), 'utf8');
-      }
-      else {
-        stream.pipe(res);
-        res.on('close', () => {
-          stream.destroy();
-        });
-      }
+      stream.pipe(res);
+      res.on('close', () => {
+        stream.destroy();
+      });
     }
     catch(err){
       end500({res, err, log});
     }
 
   };
-};
-
-
-function patch(o, name, cat) {
-  if(!o.toJSON) {
-    return o;
-  }
-  const v = o.toJSON();
-  // единицы измерения храним внутри номенклатуры
-  if(name === 'cat.nom') {
-    v.units = o.units;
-  }
-  // физлиц храним внутри пользователей
-  else if(name === 'cat.users') {
-    if(!o.individual_person.empty()) {
-      v.person = o.individual_person.toJSON();
-    }
-  }
-  return v;
 }
 
 function order (md) {
@@ -222,5 +157,12 @@ function order (md) {
       res[4].add(`cat.${class_name}`);
     }
   }
+
   return res;
 }
+
+mdm.by_branch = by_branch;
+mdm.order = order;
+mdm.common = common;
+
+module.exports = mdm;

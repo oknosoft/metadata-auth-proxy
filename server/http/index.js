@@ -9,7 +9,6 @@
 const http = require('http');
 const url = require('url');
 const qs = require('qs');
-require('./promisify');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
 
 const {end401, end404, end500} = require('./end');
