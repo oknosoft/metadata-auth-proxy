@@ -37,7 +37,7 @@ module.exports = function on_log_in({pouch, classes, job_prm, cat, abonents}) {
           if(/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
             const filter = {_top: 100000};
             if([
-              'cat.branches',
+              //'cat.branches',
               'cat.divisions',
               'cat.characteristics'].includes(mgr.class_name)) {
               return;

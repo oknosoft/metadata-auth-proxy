@@ -32,6 +32,8 @@ metadata(log, true)
 
         const polling = new Polling(db, log);
 
+        const mdm_changes = require('../mdm/auto_recalc')($p, log);
+
         function execute(req, res) {
 
           const start = (req.method === 'POST' || req.method === 'PUT') ? getBody(req) : Promise.resolve();

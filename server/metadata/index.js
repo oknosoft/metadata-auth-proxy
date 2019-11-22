@@ -66,10 +66,9 @@ module.exports = function (log, is_common) {
       log(`loadind to ram: complete`);
     },
     pouch_doc_ram_loaded() {
-      const prepare = is_common ? Promise.resolve() :
-        linked_templates($p)
-          .then(() => $p.pricing.load_prices());
-      prepare.then(() => ram_changes($p, log));
+      return linked_templates($p)
+        .then(() => $p.pricing.load_prices())
+        .then(() => ram_changes($p, log));
     },
   });
 

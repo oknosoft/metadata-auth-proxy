@@ -44,7 +44,7 @@ module.exports = function auto_recalc($p, log) {
       /**
        * текущий идентификатор timeout
        */
-      id: 0,
+      id: null,
 
       /**
        * текущий штамп
@@ -123,11 +123,17 @@ module.exports = function auto_recalc($p, log) {
      * Пересчет для всех абонентов и всех отделов абонентов
      */
     async recalc() {
-      if(this.recalcing) {
+      const {timer, recalcing} = this;
+      if(timer.id) {
+        clearTimeout(timer.id);
+        timer.id = null;
+      }
+      if(recalcing) {
+        timer.id = setTimeout(this.recalc.bind(this), timer.defer);
+        timer.stamp = Date.now();
         return;
       }
       this.recalcing = true;
-      this.timer.id = 0;
 
       const queue = this.queue.get();
       const types = Array.from(queue);
@@ -137,7 +143,7 @@ module.exports = function auto_recalc($p, log) {
       try {
         for(const aref in abonents.by_ref) {
           const abonent = abonents.by_ref[aref];
-          if(abonent.empty()) {
+          if(!job_prm.server.abonents.includes(abonent.id)) {
             continue;
           }
 
@@ -241,6 +247,16 @@ module.exports = function auto_recalc($p, log) {
 
   // инициируем стартовый пересчет
   setTimeout(changes.register.bind(changes), changes.timer.defer);
+
+  pouch.on('nom_price', changes.register.bind(changes, 'cat.nom'));
+
+  // регистрируем для будущего пересчета
+  pouch.on('ram_change', (change) => {
+    try {
+      changes.register(change.id.split('|')[0]);
+    }
+    catch (e) {}
+  });
 
   return changes;
 
