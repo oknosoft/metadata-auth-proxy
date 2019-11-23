@@ -124,6 +124,13 @@ module.exports = function ({cat}, log) {
 
     if(paths[0] === 'auth') {
       res.setHeader('Content-Type', 'application/json');
+      const zones = new Set();
+      user.subscribers.forEach(({abonent}) => {
+        if(abonent.id) {
+          zones.add(abonent.id)
+        }
+      })
+      res.setHeader('zones', Array.from(zones).join(','));
       res.write(JSON.stringify(user));
       res.end();
     }

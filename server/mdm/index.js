@@ -13,6 +13,7 @@ const {resolve} = require('path');
 const merge2 = require('merge2');
 const manifest = require('./manifest');
 const head = require('./head');
+require('../http/promisify');
 
 // эти режем по отделу
 const by_branch = [
@@ -23,6 +24,8 @@ const by_branch = [
   'cat.users',
   'cat.individuals',
   'cat.organizations',
+  'cat.cashboxes',
+  'cat.stores',
 ];
 // эти общие - их не режем и грузим сразу
 const common = [
@@ -30,7 +33,6 @@ const common = [
   'cat.property_values',
   'cat.contact_information_kinds',
   'cat.clrs',
-  'cat.elm_visualization',
   'cat.units',
   'cat.countries',
   'cat.currencies',
@@ -40,7 +42,6 @@ const common = [
   'cat.nom_groups',
   'cat.nom_kinds',
   'cat.templates',
-  'cat.nom',
 ];
 
 function mdm ($p, log) {
