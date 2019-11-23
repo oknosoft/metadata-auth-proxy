@@ -139,6 +139,7 @@ module.exports = function auto_recalc($p, log) {
       const types = Array.from(queue);
       this.queue.swap = !this.queue.swap;
       queue.clear();
+      log(`Recalcing ${types.length > 6 ? types.length.toFixed() + ' types' : types.join(',')}`);
 
       try {
         for(const aref in abonents.by_ref) {
