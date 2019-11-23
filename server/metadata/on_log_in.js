@@ -6,7 +6,7 @@
  * Created by Evgeniy Malyarov on 02.06.2019.
  */
 
-module.exports = function on_log_in({pouch, classes, job_prm, cat, abonents}) {
+module.exports = function on_log_in({pouch, classes, job_prm, cat, ireg, abonents}) {
   const {auth} = pouch.remote.ram.__opts;
   const opts = {skip_setup: true, auth, owner: pouch};
   if(!pouch.local.meta) {
@@ -33,7 +33,7 @@ module.exports = function on_log_in({pouch, classes, job_prm, cat, abonents}) {
       .then(() => {
         // грузим из doc_ram
         let res = Promise.resolve();
-        cat.forEach((mgr) => {
+        const handler = (mgr) => {
           if(/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
             const filter = {_top: 100000};
             if([
@@ -51,7 +51,9 @@ module.exports = function on_log_in({pouch, classes, job_prm, cat, abonents}) {
               }
             });
           }
-        });
+        };
+        cat.forEach(handler);
+        ireg.forEach(handler);
         return res.catch((err) => {
           return null;
         });

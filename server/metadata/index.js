@@ -32,7 +32,7 @@ module.exports = function (log, is_common) {
   meta_init($p);
 
   // сообщяем адаптерам пути, суффиксы и префиксы
-  const {wsql, job_prm, adapters: {pouch}, classes, cat} = $p;
+  const {wsql, job_prm, adapters: {pouch}, classes, cat, ireg} = $p;
   wsql.set_user_param('user_name', user_node.username);
   if(user_node.suffix) {
     pouch.props._suffix = user_node.suffix;
@@ -51,7 +51,7 @@ module.exports = function (log, is_common) {
       log(`logged in ${job_prm.couch_local}, user:${name}, zone:${job_prm.zone}`);
     },
     on_log_in() {
-      return on_log_in({pouch, classes, job_prm, cat, abonents: server.abonents});
+      return on_log_in({pouch, classes, job_prm, cat, ireg, abonents: server.abonents});
     },
     user_log_fault(err) {
       log(`login error ${err}`);
