@@ -46,12 +46,17 @@ module.exports = function ($p, log, worker) {
         const parsed = req.parsed = url.parse(req.url);
         parsed.paths = parsed.pathname.replace('/', '').split('/');
 
-        parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
-        parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
-        parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
-
-        parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|static|imgs|index|builder|about|login|settings|b|o)$/.test(parsed.paths[0]);
-        req.query = qs.parse(parsed.query);
+        const {host} = req.headers;
+        if(conf.server.couchdb_proxy_direct.some((name) => host.startsWith(name))) {
+          parsed.couchdb_proxy_direct = true;
+        }
+        else {
+          parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
+          parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
+          parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
+          parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|static|imgs|index|builder|about|login|settings|b|o)$/.test(parsed.paths[0]);
+          req.query = qs.parse(parsed.query);
+        }
 
         if(parsed.is_static) {
           return staticProxy(req, res, conf);
@@ -67,10 +72,18 @@ module.exports = function ($p, log, worker) {
               if(parsed.is_mdm) {
                 return mdm(req, res, conf);
               }
-              else if(parsed.paths[0] === 'couchdb') {
+              if(parsed.couchdb_proxy_direct) {
+                if(user.roles && user.roles.includes('doc_full')) {
+                  return couchdbProxy(req, res);
+                }
+                else {
+                  return end401({res, err: {message: `host ${host} for admins only, role 'doc_full' required`}, log});
+                }
+              }
+              if(parsed.paths[0] === 'couchdb') {
                 return couchdbProxy(req, res);
               }
-              else if(parsed.paths[0] === 'adm') {
+              if(parsed.paths[0] === 'adm') {
                 return adm(req, res);
               }
               return end404(res, parsed.paths[0]);

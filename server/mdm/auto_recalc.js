@@ -169,7 +169,7 @@ module.exports = function auto_recalc($p, log) {
           });
           for(const bref in branches.by_ref) {
             const branch = branches.by_ref[bref];
-            if(branch.empty() || branch.owner !== abonent) {
+            if(branch.empty() || !branch.use || branch.owner !== abonent) {
               continue;
             }
             await recalc({

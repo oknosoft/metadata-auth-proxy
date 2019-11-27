@@ -116,9 +116,7 @@ function mdm ($p, log) {
         }
       }
       stream.pipe(res);
-      res.on('close', () => {
-        stream.destroy();
-      });
+      res.on('close', () => stream.destroy());
     }
     catch(err){
       end500({res, err, log});

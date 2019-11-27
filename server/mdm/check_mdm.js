@@ -57,7 +57,7 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
       return o.subscribers.find(abonent, 'abonent');
     }
     else if(name === 'cat.branches') {
-      return o.owner == abonent;
+      return o.owner == abonent || o._children().some((branch) => branch.owner == abonent);
     }
     else if(name === 'cat.partners') {
       const rows = o.is_folder ? o._children().concat(o) : [o];
