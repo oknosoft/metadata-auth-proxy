@@ -36,6 +36,10 @@ proxy.on('proxyRes', setVia);
 
 module.exports = function ({cat, job_prm}, log) {
 
+  proxy.on('error', (err) => {
+    log(err.message || err, 'error');
+  });
+
   return async function couchdbProxy(req, res) {
     // You can define here your custom logic to handle the request
     // and then proxy the request.
@@ -52,7 +56,7 @@ module.exports = function ({cat, job_prm}, log) {
 
     let server;
     if(couchdb_proxy_direct) {
-      server = url.parse(`${job_prm.couchdb_proxy_base}.${headers.host.split('.')[0].replace(/[^+\d]/g, '')}:5984`);
+      server = url.parse(`${job_prm.server.couchdb_proxy_base}.${parseInt(headers.host.split('.')[0].replace(/[^+\d]/g, ''), 10)}:5984`);
     }
     else {
       let parts = new RegExp(`/${local_storage_prefix}(.*?)/`).exec(path);

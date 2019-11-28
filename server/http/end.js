@@ -23,7 +23,7 @@ function end(res, body) {
 
 module.exports = {
   end401({res, err, log}) {
-    log(err);
+    log(err, 'error');
     end(res, {
       error: true,
       status: 401,
@@ -39,7 +39,7 @@ module.exports = {
     });
   },
   end500({res, err, log}) {
-    log(err);
+    log(err, 'error');
     end(res, {
       error: true,
       status: err.status || 500,
