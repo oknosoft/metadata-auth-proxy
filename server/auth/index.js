@@ -66,7 +66,7 @@ module.exports = function ({cat}, log) {
    */
   return async (req, res) => {
 
-    const {paths, is_common, is_mdm, is_log, couchdb_proxy_direct} = req.parsed;
+    const {paths, is_common, is_mdm, is_log, is_event_source, couchdb_proxy_direct} = req.parsed;
 
     if(paths[0] === 'auth' && !['ldap','couchdb'].includes(paths[1])) {
       return oauth(req, res);
@@ -81,7 +81,7 @@ module.exports = function ({cat}, log) {
         res.end('Укажите логин и пароль');
         return false;
       }
-      if(is_common || is_mdm || is_log) {
+      if(is_common || is_mdm || is_log || is_event_source) {
         return {};
       }
       throw new TypeError('Отсутствует заголовок авторизации');

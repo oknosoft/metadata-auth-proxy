@@ -20,6 +20,7 @@ module.exports = function ($p, log, worker) {
   const staticProxy = require('./static');
   const adm = require('./adm')($p, log);
   const mdm = require('../mdm')($p, log);
+  const event_source = require('../mdm/event_source')($p, log);
   const auth = require('../auth')($p, log);
   const conf = require('../../config/app.settings')();
 
@@ -53,6 +54,7 @@ module.exports = function ($p, log, worker) {
         else {
           parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
           parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
+          parsed.is_event_source = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'events';
           parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
           parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|static|imgs|index|builder|about|login|settings|b|o)$/.test(parsed.paths[0]);
           req.query = qs.parse(parsed.query);
@@ -60,6 +62,9 @@ module.exports = function ($p, log, worker) {
 
         if(parsed.is_static) {
           return staticProxy(req, res, conf);
+        }
+        if(parsed.is_event_source) {
+          return event_source(req, res);
         }
 
         // пытаемся авторизовать пользователя
