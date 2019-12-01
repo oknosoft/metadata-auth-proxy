@@ -18,6 +18,21 @@ module.exports = function event_source({wsql}, log) {
     }
   };
 
+  const ping = (test) => {
+    for(const res of resps) {
+      if(test) {
+        res.write('\n');
+      }
+      else {
+        wsql.post_event({test: `i-${posti}`});
+      }
+    }
+  }
+
+  setInterval(ping, 50000);
+
+  setInterval(ping.bind(null, true), 300000);
+
   /**
    * Обрабатывает запросы к event-source
    * @param req

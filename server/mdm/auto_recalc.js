@@ -54,7 +54,7 @@ module.exports = function auto_recalc($p, log) {
       /**
        * 5 минут - чаще не надо
        */
-      defer: 300000,
+      defer: 6000,
     },
 
     /**
@@ -247,7 +247,7 @@ module.exports = function auto_recalc($p, log) {
   }
 
   // инициируем стартовый пересчет
-  setTimeout(changes.register.bind(changes), changes.timer.defer);
+  setTimeout(changes.register.bind(changes), changes.timer.defer / 2);
 
   pouch.on('nom_price', changes.register.bind(changes, 'cat.nom'));
 

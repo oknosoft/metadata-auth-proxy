@@ -21,11 +21,11 @@ module.exports = function(runtime) {
 			}
 		}
 
-		console[logObject.type === 'error' ? 'error' : 'log'](
+		console[logObject.type === 'error' || message instanceof Error ? 'error' : 'log'](
 				time.toISOString() +
 				workerKey +
 				"[" + logObject.type + "]: "+
-				JSON.stringify(logObject.message)
+      (logObject.message instanceof Error ? logObject.message.message : JSON.stringify(logObject.message))
 		);
 	};
 
