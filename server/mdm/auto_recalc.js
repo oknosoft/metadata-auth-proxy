@@ -52,9 +52,9 @@ module.exports = function auto_recalc($p, log) {
       stamp: 0,
 
       /**
-       * 5 минут - чаще не надо
+       * 3 минут - чаще не надо
        */
-      defer: 6000,
+      defer: 180000,
     },
 
     /**
