@@ -41,6 +41,7 @@ module.exports = function ($p) {
                 pouch.emit('nom_price');
               }
               else if(change.id.startsWith('cat.scheme_settings')) {
+                pouch.load_changes({docs: [change.doc]});
                 pouch.emit('ram_change', change);
               }
             });
