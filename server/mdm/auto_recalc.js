@@ -254,7 +254,14 @@ module.exports = function auto_recalc($p, log) {
   // регистрируем для будущего пересчета
   pouch.on('ram_change', (change) => {
     try {
-      changes.register(change.id.split('|')[0]);
+      const class_name = change.id.split('|')[0];
+      changes.register(class_name);
+      if(class_name === 'cch.predefined_elmnts') {
+        const {types} = change.doc.type;
+        types && types.forEach((type) => {
+          type.includes('.') && changes.register(type);
+        });
+      }
     }
     catch (e) {}
   });
