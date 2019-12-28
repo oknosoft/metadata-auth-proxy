@@ -252,6 +252,18 @@ AppView.propTypes = {
   classes: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
   title: PropTypes.string.isRequired,
+  snack: PropTypes.object,
+  alert: PropTypes.object,
+  confirm: PropTypes.object,
+  user: PropTypes.object,
+  doc_ram_loaded: PropTypes.bool,
+  sync_started: PropTypes.bool,
+  fetch: PropTypes.bool,
+  couch_direct: PropTypes.bool,
+  offline: PropTypes.bool,
+  meta_loaded: PropTypes.bool,
+  complete_loaded: PropTypes.bool,
+  windowWidth: PropTypes.number,
 };
 
 export default compose(withStyles, withWindowSize, withIfaceAndMeta)(AppView);

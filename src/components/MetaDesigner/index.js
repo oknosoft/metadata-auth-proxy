@@ -1,3 +1,3 @@
-import MetaDesigner from './MetaDesigner'
+import MetaDesigner from './MetaDesigner';
 
-export default MetaDesigner
+export default MetaDesigner;

@@ -10,7 +10,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import TextField from '@material-ui/core/TextField';
 import Popover from '@material-ui/core/Popover';
-import { ChromePicker } from 'react-color'
+import { ChromePicker } from 'react-color';
 
 import AbstractField from 'metadata-react/DataField/AbstractField';
 import withStyles from 'metadata-react/DataField/styles';
@@ -35,7 +35,7 @@ class FieldColor extends AbstractField {
   setClr(v) {
     const {_obj, _fld} = this.props;
     _obj[_fld] = v;
-  };
+  }
 
   render() {
     const {props, state: {anchorEl}, _meta, onChange} = this;
@@ -46,7 +46,7 @@ class FieldColor extends AbstractField {
       value: _obj[_fld],
       onChange,
       onClick: this.setAnchorEl,
-    }
+    };
     let hex;
     if(attr.value.length === 3) {
       hex = '';

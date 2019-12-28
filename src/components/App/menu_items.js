@@ -1,10 +1,11 @@
 import React from 'react';
+
 //import IconChart from '@material-ui/icons/InsertChart';
-import IconBuild from '@material-ui/icons/Build';
 //import IconDoc from '@material-ui/icons/EventNote';
-import IconColor from '@material-ui/icons/ColorLens';
+//import IconHelp from '@material-ui/icons/Help';
 import IconInfo from '@material-ui/icons/Info';
-import IconHelp from '@material-ui/icons/Help';
+import IconBuild from '@material-ui/icons/Build';
+import IconColor from '@material-ui/icons/ColorLens';
 import IconPerson from '@material-ui/icons/Person';
 import IconSettings from '@material-ui/icons/Settings';
 import IconBusiness from '@material-ui/icons/Business';
