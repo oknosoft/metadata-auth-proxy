@@ -47,6 +47,12 @@ module.exports = {
       });
     }
     this.dedup.add(obj);
+    // если объект является папкой, добавляем всех его детей
+    if(obj.is_folder && obj._children) {
+      for(const child of obj._children(true)) {
+        this.links(child);
+      }
+    }
   },
 
   check(o) {
