@@ -34,7 +34,7 @@ const proxy = httpProxy.createProxyServer({
 
 proxy.on('proxyRes', setVia);
 
-module.exports = function ({cat, job_prm}, log) {
+module.exports = function ({cat, job_prm, utils}, log) {
 
   proxy.on('error', (err) => {
     log(err.message || err, 'error');
@@ -44,7 +44,7 @@ module.exports = function ({cat, job_prm}, log) {
     // You can define here your custom logic to handle the request
     // and then proxy the request.
 
-    const {parsed: {query, path, paths, couchdb_proxy_direct}, headers, user}  = req;
+    let {parsed: {query, path, paths, couchdb_proxy_direct}, headers, user}  = req;
 
     const { username, roles, token } = headerFields;
     headerFields.clear(headers);
@@ -75,6 +75,14 @@ module.exports = function ({cat, job_prm}, log) {
       const abonent = cat.abonents.by_id(parts[0]);
 
       let {branch} = user || {};
+      // если пользователю разрешен доступ к корню и в заголовке передали branch - перенаправляем на базу отдела
+      if(user && utils.is_guid(headers.branch) && user.branch.empty()) {
+        branch = cat.branches.by_ref[headers.branch];
+        if(branch && branch.suffix && parts[1] === 'doc') {
+          path = path.replace('_doc/', `_doc_${branch.suffix}/`);
+        }
+      }
+
       server = branch && branch.server;
       switch (parts[1]) {
       case 'doc':
@@ -122,7 +130,7 @@ module.exports = function ({cat, job_prm}, log) {
         setVia(upstreamRes, req, res);
         upstreamRes.pipe(res);
       });
-      if(req.method === 'POST') {
+      if(req.method === 'POST' || req.method === 'PUT') {
         try{
           upstreamReq.write(await getBody(req));
         }

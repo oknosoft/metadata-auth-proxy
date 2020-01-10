@@ -84,7 +84,7 @@ module.exports = function ({cat}, log) {
       if(is_common || is_mdm || is_log || is_event_source) {
         return {};
       }
-      throw new TypeError('Отсутствует заголовок авторизации');
+      throw new TypeError(`Отсутствует заголовок авторизации '${req.url}'`);
     }
 
     if(req.method === 'DELETE') {
