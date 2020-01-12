@@ -6,6 +6,7 @@
  */
 
 const is_node = typeof process !== 'undefined' && process.versions && process.versions.node;
+const local_storage_prefix = process.env.LSPREFIX || 'wb_';
 
 module.exports = function settings(prm = {}) {
 
@@ -14,17 +15,17 @@ module.exports = function settings(prm = {}) {
     is_node,
 
     // разделитель для localStorage
-    local_storage_prefix: 'wb_',
+    local_storage_prefix,
 
     // гостевые пользователи для демо-режима
     guests: [],
 
     // расположение couchdb для nodejs
-    couch_local: process.env.COUCHLOCAL || 'http://cou221:5984/wb_',
+    couch_local: process.env.COUCHLOCAL || `http://cou221:5984/${local_storage_prefix}`,
 
     // расположение couchdb для браузера
     get couch_path() {
-      return is_node ? this.couch_local : '/couchdb/wb_';
+      return is_node ? this.couch_local : `/couchdb/${local_storage_prefix}`;
     },
 
     // без автономного режима
@@ -72,7 +73,7 @@ module.exports = function settings(prm = {}) {
         }
       },
       couchdb_proxy_direct: 'c221,c076,c077,c078,c079,c112,c177,c178,c180,c181,c182,c183,c184,c185,c186,c187,c207,c208,c209,c210,c211,c212,c213,c214,c215,c216,c217,c218,c219,c220,c222,c223'.split(','), // список хостов, с которых маршрутизируем direct в couchdb (https://c221.oknosoft.com)
-      couchdb_proxy_base: 'http://192.168.21', // начальная часть адреса пула серверов в локальной сети
+      couchdb_proxy_base: 'http://192.168.9', // начальная часть адреса пула серверов в локальной сети
     },
 
     workers: {
