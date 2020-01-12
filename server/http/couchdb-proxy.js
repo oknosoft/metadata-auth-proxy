@@ -121,7 +121,7 @@ module.exports = function ({cat, job_prm, utils}, log) {
         headers: headers,
         hostname: server.hostname,
         port: parseInt(server.port, 10),
-        path: path.replace('/couchdb', ''),
+        path: path.replace('/couchdb/', '/'),
         agent: keepAliveAgent,
       }, (upstreamRes) => {
         for(const header in upstreamRes.headers) {
@@ -140,7 +140,7 @@ module.exports = function ({cat, job_prm, utils}, log) {
     }
     else {
       proxy.web(req, res, {
-        target: `${server.href.replace(new RegExp(server.path + '$'), '')}${path.replace('/couchdb', '')}`,
+        target: `${server.href.replace(new RegExp(server.path + '$'), '')}${path.replace('/couchdb/', '/')}`,
         ignorePath: true,
       });
     }
