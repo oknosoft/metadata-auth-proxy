@@ -36,18 +36,18 @@ module.exports = function on_log_in(log) {
           let res = Promise.resolve();
           const handler = (mgr) => {
             if(/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
-              const filter = {_top: 100000};
               if([
                 //'cat.branches',
                 'cat.divisions',
                 'cat.characteristics'].includes(mgr.class_name)) {
                 return;
               }
-              else if(mgr.class_name === 'cat.scheme_settings') {
-                filter.user = '';
-              }
               cat.abonents.forEach((abonent) => {
                 if(abonents.includes(abonent.id)) {
+                  const filter = {_top: 100000};
+                  if(mgr.class_name === 'cat.scheme_settings') {
+                    filter.user = '';
+                  }
                   res = res.then(() => pouch.find_rows(mgr, filter, abonent.db('doc')));
                 }
               });
