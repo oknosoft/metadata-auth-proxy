@@ -27,7 +27,7 @@ module.exports = {
     end(res, {
       error: true,
       status: 401,
-      message: `Unauthorized\n${err.message || ''}`,
+      message: `Unauthorized ${err.stack || err.message || ''}`,
     });
 
   },

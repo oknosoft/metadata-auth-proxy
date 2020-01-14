@@ -77,7 +77,9 @@ module.exports = function ({cat, job_prm, utils}, log) {
       let {branch} = user || {};
       // если пользователю разрешен доступ к корню и в заголовке передали branch - перенаправляем на базу отдела
       if(user && utils.is_guid(headers.branch) && user.branch.empty()) {
-        branch = cat.branches.by_ref[headers.branch];
+        if(cat.branches.by_ref[headers.branch]) {
+          branch = cat.branches.by_ref[headers.branch];
+        }
         if(branch && branch.suffix && parts[1] === 'doc') {
           path = path.replace('_doc/', `_doc_${branch.suffix}/`);
         }
