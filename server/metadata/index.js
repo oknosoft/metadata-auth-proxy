@@ -11,7 +11,6 @@ const settings = require('../../config/app.settings');
 
 // функция инициализации структуры метаданных
 const meta_init = require('../../src/metadata/init');
-const on_log_in = require('./on_log_in');
 const ram_changes = require('./ram_changes');
 const linked_templates = require('./linked_templates');
 const modifiers = require('./modifiers');
@@ -21,6 +20,8 @@ module.exports = function (log, is_common) {
   // создаём контекст MetaEngine
   const $p = new MetaEngine();
   log('created MetaEngine');
+
+  const on_log_in = require('./on_log_in')(log);
 
   // параметры сеанса инициализируем сразу
   $p.wsql.init(settings);

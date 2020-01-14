@@ -6,56 +6,59 @@
  * Created by Evgeniy Malyarov on 02.06.2019.
  */
 
-module.exports = function on_log_in({pouch, classes, job_prm, cat, ireg, abonents}) {
-  const {auth} = pouch.remote.ram.__opts;
-  const opts = {skip_setup: true, auth, owner: pouch};
-  if(!pouch.local.meta) {
-    pouch.remote.meta = new classes.PouchDB(pouch.props.path + 'meta', opts);
-    Object.defineProperty(pouch.local, 'meta', {get(){ return pouch.remote.meta;}});
-  }
-  const meta = pouch.remote.meta.info();
-  return !job_prm || !job_prm.is_node
-    ?
-    meta
-    :
-    meta
-      .then(() => {
+module.exports = function on_log_in(log) {
+  return function on_log_in({pouch, classes, job_prm, cat, ireg, abonents}) {
+    const {auth} = pouch.remote.ram.__opts;
+    const opts = {skip_setup: true, auth, owner: pouch};
+    if(!pouch.local.meta) {
+      pouch.remote.meta = new classes.PouchDB(pouch.props.path + 'meta', opts);
+      Object.defineProperty(pouch.local, 'meta', {get(){ return pouch.remote.meta;}});
+    }
+    const meta = pouch.remote.meta.info();
+    return !job_prm || !job_prm.is_node
+      ?
+      meta
+      :
+      meta
+        .then(() => {
 
-        // грузим из meta
-        let res = Promise.resolve();
-        cat.forEach((mgr) => {
-          if(mgr.cachable === 'meta') {
-            res = res.then(() => mgr.find_rows_remote({_top: 1000}));
-          }
-        });
-        return res;
-      })
-      .then(() => {
-        // грузим из doc_ram
-        let res = Promise.resolve();
-        const handler = (mgr) => {
-          if(/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
-            const filter = {_top: 100000};
-            if([
-              //'cat.branches',
-              'cat.divisions',
-              'cat.characteristics'].includes(mgr.class_name)) {
-              return;
+          // грузим из meta
+          let res = Promise.resolve();
+          cat.forEach((mgr) => {
+            if(mgr.cachable === 'meta') {
+              res = res.then(() => mgr.find_rows_remote({_top: 1000}));
             }
-            else if(mgr.class_name === 'cat.scheme_settings') {
-              filter.user = '';
-            }
-            cat.abonents.forEach((abonent) => {
-              if(abonents.includes(abonent.id)) {
-                res = res.then(() => pouch.find_rows(mgr, filter, abonent.db('doc')));
+          });
+          return res;
+        })
+        .then(() => {
+          // грузим из doc_ram
+          let res = Promise.resolve();
+          const handler = (mgr) => {
+            if(/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
+              const filter = {_top: 100000};
+              if([
+                //'cat.branches',
+                'cat.divisions',
+                'cat.characteristics'].includes(mgr.class_name)) {
+                return;
               }
-            });
-          }
-        };
-        cat.forEach(handler);
-        ireg.forEach(handler);
-        return res.catch((err) => {
-          return null;
+              else if(mgr.class_name === 'cat.scheme_settings') {
+                filter.user = '';
+              }
+              cat.abonents.forEach((abonent) => {
+                if(abonents.includes(abonent.id)) {
+                  res = res.then(() => pouch.find_rows(mgr, filter, abonent.db('doc')));
+                }
+              });
+            }
+          };
+          cat.forEach(handler);
+          ireg.forEach(handler);
+          return res.catch((err) => {
+            log(err);
+            return null;
+          });
         });
-      });
-};
+  };
+}
