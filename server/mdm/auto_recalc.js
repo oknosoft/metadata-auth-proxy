@@ -50,11 +50,6 @@ module.exports = function auto_recalc($p, log) {
        * текущий штамп
        */
       stamp: 0,
-
-      /**
-       * 3 минут - чаще не надо
-       */
-      defer: 180000,
     },
 
     /**
@@ -105,15 +100,15 @@ module.exports = function auto_recalc($p, log) {
       const {timer} = this;
       if(timer.id) {
         // если с момента прошлой регистрации прошло немного времени - откладываем
-        if((now - timer.stamp) < (timer.defer / 2)) {
+        if((now - timer.stamp) < (job_prm.server.defer / 2)) {
           clearTimeout(timer.id);
-          timer.id = setTimeout(this.recalc.bind(this), timer.defer);
+          timer.id = setTimeout(this.recalc.bind(this), job_prm.server.defer);
         }
         // иначе - выполним пересчет по расписанию прежней регистрации
       }
       else {
         // после пересчета прошло более 5 минут - запускаем таймер в лоб
-        timer.id = setTimeout(this.recalc.bind(this), timer.defer);
+        timer.id = setTimeout(this.recalc.bind(this), job_prm.server.defer);
         timer.stamp = now;
       }
 
@@ -129,7 +124,7 @@ module.exports = function auto_recalc($p, log) {
         timer.id = null;
       }
       if(recalcing) {
-        timer.id = setTimeout(this.recalc.bind(this), timer.defer);
+        timer.id = setTimeout(this.recalc.bind(this), job_prm.server.defer);
         timer.stamp = Date.now();
         return;
       }
@@ -169,9 +164,15 @@ module.exports = function auto_recalc($p, log) {
           });
           for(const bref in branches.by_ref) {
             const branch = branches.by_ref[bref];
+
             if(branch.empty() || !branch.use || branch.owner !== abonent) {
               continue;
             }
+
+            if(job_prm.server.branches && !job_prm.server.branches.includes(branch.suffix)) {
+              continue;
+            }
+
             await recalc({
               abonent,
               branch,
@@ -247,7 +248,7 @@ module.exports = function auto_recalc($p, log) {
   }
 
   // инициируем стартовый пересчет
-  setTimeout(changes.register.bind(changes), changes.timer.defer / 2);
+  setTimeout(changes.register.bind(changes), job_prm.server.defer / 2);
 
   pouch.on('nom_price', changes.register.bind(changes, 'cat.nom'));
 

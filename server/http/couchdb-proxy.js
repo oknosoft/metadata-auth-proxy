@@ -5,7 +5,7 @@ const httpProxy = require('http-proxy');
 const {createHmac} = require('crypto');
 const url = require('url');
 const {name, version} = require('../../package.json');
-const {user_node, zone, local_storage_prefix} = require('../../config/app.settings')();
+const {user_node, zone, client_prefix} = require('../../config/app.settings')();
 const keepAliveAgent = new http.Agent({ keepAlive: true });
 const getBody = require('./raw-body');
 const {end404} = require('./end');
@@ -59,8 +59,8 @@ module.exports = function ({cat, job_prm, utils}, log) {
       server = url.parse(`${job_prm.server.couchdb_proxy_base}.${parseInt(headers.host.split('.')[0].replace(/[^+\d]/g, ''), 10)}:5984`);
     }
     else {
-      let parts = new RegExp(`/${local_storage_prefix}(.*?)/`).exec(path);
-      if((parts && parts[0] === 'meta') || path.includes(`/${local_storage_prefix}meta`)) {
+      let parts = new RegExp(`/${client_prefix}(.*?)/`).exec(path);
+      if((parts && parts[0] === 'meta') || path.includes(`/${client_prefix}meta`)) {
         parts = [zone, 'ram'];
       }
       else if(parts && parts[1]) {
@@ -84,6 +84,13 @@ module.exports = function ({cat, job_prm, utils}, log) {
           path = path.replace('_doc/', `_doc_${branch.suffix}/`);
         }
       }
+      else if(job_prm.server.branches && job_prm.server.branches.length === 1) {
+        cat.branches.find_rows({suffix: job_prm.server.branches[0]}, (o) => {
+          branch = o;
+          path = path.replace('_doc/', `_doc_${branch.suffix}/`);
+          return false;
+        });
+      }
 
       server = branch && branch.server;
       switch (parts[1]) {
@@ -99,7 +106,9 @@ module.exports = function ({cat, job_prm, utils}, log) {
 
       case 'ram':
       case '':
-        server = abonent.server;
+        if(!job_prm.server.branches || job_prm.server.branches.length !== 1) {
+          server = abonent.server;
+        }
         break;
 
       default:

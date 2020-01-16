@@ -7,6 +7,7 @@
 
 const is_node = typeof process !== 'undefined' && process.versions && process.versions.node;
 const local_storage_prefix = process.env.LSPREFIX || 'wb_';
+const client_prefix = process.env.CLIENT_PREFIX || local_storage_prefix;
 
 module.exports = function settings(prm = {}) {
 
@@ -16,6 +17,9 @@ module.exports = function settings(prm = {}) {
 
     // разделитель для localStorage
     local_storage_prefix,
+
+    // префиксы клиента и сервера могут отличаться
+    client_prefix,
 
     // гостевые пользователи для демо-режима
     guests: [],
@@ -62,6 +66,9 @@ module.exports = function settings(prm = {}) {
       common_url: process.env.RAMURL || 'http://localhost:3026',
       maxpost: 40 * 1024 * 1024,      // Max size of POST request
       abonents: process.env.ABONENTS ? JSON.parse(process.env.ABONENTS) : [21, 20], // абоненты - источники
+      branches: process.env.BRANCHES ? JSON.parse(process.env.BRANCHES) : null,     // список отделов можно ограничить
+      single_db: process.env.SINGLE_DB,                                             // использовать основную базу doc вместо перебора баз абонентов
+      defer: process.env.DEFER ? parseFloat(process.env.DEFER) : 180000,            // задержка пересчета mdm
       rater: {                        // Request rate locker
         all: {                        // Total requests limit
           interval: 4,                // Seconds, collect interval
