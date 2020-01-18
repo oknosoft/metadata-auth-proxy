@@ -22,7 +22,7 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
     return !o.disabled && (o.context !== 2) && (o.is_folder || o.zone === 0 || o.zone == zone);
   }
 
-  if(abonent.no_mdm) {
+  if(abonent.no_mdm && branch.empty() || branch.no_mdm) {
     return true;
   }
 
