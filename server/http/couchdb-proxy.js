@@ -44,7 +44,7 @@ module.exports = function ({cat, job_prm, utils}, log) {
     // You can define here your custom logic to handle the request
     // and then proxy the request.
 
-    let {parsed: {query, path, paths, couchdb_proxy_direct}, headers, user}  = req;
+    let {parsed: {query, path, couchdb_proxy_direct}, headers, user}  = req;
 
     const { username, roles, token } = headerFields;
     headerFields.clear(headers);
@@ -93,27 +93,27 @@ module.exports = function ({cat, job_prm, utils}, log) {
       }
 
       server = branch && branch.server;
-      switch (parts[1]) {
-      case 'doc':
-        while (server.empty() && !branch.parent.empty()) {
-          branch = branch.parent;
-          server = branch.server;
-        }
-        if(server.empty()) {
-          server = abonent.server;
-        }
-        break;
+      if(!job_prm.server.branches || job_prm.server.branches.length !== 1) {
+        switch (parts[1]) {
+        case 'doc':
+          while (server.empty() && !branch.parent.empty()) {
+            branch = branch.parent;
+            server = branch.server;
+          }
+          if(server.empty()) {
+            server = abonent.server;
+          }
+          break;
 
-      case 'ram':
-      case '':
-        if(!job_prm.server.branches || job_prm.server.branches.length !== 1) {
+        case 'ram':
+        case '':
           server = abonent.server;
-        }
-        break;
+          break;
 
-      default:
-        const row = abonent.ex_bases.find({name: parts[1]});
-        server = row ? row.server : abonent.server;
+        default:
+          const row = abonent.ex_bases.find({name: parts[1]});
+          server = row ? row.server : abonent.server;
+        }
       }
 
       if(!server && abonent) {
@@ -169,7 +169,7 @@ function setVia(proxyRes, req, res) {
 // couchdb proxy signed token
 function sign(user, secret) {
   return createHmac('sha1', secret).update(user).digest('hex');
-};
+}
 
 
 
