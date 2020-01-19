@@ -33,14 +33,14 @@ module.exports = function ($p) {
               since: 'now',
               live: true,
               include_docs: true,
-              selector: {class_name: {$in: ['doc.nom_prices_setup', 'cat.scheme_settings']}}
+              selector: {class_name: {$in: ['doc.nom_prices_setup', 'cat.scheme_settings', 'ireg.margin_coefficients']}}
             }).on('change', (change) => {
               if(change.id.startsWith('doc.nom_prices_setup')) {
                 // формируем новый
                 this.by_doc(change.doc);
                 pouch.emit('nom_price');
               }
-              else if(change.id.startsWith('cat.scheme_settings')) {
+              else if(change.id.startsWith('cat.scheme_settings') || change.id.startsWith('ireg.margin_coefficients')) {
                 pouch.load_changes({docs: [change.doc]});
                 pouch.emit('ram_change', change);
               }
