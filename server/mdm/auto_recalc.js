@@ -256,7 +256,7 @@ module.exports = function auto_recalc($p, log) {
   pouch.on('ram_change', (change) => {
     try {
       const class_name = change.id.split('|')[0];
-      changes.register(class_name);
+      changes.register(class_name === 'cat.branches' ? '' : class_name);
       if(class_name === 'cch.predefined_elmnts') {
         const {types} = change.doc.type;
         types && types.forEach((type) => {

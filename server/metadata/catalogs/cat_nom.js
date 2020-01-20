@@ -6,7 +6,9 @@
  * Created by Evgeniy Malyarov on 25.10.2019.
  */
 
-module.exports = function ($p) {
+const doc_changes = require('../changes_doc');
+
+module.exports = function ($p, log) {
 
   const {CatNom, classes: {CatObj}} = $p;
 
@@ -25,27 +27,8 @@ module.exports = function ($p) {
       // сначала, пытаемся из local
       return this.by_range()
         .then(() => {
-          const {pouch} = $p.adapters;
-
-          // следим за изменениями документа установки цен, чтобы при необходимости обновить кеш
-          if(pouch.local.doc === pouch.remote.doc) {
-            pouch.local.doc.changes({
-              since: 'now',
-              live: true,
-              include_docs: true,
-              selector: {class_name: {$in: ['doc.nom_prices_setup', 'cat.scheme_settings', 'ireg.margin_coefficients']}}
-            }).on('change', (change) => {
-              if(change.id.startsWith('doc.nom_prices_setup')) {
-                // формируем новый
-                this.by_doc(change.doc);
-                pouch.emit('nom_price');
-              }
-              else if(change.id.startsWith('cat.scheme_settings') || change.id.startsWith('ireg.margin_coefficients')) {
-                pouch.load_changes({docs: [change.doc]});
-                pouch.emit('ram_change', change);
-              }
-            });
-          }
+          // затем, подписываемся на изменения doc
+          doc_changes($p, log);
         });
     }
 
@@ -109,6 +92,7 @@ module.exports = function ($p) {
         });
     }
 
+
     /**
      * Перестраивает кеш цен номенклатуры по массиву ключей
      * @param startkey
@@ -116,8 +100,7 @@ module.exports = function ($p) {
      */
     by_doc({goods}) {
       const keys = goods.map(({nom, nom_characteristic, price_type}) => [nom, nom_characteristic, price_type]);
-      const {doc} = $p.adapters.pouch.local;
-      return doc.query("doc/doc_nom_prices_setup_slice_last",
+      return $p.adapters.pouch.local.doc.query('doc/doc_nom_prices_setup_slice_last',
         {
           include_docs: false,
           keys: keys,

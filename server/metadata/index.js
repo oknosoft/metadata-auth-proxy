@@ -11,7 +11,7 @@ const settings = require('../../config/app.settings');
 
 // функция инициализации структуры метаданных
 const meta_init = require('../../src/metadata/init');
-const ram_changes = require('./ram_changes');
+const ram_changes = require('./changes_ram');
 const linked_templates = require('./linked_templates');
 const modifiers = require('./modifiers');
 
@@ -43,8 +43,8 @@ module.exports = function (log, is_common) {
   }
   pouch.init(wsql, job_prm);
 
-  // // подключим модификаторы
-  modifiers($p);
+  // подключим модификаторы
+  modifiers($p, log);
 
   // подключаем обработчики событий адаптера данных
   pouch.on({

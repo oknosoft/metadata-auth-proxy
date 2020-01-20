@@ -38,7 +38,7 @@ module.exports = function on_log_in(log) {
             if(/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
               if([
                 //'cat.branches',
-                'cat.divisions',
+                //'cat.divisions',
                 'cat.characteristics'].includes(mgr.class_name)) {
                 return;
               }
