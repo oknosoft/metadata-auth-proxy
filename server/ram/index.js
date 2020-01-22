@@ -1,83 +1,74 @@
 /**
- * Рабочий процесс фильтрованной репликации ram
+ * Кластер общих данных
+ * Используется не совсем по назначению - для единообразия с кластером auth-proxy а так же, для перезапуска по аварии
  *
  * @module index
  *
- * Created by Evgeniy Malyarov on 14.08.2019.
+ * Created by Evgeniy Malyarov on 05.02.2019.
  */
 
-'use strict';
+const worker = require('./worker'),
+  fs = require('fs'),
+  runtime = {
+    cluster: require('cluster'),
+    root: __dirname,
+    common: true,
+  },
+  conf = require('../../config/app.settings')(),
+  log = require('../logger')(runtime);
 
-const http = require('http');
-const url = require('url');
-const qs = require('qs');
+if (runtime.cluster.isMaster) {
 
-// Logger
-const runtime = {cluster: {worker: {id: 'ram'}}};
-const log = require('../logger')(runtime);
+  const cpus = 1;
+  let workers = [];
 
-const conf = require('../../config/app.settings')();
-const {end401, end404, end500} = require('../http/end');
-const getBody = require('../http/raw-body');
-const common = require('./common');
-const metadata = require('../metadata');
-const local_couchdb = require('./couchdb');
-const Polling = require('./polling');
-
-// MetaEngine
-metadata(log, true)
-  .then(($p) => {
-    local_couchdb({log, $p})
-      .then((db) => {
-
-        const polling = new Polling(db, log);
-
-        const mdm_changes = require('../mdm/auto_recalc')($p, log);
-
-        function execute(req, res) {
-
-          const start = (req.method === 'POST' || req.method === 'PUT') ? getBody(req) : Promise.resolve();
-
-          return start.then((body) => {
-            const {remotePort, remoteAddress} = res.socket;
-            const parsed = req.parsed = url.parse(req.url);
-            parsed.paths = parsed.pathname.replace('/', '').split('/').map(decodeURIComponent);
-            req.query = qs.parse(decodeURIComponent(parsed.query));
-            if(body) {
-              req.body = JSON.parse(body);
-            }
-            if(parsed.paths[0] === 'couchdb') {
-              parsed.paths = parsed.paths.splice(1);
-            }
-            //console.log(`${req.method} ${req.url}`, req.body || '');
-            return parsed.paths[0] === 'common' ? common({req, res, $p, polling}) : end404(res, parsed.paths[0]);
-          })
-            .catch((err) => {
-              if(!err.status) {
-                err.status = 500;
-              }
-              err.error = true;
-              end500({res, log, err});
-            });
-        }
-
-        process.on('message', function (msg) {
-          if(msg && msg.event == 'execute') {
-            execute(msg.req, msg.res);
-          }
-        });
-
-        const server = http.createServer(execute);
-        const server_url = url.parse(conf.server.common_url);
-        server.listen(parseInt(server_url.port, 10));
-        log(`COMMON DATA listen on port: ${server_url.port}`);
-      });
+  // On worker die
+  runtime.cluster.on('exit', function (worker) {
+    for (let i = 0; i < workers.length; i++) {
+      if(worker.id == workers[i].id) {
+        workers[i] = null;
+      }
+    }
+    workers = workers.filter((v) => v);
+    workers.push(runtime.cluster.fork());
   });
 
+  fs.watch(require.resolve('../../config/app.settings'), (event, filename) => {
+    _restart('Config changed');
+  });
 
+  // Fork workers
+  for (let i = 0; i < cpus; i++) {
+    workers.push(runtime.cluster.fork());
+  }
 
+  // Restarter
+  const _restart = function (msg) {
+      log('Restart workers: ' + msg);
+      let i = workers.length;
+      while (i--) {
+        setTimeout(_stop.bind(null, workers[i]), i * conf.workers.reloadOverlap);
+      }
+    },
+    _stop = function (w) {
+      if (w) {
+        w.send({event: 'shutdown', time: Date.now()});
+        setTimeout(_kill.bind(null, w), conf.workers.killDelay);
+      }
+    },
+    _kill = function (w) {
+      if(w && w.exitedAfterDisconnect === undefined) {
+        w.kill();
+      }
+    },
+    _restarter = function () {
+      if ((new Date()).getHours() == (conf.workers.reloadAt || 0)) {
+        _restart('Daily restart');
+      }
+    },
+    restarter = setInterval(_restarter, 36e5);
 
-process.on('unhandledRejection', error => {
-  // Will print "unhandledRejection err is not defined"
-  log(`unhandledRejection ${error.message}`, 'error');
-});
+}
+else if(runtime.cluster.isWorker) {
+  worker(runtime);
+}

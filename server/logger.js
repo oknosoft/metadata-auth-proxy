@@ -4,8 +4,8 @@
 
 module.exports = function(runtime) {
 
-	var workerId = runtime && runtime.cluster && runtime.cluster.worker ? runtime.cluster.worker.id : null,
-		workerKey = workerId != null ? '[worker#'+ workerId +']' : "";
+	const workerId = runtime && (runtime.common ? 'ram' : (runtime.cluster && runtime.cluster.worker ? runtime.cluster.worker.id : null)),
+		workerKey = workerId ? '[worker#'+ workerId +']' : "";
 
 	return function (message, type, args) {
 		var time = new Date(),
