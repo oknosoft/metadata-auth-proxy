@@ -59,7 +59,27 @@ function mdm ($p, log) {
       const zone = paths[2];
       let suffix = paths[3];
       let branch = user && user.branch;
-      if(branch && !branch.empty() && suffix !== 'common') {
+
+      if(suffix === 'templates') {
+        // возвращаем характеристики шаблона
+        const fname = resolve(__dirname, `./cache/${zone}/0000/doc.calc_order.${paths[4]}.json`);
+        const mname = fname.replace('.json', '.manifest');
+        const mtext = fs.existsSync(mname) && await fs.readFileAsync(mname, 'utf8');
+        res.setHeader('manifest', mtext || '');
+        if(req.method === 'HEAD') {
+          res.end();
+        }
+        else if(!fs.existsSync(fname)) {
+          return end404(res, fname);
+        }
+        else {
+          const stream = fs.createReadStream(fname);
+          stream.pipe(res);
+          res.on('close', () => stream.destroy());
+        }
+        return;
+      }
+      else if(branch && !branch.empty() && suffix !== 'common') {
         suffix = branch.suffix;
       }
       else if(suffix && (!branch || branch.empty())) {

@@ -84,27 +84,18 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
 
 
 function check_characteristics(o) {
-  if(o.calc_order.empty()) return true;
-  if(!check_characteristics.cache) {
-    check_characteristics.cache = new Set();
-    o._manager._owner.templates.forEach((template) => {
-      template.templates.forEach(({template}) => {
-        check_characteristics.cache.add(template);
-      });
-    });
-  }
-  return check_characteristics.cache.has(o);
+  return o.calc_order.empty();
+  // if(!check_characteristics.cache) {
+  //   check_characteristics.cache = new Set();
+  //   o._manager._owner.templates.forEach((template) => {
+  //     template.templates.forEach(({template}) => {
+  //       check_characteristics.cache.add(template);
+  //     });
+  //   });
+  // }
 }
 
 function check_calc_order(o) {
   if(o.obj_delivery_state != 'Шаблон') return false;
-  if(!check_calc_order.cache) {
-    check_calc_order.cache = new Set();
-    o._manager._owner.$p.cat.templates.forEach((template) => {
-      template.templates.forEach(({template}) => {
-        check_calc_order.cache.add(template.calc_order);
-      });
-    });
-  }
-  return check_calc_order.cache.has(o);
+  return dyn_mdm.templates.has(o);
 }

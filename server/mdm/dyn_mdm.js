@@ -72,15 +72,27 @@ module.exports = {
     });
   },
 
-  prepare(objs) {
+  // кеш для внешних модулей
+  templates: new Set(),
+
+  prepare(objs, tmplts) {
+    // чистим кеш ссылок
     this.dedup.clear();
     if(!Array.isArray(objs)) {
       objs = Object.values(objs);
     }
+    // формируем кеш по массиву входящих ссылок
     for(const obj of objs) {
       this.links(obj);
     }
-    objs.length && this.cnns(objs[0]._manager._owner.$p.cat);
+    // дополняем кеш ссылками соединений
+    const {cat, doc} = objs[0]._manager._owner.$p;
+    objs.length && this.cnns(cat);
+    // чистим кеш заказов-шаблонов и характеристик
+    this.templates.clear();
+    for(const tmpl of tmplts) {
+      this.templates.add(tmpl);
+    }
   },
 
 };

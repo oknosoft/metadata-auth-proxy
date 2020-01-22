@@ -27,7 +27,7 @@ module.exports = function (log, is_common) {
   $p.wsql.init(settings);
 
   // реквизиты подключения к couchdb
-  const {user_node, server} = settings();
+  const {user_node} = settings();
 
   // выполняем скрипт инициализации метаданных
   meta_init($p);
@@ -52,7 +52,7 @@ module.exports = function (log, is_common) {
       log(`logged in ${job_prm.couch_local}, user:${name}, zone:${job_prm.zone}`);
     },
     on_log_in() {
-      return on_log_in({pouch, classes, job_prm, cat, ireg, abonents: server.abonents});
+      return on_log_in({pouch, classes, job_prm, cat, ireg});
     },
     user_log_fault(err) {
       log(`login error ${err}`);
@@ -67,7 +67,7 @@ module.exports = function (log, is_common) {
       log(`loadind to ram: complete`);
     },
     pouch_doc_ram_loaded() {
-      return linked_templates($p)
+      return (is_common ? linked_templates($p) : Promise.resolve())
         .then(() => $p.pricing.load_prices())
         .then(() => ram_changes($p, log));
     },

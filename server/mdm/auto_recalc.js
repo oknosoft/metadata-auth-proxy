@@ -145,16 +145,26 @@ module.exports = function auto_recalc($p, log) {
 
           // рассчитаем динамический mdm по табчасти acl_objs текущего абонента
           const objs = new Set();
+          const tmplts = new Set();
           abonent.acl_objs.forEach(({obj}) => {
             if(obj) {
               objs.add(obj);
+              if(obj._manager.class_name === 'doc.calc_order' && obj.obj_delivery_state === 'Шаблон') {
+                tmplts.add(obj);
+              }
+              else if(obj._manager.class_name === 'cat.templates') {
+                obj.templates.forEach(({template}) => {
+                  tmplts.add(template.calc_order);
+                });
+              }
             }
           });
-          dyn_mdm.prepare(Array.from(objs));
+          dyn_mdm.prepare(Array.from(objs), Array.from(tmplts));
 
           const abranches = [];
           branches.find_rows({owner: abonent}, (o) => abranches.push(o));
 
+          // пересчет корня текущего абонента
           await recalc({
             abonent,
             branch: branches.get(),
@@ -162,6 +172,12 @@ module.exports = function auto_recalc($p, log) {
             suffix: 'common',
             types,
           });
+
+          // пересчет продукций текущих шаблонов
+          if(types.includes('doc.calc_order')) {
+            await recalc_templates({abonent, tmplts});
+          }
+
           for(const bref in branches.by_ref) {
             const branch = branches.by_ref[bref];
 
@@ -173,6 +189,7 @@ module.exports = function auto_recalc($p, log) {
               continue;
             }
 
+            // пересчет текущего отдела
             await recalc({
               abonent,
               branch,
@@ -245,6 +262,27 @@ module.exports = function auto_recalc($p, log) {
     if(changed) {
       await fs.writeFileAsync(manifest, JSON.stringify(tags), 'utf8');
     }
+  }
+
+  async function recalc_templates({abonent, tmplts}) {
+    const name = 'cat.characteristics';
+    for (const tmpl of tmplts) {
+      const fname = resolve(__dirname, `./cache/${abonent.id}/0000/doc.calc_order.${tmpl.ref}.json`);
+      const rows = [];
+      tmpl.production.forEach(({characteristic: o}) => {
+        !o.empty() && rows.push(patch(o, name));
+      });
+      const text = JSON.stringify({name, rows}) + '\r\n';
+      const old = fs.existsSync(fname) && await fs.readFileAsync(fname, 'utf8');
+
+      // если данные реально изменены - записываем
+      if(text !== old) {
+        await fs.writeFileAsync(fname, text, 'utf8');
+        const mname = fname.replace('.json', '.manifest');
+        await fs.writeFileAsync(mname, utils.crc32(text), 'utf8');
+      }
+    }
+
   }
 
   // инициируем стартовый пересчет

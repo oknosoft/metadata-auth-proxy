@@ -7,7 +7,7 @@
  */
 
 module.exports = function on_log_in(log) {
-  return function on_log_in({pouch, classes, job_prm, cat, ireg, abonents}) {
+  return function on_log_in({pouch, classes, job_prm, cat, ireg}) {
     const {auth} = pouch.remote.ram.__opts;
     const opts = {skip_setup: true, auth, owner: pouch};
     if(!pouch.local.meta) {
@@ -43,7 +43,7 @@ module.exports = function on_log_in(log) {
                 return;
               }
               cat.abonents.forEach((abonent) => {
-                if(abonents.includes(abonent.id)) {
+                if(job_prm.server.abonents.includes(abonent.id)) {
                   const filter = {_top: 100000};
                   if(mgr.class_name === 'cat.scheme_settings') {
                     filter.user = '';
