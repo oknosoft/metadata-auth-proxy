@@ -1,13 +1,14 @@
 const handler = require('serve-handler');
 const paths = require('../../config/paths');
+const render_path = process.env.RENDER_PATH || paths.appBuild;
 
 module.exports = async (req, res) => {
   await handler(req, res, {
     cleanUrls: true,
-    'public': paths.appBuild,
+    'public': render_path,
     headers: [
       {
-        source: 'light/service-worker.js',
+        source: 'service-worker.js',
         headers: [{
           key: 'Service-Worker-Allowed',
           value: '/'
@@ -15,7 +16,7 @@ module.exports = async (req, res) => {
       }
     ],
     rewrites: [
-      {source: 'light/doc.**', destination: '/light/index.html'},
+      {source: 'doc.**', destination: '/index.html'},
     ]
   });
 };
