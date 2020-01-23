@@ -34,7 +34,7 @@ function patch(o, name) {
 
 module.exports = function auto_recalc($p, log) {
 
-  const {cat: {branches, abonents, templates}, utils, job_prm, md, adapters: {pouch}} = $p;
+  const {cat: {branches, abonents, templates}, doc: {calc_order}, utils, job_prm, md, adapters: {pouch}} = $p;
   const {by_branch, order} = require('./index');
   const load_order = order(md);
 
@@ -149,10 +149,10 @@ module.exports = function auto_recalc($p, log) {
           abonent.acl_objs.forEach(({obj}) => {
             if(obj) {
               objs.add(obj);
-              if(obj._manager.class_name === 'doc.calc_order' && obj.obj_delivery_state === 'Шаблон') {
+              if(obj._manager === calc_order && obj.obj_delivery_state == 'Шаблон') {
                 tmplts.add(obj);
               }
-              else if(obj._manager.class_name === 'cat.templates') {
+              else if(obj._manager === templates) {
                 obj.templates.forEach(({template}) => {
                   tmplts.add(template.calc_order);
                 });
@@ -282,7 +282,6 @@ module.exports = function auto_recalc($p, log) {
         await fs.writeFileAsync(mname, utils.crc32(text), 'utf8');
       }
     }
-
   }
 
   // инициируем стартовый пересчет

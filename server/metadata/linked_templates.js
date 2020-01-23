@@ -24,7 +24,7 @@ module.exports = function linked_templates({cat, doc, job_prm, adapters: {pouch}
         });
         return refs.size && pouch.load_array(
           cat.characteristics, Array.from(refs).map((v) => v.ref), false, job_prm.server.single_db ? pouch.remote.doc : abonent.db('doc'))
-          .then(() => !job_prm.server.single_db && pouch.load_array(
+          .then(() => !job_prm.server.single_db && pouch.remote.doc.name !== abonent.db('doc').name && pouch.load_array(
             cat.characteristics, Array.from(refs).map((v) => v.ref), false, pouch.remote.doc));
       })
         .then(() => {
@@ -46,7 +46,7 @@ module.exports = function linked_templates({cat, doc, job_prm, adapters: {pouch}
           });
           return pouch.load_array(
             doc.calc_order, Array.from(tmplts).map((v) => v.ref), false, job_prm.server.single_db ? pouch.remote.doc : abonent.db('doc'))
-            .then(() => !job_prm.server.single_db && pouch.load_array(
+            .then(() => !job_prm.server.single_db && pouch.remote.doc.name !== abonent.db('doc').name && pouch.load_array(
               doc.calc_order, Array.from(tmplts).map((v) => v.ref), false, pouch.remote.doc))
             .then(() => all_tmplts);
         })
@@ -62,7 +62,7 @@ module.exports = function linked_templates({cat, doc, job_prm, adapters: {pouch}
           if(refs.size){
             return pouch.load_array(
               cat.characteristics, Array.from(refs).map((v) => v.ref), false, job_prm.server.single_db ? pouch.remote.doc : abonent.db('doc'))
-              .then(() => !job_prm.server.single_db && pouch.load_array(
+              .then(() => !job_prm.server.single_db && pouch.remote.doc.name !== abonent.db('doc').name && pouch.load_array(
                 cat.characteristics, Array.from(refs).map((v) => v.ref), false, pouch.remote.doc));
           }
         });
