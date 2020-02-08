@@ -68,9 +68,9 @@ module.exports = function settings(prm = {}) {
       abonents: process.env.ABONENTS ? JSON.parse(process.env.ABONENTS) : [21, 20], // абоненты - источники
       branches: process.env.BRANCHES ? JSON.parse(process.env.BRANCHES) : null,     // список отделов можно ограничить
       single_db: process.env.SINGLE_DB,                                             // использовать основную базу doc вместо перебора баз абонентов
-      defer: process.env.DEFER ? parseFloat(process.env.DEFER) : 180000,            // задержка пересчета mdm
+      defer: (process.env.DEFER ? parseFloat(process.env.DEFER) : 200000) + Math.random() * 10000,  // задержка пересчета mdm
       bar_urls: process.env.BAR_URLS ? JSON.parse(process.env.BAR_URLS) :
-        ['http://oknosoft.ecookna.ru:5984/wb_21_doc_0100', 'https://c221.oknosoft.com/wb_21_doc'],
+        ['http://oknosoft.ecookna.ru:5984/wb_21_doc_0100', 'https://c210.oknosoft.com/wb_21_doc_0100'],
       rater: {                        // Request rate locker
         all: {                        // Total requests limit
           interval: 4,                // Seconds, collect interval
