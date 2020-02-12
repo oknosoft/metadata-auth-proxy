@@ -91,6 +91,8 @@ module.exports = function (runtime) {
     process.on('unhandledRejection', error => {
       // Will print "unhandledRejection err is not defined"
       log(`unhandledRejection ${error.message}`, 'error');
+      // end restart process
+      runtime.cluster.worker.kill();
     });
   }
 
