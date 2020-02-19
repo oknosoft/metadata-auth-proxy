@@ -58,7 +58,7 @@ export function init(store) {
 
   pouch.on({
     on_log_in() {
-      return on_log_in({pouch, classes, job_prm, cat})
+      return on_log_in($p.record_log)({pouch, classes, job_prm, cat})
         .then(() => load_ram({pouch, classes, job_prm, cat}));
     },
     pouch_doc_ram_loaded() {

@@ -48,17 +48,16 @@ module.exports = function on_log_in(log) {
                   if(mgr.class_name === 'cat.scheme_settings') {
                     filter.user = '';
                   }
-                  res = res.then(() => pouch.find_rows(mgr, filter, job_prm.server.single_db ? pouch.remote.doc : abonent.db('doc')));
+                  res = res
+                    .then(() => pouch.find_rows(mgr, filter, job_prm.server.single_db ? pouch.remote.doc : abonent.db('doc')))
+                    .catch(log);
                 }
               });
             }
           };
           cat.forEach(handler);
           ireg.forEach(handler);
-          return res.catch((err) => {
-            log(err);
-            return null;
-          });
+          return res;
         });
   };
 }

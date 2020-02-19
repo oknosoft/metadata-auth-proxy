@@ -39,7 +39,7 @@ for (const lib of libs) {
   const lpath = path.resolve(localNodeModules, lib);
   const rpath = path.resolve(remoteNodeModules, lib);
   let i = 0;
-  fromDir(rpath, /\.(css|js|mjs|md|map)$/, (rname, isDir) => {
+  fromDir(rpath, /\.(css|js|mjs|md|map|gif|png)$/, (rname, isDir) => {
     const name = rname.replace(rpath, '');
     const lame = path.join(lpath, name);
     if(isDir) {
