@@ -65,7 +65,6 @@ const exclude = [
   'doc.selling',
   'doc.nom_prices_setup',
   'doc.planning_event',
-  'doc.purchase_order',
   'dp.builder_size',
   'dp.builder_coordinates',
   'dp.builder_price',
@@ -81,7 +80,7 @@ const exclude = [
   'rep.goods',
 ];
 const minimal = [
-
+  'doc.purchase_order',
 ];
 const writable = [
   'cat.abonents',
