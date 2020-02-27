@@ -87,7 +87,7 @@ module.exports = function ({cat}, log) {
       throw new TypeError(`Отсутствует заголовок авторизации '${req.url}'`);
     }
 
-    if(req.method === 'DELETE') {
+    if(paths[0] === 'auth' && req.method === 'DELETE') {
       cache.del(authorization.key);
       res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify({ok: true}));

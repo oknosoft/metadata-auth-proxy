@@ -42,6 +42,7 @@ const common = [
   'cat.nom_groups',
   'cat.nom_kinds',
   'cat.templates',
+  'cat.http_apis',
 ];
 
 function mdm ($p, log) {
