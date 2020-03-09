@@ -80,7 +80,3 @@ module.exports = function (log, is_common) {
     .then(() => pouch.load_data(pouch.remote.ram))
     .then(() => $p);
 }
-
-
-
-

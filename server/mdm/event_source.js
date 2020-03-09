@@ -6,15 +6,37 @@
  * Created by Evgeniy Malyarov on 28.11.2019.
  */
 
-module.exports = function event_source({wsql}, log) {
+const {end401} = require('../http/end');
+
+module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, log) {
 
   const resps = new Set();
-  let posti = 0;
+
+  pouch.on({
+    doc_change(change) {
+      const data = `event: doc\ndata: ${JSON.stringify(change.doc)}\n`;
+      for(const res of resps) {
+        res.posti++;
+        res.write(`${data}id: ${res.posti}\n\n`);
+      }
+    },
+    ram_change(change) {
+      const data = `event: ram\ndata: ${JSON.stringify(change.doc)}\n`;
+      for(const res of resps) {
+        res.posti++;
+        res.write(`${data}id: ${res.posti}\n\n`);
+      }
+    },
+    nom_price(change) {
+
+    }
+  });
+
 
   wsql.post_event = (data = {}) => {
-    posti++;
     for(const res of resps) {
-      res.write(`data: ${JSON.stringify(data)}\nid: ${posti}\n\n`);
+      res.posti++;
+      res.write(`data: ${JSON.stringify(data)}\nid: ${res.posti}\n\n`);
     }
   };
 
@@ -24,14 +46,14 @@ module.exports = function event_source({wsql}, log) {
         res.write('\n');
       }
       else {
-        wsql.post_event({test: `i-${posti}`});
+        wsql.post_event({test: `test`});
       }
     }
   }
 
-  setInterval(ping, 50000);
+  //setInterval(ping, 50000);
 
-  setInterval(ping.bind(null, true), 300000);
+  setInterval(ping.bind(null, true), 70000);
 
   /**
    * Обрабатывает запросы к event-source
@@ -40,6 +62,13 @@ module.exports = function event_source({wsql}, log) {
    */
   return async (req, res) => {
 
+    const user = users.by_ref[req.parsed.paths[2]];
+    if(!user || user.is_new() || user.empty()) {
+      return end401({res, err: req.parsed.paths[2], log});
+    }
+
+    res.user = user;
+    res.posti = 0;
     res.removeHeader('Transfer-Encoding');
     res.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
