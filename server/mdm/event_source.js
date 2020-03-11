@@ -6,9 +6,10 @@
  * Created by Evgeniy Malyarov on 28.11.2019.
  */
 
-const {end401} = require('../http/end');
+const {end401, end404} = require('../http/end');
+const getBody = require('../http/raw-body');
 
-module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, log) {
+module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, log, auth) {
 
   const resps = new Set();
 
@@ -16,12 +17,15 @@ module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, 
     doc_change(change) {
       const data = `event: doc\ndata: ${JSON.stringify(change.doc)}\n`;
       for(const res of resps) {
+        // фильтруем по контрагенту и подразделению
+        const {user} = res;
         res.posti++;
         res.write(`${data}id: ${res.posti}\n\n`);
       }
     },
-    ram_change(change) {
-      const data = `event: ram\ndata: ${JSON.stringify(change.doc)}\n`;
+    mdm_change(attr) {
+      const {abonent, branch, types} = attr;
+      const data = `event: ram\ndata: ${JSON.stringify(types)}\n`;
       for(const res of resps) {
         res.posti++;
         res.write(`${data}id: ${res.posti}\n\n`);
@@ -51,9 +55,31 @@ module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, 
     }
   }
 
-  //setInterval(ping, 50000);
-
   setInterval(ping.bind(null, true), 70000);
+
+  const incoming = (req, res) => {
+    const {paths} = req.parsed;
+    return (req.connection.remoteAddress.includes('127.0.0.1') ? Promise.resolve(true) : auth(req, res))
+      .then(async (user) => {
+        if(user) {
+          if(['broadcast', 'mdm_change'].includes(paths[2])) {
+            return getBody(req)
+              .then((data) => {
+                pouch.emit_async(paths[2], JSON.parse(data));
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ok: true}));
+              });
+          }
+          return end404(res, paths[2]);
+        }
+        else if(!res.finished) {
+          return end401({res, err: paths[2], log});
+        }
+      })
+      .catch((err) => {
+        end401({res, err, log});
+      });
+  }
 
   /**
    * Обрабатывает запросы к event-source
@@ -61,6 +87,10 @@ module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, 
    * @return {Promise}
    */
   return async (req, res) => {
+
+    if(req.method === 'POST' || req.method === 'PUT') {
+      return incoming(req, res);
+    }
 
     const user = users.by_ref[req.parsed.paths[2]];
     if(!user || user.is_new() || user.empty()) {

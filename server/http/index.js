@@ -20,8 +20,8 @@ module.exports = function ($p, log, worker) {
   const staticProxy = require('./static');
   const adm = require('./adm')($p, log);
   const mdm = require('../mdm')($p, log);
-  const event_source = require('../mdm/event_source')($p, log);
   const auth = require('../auth')($p, log);
+  const event_source = require('../mdm/event_source')($p, log, auth);
   const conf = require('../../config/app.settings')();
 
   const ipLimiter = new RateLimiterCluster({

@@ -12,8 +12,10 @@ const {resolve} = require('path');
 const check_mdm = require('./check_mdm');
 const load_predefined = require('./load_predefined');
 const dyn_mdm = require('./dyn_mdm');
+const fetch = require('node-fetch');
 require('../http/promisify');
 
+// корректировка данных
 function patch(o, name) {
   if(!o.toJSON) {
     return o;
@@ -30,6 +32,14 @@ function patch(o, name) {
     }
   }
   return v;
+}
+
+// оповещает клиентский поток об изменениях
+function notify(abonent, branch, types, port) {
+  fetch(`http://localhost:${port}/couchdb/events/mdm_change`, {
+    method: 'POST',
+    body: JSON.stringify({abonent: abonent.ref, branch: branch.ref, types}),
+  });
 }
 
 module.exports = function auto_recalc($p, log) {
@@ -212,6 +222,7 @@ module.exports = function auto_recalc($p, log) {
   async function recalc({abonent, branch, abranches, suffix, types}) {
 
     const zone = abonent.id;
+    const ctypes = [];
 
     // путь кеша текущей зоны
     if(!fs.existsSync(resolve(__dirname, `./cache/${zone}`))) {
@@ -224,7 +235,6 @@ module.exports = function auto_recalc($p, log) {
 
     const manifest = resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}/manifest.json`);
     const tags = fs.existsSync(manifest) ? JSON.parse(await fs.readFileAsync(manifest, 'utf8')) : {};
-    let changed;
     for(const name of types) {
       const mgr = md.mgr_by_class_name(name);
       if(mgr) {
@@ -254,13 +264,14 @@ module.exports = function auto_recalc($p, log) {
             crc32: utils.crc32(text),
           };
           await fs.writeFileAsync(fname, text, 'utf8');
-          changed = true;
+          ctypes.push(name);
         }
       }
     }
 
-    if(changed) {
+    if(ctypes.length) {
       await fs.writeFileAsync(manifest, JSON.stringify(tags), 'utf8');
+      notify(abonent, branch, ctypes, job_prm.server.port);
     }
   }
 
