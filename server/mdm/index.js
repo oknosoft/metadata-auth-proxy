@@ -56,7 +56,7 @@ function mdm ($p, log) {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
     try{
-      const {user, parsed: {query, path, paths}} = req;
+      const {user, parsed: {query, path, paths}, headers} = req;
       const zone = paths[2];
       let suffix = paths[3];
       let branch = user && user.branch;
@@ -117,8 +117,13 @@ function mdm ($p, log) {
 
       const tags = {};
       const stream = merge2();
+      const types = headers.types ? headers.types.split(',') : null;
       for(const names of load_order) {
         for(const name of names) {
+          // если запросили определенные типы данных, возвращаем только их
+          if(types && !types.includes(name)) {
+            continue;
+          }
           const mgr = md.mgr_by_class_name(name);
           if(mgr) {
             const fname = suffix === 'common' ?
