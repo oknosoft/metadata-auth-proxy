@@ -14,6 +14,7 @@ module.exports = function ($p, log) {
   const bar = require('./bar')($p, log);
   const scan = require('./scan')($p, log);
   const supplier = require('./supplier')($p, log);
+  const foroom = require('./foroom')($p, log);
 
   // формирует json описания продукции заказа
   async function ram_data(req, res) {
@@ -59,6 +60,9 @@ module.exports = function ($p, log) {
 
       case 'supplier':
         return supplier(req, res);
+
+      case 'foroom':
+        return foroom(req, res);
 
       default:
         end404(res, `${paths[0]}/${paths[1]}/${paths[2]}`);

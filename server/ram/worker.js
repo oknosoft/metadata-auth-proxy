@@ -33,6 +33,7 @@ module.exports = function (runtime) {
           const polling = new Polling(db, log);
 
           const mdm_changes = require('../mdm/auto_recalc')($p, log);
+          require('../mdm/foroom.js')($p, log);
 
           function execute(req, res) {
 

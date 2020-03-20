@@ -47,6 +47,7 @@
     "react-grid-layout": "^0.17.1",
     "react-treebeard": "^3.2.4",
     "serve-handler": "^6.1.2",
+    "unzip": "^0.1.11",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {

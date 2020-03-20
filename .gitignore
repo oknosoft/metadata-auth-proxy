@@ -15,8 +15,11 @@ coverage/
 /.eslintcache
 /scripts/stats.json
 /scripts/wb.link.js
-src/public/data/
-server/mdm/cache/
+/src/public/data/
+/server/mdm/cache/
+!/server/mdm/cache/.gitkeep
+/server/mdm/foroom/
+!/server/mdm/foroom/.gitkeep
 
 # Private config files
 

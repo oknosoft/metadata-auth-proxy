@@ -56,6 +56,54 @@ module.exports = function supplier($p, log) {
           prs.body.pipe(res);
         });
     }
+    else if(supplier.name === 'FOROOM') {
+      const payload = {
+        name: 'unpete',
+        email: 'unpete@yandex.ru',
+        phone: '+73519093591',
+        num: doc.ref,
+        items: doc.goods.map((row) => {
+          const params = JSON.parse(row.params);
+          const ids = row.identifier.split('|');
+          const common = {
+            type: ids[1],
+            subtype: ids[2],
+            amount: row.quantity,
+          }
+          // width - ширина по замеру
+          // height - высота по замеру
+          return Object.assign(common, params);
+        })
+      };
+      const body = `--WebAppBoundary
+Content-Disposition: form-data; name="auth";
+Content-Type: application/json
+
+{"login":"${server.username}","hash":"${server.password}"}
+--WebAppBoundary
+Content-Disposition: form-data; name="data";
+Content-Type: application/json
+
+%%%
+--WebAppBoundary--
+`;
+      const opts = {
+        method: 'POST',
+        headers: {'Content-Type': 'multipart/form-data; boundary=WebAppBoundary'},
+        body: body.replace('%%%', JSON.stringify(payload)),
+      };
+      return fetch(`${server.http}?action=create_request`, opts)
+        .then((prs) => prs.json())
+        .then((data) => {
+          opts.body = body.replace('%%%', JSON.stringify({request_id: data.data.request_id}));
+          return fetch(`${server.http}?action=create_order`, opts);
+        })
+        .then((prs) => prs.json())
+        .then((data) => {
+          data = null;
+          res.end(JSON.stringify({ok: true}));
+        });
+    }
     end404(res, `unknown supplier`);
   }
 }
