@@ -74,7 +74,8 @@ module.exports = function bar($p, log) {
                       return;
                     }
                   }
-                  key.push(row.value.length, row.value.distinct.length);
+                  const {length, distinct} = row.value || {};
+                  key.push(length || 0, distinct ? distinct.length : 0);
                   return true;
                 })) {
                   key.push(0, 0);
@@ -94,18 +95,8 @@ module.exports = function bar($p, log) {
     else if(method === 'PUT' || method === 'POST') {
       return getBody(req)
         .then((body) => {
-          const doc = JSON.parse(body);
-          const barcode = `bar|${doc._id.substr(18)}`;
-          return pouch.remote.events.put(doc)
-            .then((rsp) => {
-              return pouch.remote.bars[0].get(`_local/${barcode}`);
-            })
-            .catch(() => {
-              return pouch.remote.events.get(barcode);
-            })
-            .then((rsp) => {
-              res.end(JSON.stringify(rsp));
-            });
+          return pouch.remote.events.put(JSON.parse(body))
+            .then((rsp) => res.end(JSON.stringify(rsp)));
         });
     }
     else {
