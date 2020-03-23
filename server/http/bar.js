@@ -12,42 +12,30 @@ const getBody = require('./raw-body');
 module.exports = function bar($p, log) {
 
   const {job_prm: {user_node: auth, server}, adapters: {pouch}, classes: {PouchDB}} = $p;
-  if(!pouch.remote.bars) {
-    pouch.remote.bars = server.bar_urls.map((url) => new PouchDB(url, {skip_setup: true, owner: pouch, adapter: 'http', auth}));
-  }
   if(!pouch.remote.events) {
     pouch.remote.events = new PouchDB(server.eve_url, {skip_setup: true, owner: pouch, adapter: 'http', auth});
   }
 
   return async function bar(req, res) {
 
-    const {user, parsed: {query, path, paths}, method} = req;
+    const {parsed: {path}, method} = req;
     if(method === 'GET') {
       let ok;
       const id = decodeURIComponent(path.split('api/bar/')[1]);
-      for(const db of pouch.remote.bars) {
-        try {
-          const doc = await db.get(id);
-          res.end(JSON.stringify(doc));
-          ok = true;
-          break;
-        }
-        catch(err) {
-          log(err);
-        }
+      if(!id) {
+        throw {status: 404, message: `empty bar`};
+      }
+      try {
+        const doc = await pouch.remote.events.get(id.replace('_local/', ''));
+        res.end(JSON.stringify(doc));
+        ok = true;
+      }
+      catch(err) {
+        err.message = 'bar ' + (err.message || '');
+        log(err);
       }
       if(!ok) {
-        try {
-          const doc = await pouch.remote.events.get(id.replace('_local/', ''));
-          res.end(JSON.stringify(doc));
-          ok = true;
-        }
-        catch(err) {
-          log(err);
-        }
-      }
-      if(!ok) {
-        throw {status: 404, message: `not found '${id}'`};
+        throw {status: 404, message: `bar not found '${id}'`};
       }
     }
     else if(method === 'PUT') {

@@ -69,8 +69,6 @@ module.exports = function settings(prm = {}) {
       branches: process.env.BRANCHES ? JSON.parse(process.env.BRANCHES) : null,     // список отделов можно ограничить
       single_db: process.env.SINGLE_DB,                                             // использовать основную базу doc вместо перебора баз абонентов
       defer: (process.env.DEFER ? parseFloat(process.env.DEFER) : 200000) + Math.random() * 10000,  // задержка пересчета mdm
-      bar_urls: process.env.BAR_URLS ? JSON.parse(process.env.BAR_URLS) :
-        ['http://oknosoft.ecookna.ru:5984/wb_21_doc_0100', 'https://c210.oknosoft.com/wb_21_doc_0100'],
       eve_url: process.env.EVEURL || 'http://localhost:5984/pl_events',
       rater: {                        // Request rate locker
         all: {                        // Total requests limit
