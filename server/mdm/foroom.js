@@ -27,12 +27,20 @@ function refresh(log) {
       const files = fs.readdirSync(dir);
       const data = {};
       for (let i = 0; i < files.length; i++) {
-        if(files[i].startsWith('.') || files[i] === 'index.json') {
+        if(files[i].startsWith('.') || !files[i].endsWith('.json')) {
           continue;
         }
         const filename = path.join(dir, files[i]);
-        const mtext = await fs.readFileAsync(filename, 'utf8');
-        data[files[i].replace(/(get_|\.json)/g, '')] = JSON.parse(mtext).data;
+        try {
+          const mtext = await fs.readFileAsync(filename, 'utf8');
+          data[files[i].replace(/(get_|\.json)/g, '')] = JSON.parse(mtext).data;
+        }
+        catch(err) {
+          err = null;
+        }
+      }
+      if(data.all_data && data.all_data.izd) {
+        data.all_data.izd = data.all_data.izd.filter((v) => v && v.enabled === 'all');
       }
       return fs.writeFileAsync(path.join(dir, 'index.json'), JSON.stringify(data), 'utf8');
     })
