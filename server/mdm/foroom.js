@@ -11,6 +11,14 @@ const fs = require('fs');
 const path = require('path');
 const dir = path.resolve(__dirname, './foroom');
 
+function prm_move(arr, alias) {
+  const prm = arr.find((v) => v.alias === alias);
+  if(prm) {
+    arr.splice(arr.indexOf(prm), 1);
+    arr.unshift(prm);
+  }
+}
+
 function refresh(log) {
   // тянем файлы данных
   return fetch('https://api.foroom.ru/uploads/download/zip/data_new.zip')
@@ -40,7 +48,15 @@ function refresh(log) {
         }
       }
       if(data.all_data && data.all_data.izd) {
-        data.all_data.izd = data.all_data.izd.filter((v) => v && v.enabled === 'all');
+        data.all_data.izd = data.all_data.izd
+          .filter((v) => v && v.enabled === 'all')
+          .map((v) => {
+            // сортируем параметры
+            if(Array.isArray(v.params)) {
+              ['gab_height', 'gab_width', 'height', 'width', 'amount'].forEach((alias) => prm_move(v.params, alias));
+            }
+            return v;
+          });
       }
       return fs.writeFileAsync(path.join(dir, 'index.json'), JSON.stringify(data), 'utf8');
     })
