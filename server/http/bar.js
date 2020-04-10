@@ -45,7 +45,7 @@ module.exports = function bar($p, log) {
           doc._id = doc._id.replace('_local/', '');
           return pouch.remote.events.get(doc._id)
             .then((ndoc) => {
-              doc._rev = ndoc.rev;
+              doc._rev = ndoc._rev;
             })
             .catch(() => null)
             .then(() => pouch.remote.events.put(doc))
