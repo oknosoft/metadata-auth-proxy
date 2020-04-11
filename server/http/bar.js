@@ -38,7 +38,7 @@ module.exports = function bar($p, log) {
         throw {status: 404, message: `bar not found '${id}'`};
       }
     }
-    else if(method === 'PUT') {
+    else if(method === 'PUT' || method === 'POST') {
       return getBody(req)
         .then((body) => {
           const doc = JSON.parse(body);
@@ -51,9 +51,6 @@ module.exports = function bar($p, log) {
             .then(() => pouch.remote.events.put(doc))
             .then((rsp) => {
               res.end(JSON.stringify(rsp));
-            })
-            .catch((err) => {
-              throw err;
             });
         });
     }

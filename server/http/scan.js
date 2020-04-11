@@ -95,9 +95,16 @@ module.exports = function bar($p, log) {
     else if(method === 'PUT' || method === 'POST') {
       return getBody(req)
         .then((body) => {
-          return pouch.remote.events.put(JSON.parse(body))
-            .then((rsp) => res.end(JSON.stringify(rsp)));
-        });
+          const doc = JSON.parse(body);
+          const barcode = `bar|${doc._id.substr(18)}`;
+          return pouch.remote.events.put(doc)
+            .catch(() => null)
+            .then(() => pouch.remote.events.get(barcode))
+            .catch(() => pouch.remote.doc.get(`_local/${barcode}`))
+            .then((rsp) => {
+              res.end(JSON.stringify(rsp));
+            });
+      });
     }
     else {
       end404(res, `${method} ${path}`);
