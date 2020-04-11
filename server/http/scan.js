@@ -96,7 +96,11 @@ module.exports = function bar($p, log) {
       return getBody(req)
         .then((body) => {
           const doc = JSON.parse(body);
-          const barcode = `bar|${doc._id.substr(18)}`;
+          const code = doc._id.substr(18);
+          if(code.length < 3 || code === 'undefined') {
+            return end404(res, `${method} ${path}`);
+          }
+          const barcode = `bar|${code}`;
           return pouch.remote.events.put(doc)
             .catch(() => null)
             .then(() => pouch.remote.events.get(barcode))
