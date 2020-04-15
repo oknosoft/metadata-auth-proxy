@@ -5,7 +5,7 @@ const getBody = require('../raw-body');
 function upsert(acc, {date, state, department, manager, doc, nom, sys, quantity, s, amount}) {
   return acc.client.query(`INSERT INTO calc_stat (date, state, department, manager, doc, nom, sys, quantity, s, amount)
       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
-      ON CONFLICT (date, state, department, doc, nom, sys) DO UPDATE SET
+      ON CONFLICT (date, state, department, manager, doc, nom, sys) DO UPDATE SET
         date = EXCLUDED.date,
         state = EXCLUDED.state,
         department = EXCLUDED.department,
