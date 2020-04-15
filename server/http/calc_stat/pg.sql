@@ -31,13 +31,14 @@ CREATE TABLE public.calc_stat
     date date NOT NULL,
     state smallint NOT NULL,
     department uuid NOT NULL,
+    manager uuid NOT NULL,
     doc uuid NOT NULL,
     nom uuid NOT NULL,
     sys uuid NOT NULL,
     quantity money,
     s money,
     amount money,
-    CONSTRAINT calc_stat_pkey PRIMARY KEY (date, state, department, doc, nom, sys)
+    CONSTRAINT calc_stat_pkey PRIMARY KEY (date, state, department, manager, doc, nom, sys)
 )
 WITH (OIDS = FALSE);
 
