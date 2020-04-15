@@ -6,8 +6,8 @@
  * Created by Evgeniy Malyarov on 09.02.2020.
  */
 
-const {end404} = require('./end');
-const getBody = require('./raw-body');
+const {end404} = require('../end');
+const getBody = require('../raw-body');
 
 module.exports = function bar($p, log) {
 

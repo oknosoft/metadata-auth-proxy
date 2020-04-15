@@ -11,10 +11,11 @@ module.exports = function ($p, log) {
 
   const {cat, utils} = $p;
 
-  const bar = require('./bar')($p, log);
-  const scan = require('./scan')($p, log);
+  const bar = require('./paperless/bar')($p, log);
+  const scan = require('./paperless/scan')($p, log);
   const supplier = require('./supplier')($p, log);
   const foroom = require('./foroom')($p, log);
+  const stat = require('./calc_stat')($p, log);
 
   // формирует json описания продукции заказа
   async function ram_data(req, res) {
@@ -63,6 +64,9 @@ module.exports = function ($p, log) {
 
       case 'foroom':
         return foroom(req, res);
+
+      case 'stat':
+        return stat(req, res);
 
       default:
         end404(res, `${paths[0]}/${paths[1]}/${paths[2]}`);
