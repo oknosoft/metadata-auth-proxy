@@ -12,14 +12,18 @@ module.exports = function calc_stat($p, log) {
 
   const accumulation = new Accumulation();
   accumulation.init();
-  const reg = require('./reg_calc_order_stat')($p, log, accumulation)
+  const reg = require('./calc_order_reg')($p, log, accumulation);
+  const query = require('./calc_order_query')($p, log, accumulation);
 
-  return async function calc_stat(req, res) {
-    const {query, path, paths} = req.parsed;
+  return function calc_stat(req, res) {
+    const {path, paths} = req.parsed;
 
     switch (paths[3]){
     case 'reg':
-      return await reg(req, res);
+      return reg(req, res);
+
+    case 'query':
+      return query(req, res);
 
     default:
       end404(res, path);
