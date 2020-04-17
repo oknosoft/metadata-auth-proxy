@@ -8,9 +8,16 @@
 
 
 function select(acc, date) {
-  return acc.client.query(`select date, state, department, manager, nom, sys, sum(quantity) quantity, sum(s) s, sum(amount) amount
-    from calc_stat where date = $1
-    group by date, state, department, manager, nom, sys`, [date]);
+  return acc.client.query(`select date, department, manager, nom, sys,
+  sum(case when state = 0 then quantity else 0 end) q0,
+  sum(case when state = 1 then quantity else 0 end) q1,
+  sum(case when state = 0 then s else 0 end) s0,
+  sum(case when state = 1 then s else 0 end) s1,
+  sum(case when state = 0 then amount else 0 end) a0,
+  sum(case when state = 1 then amount else 0 end) a1
+  from calc_stat
+  where date = $1
+  group by date, department, manager, nom, sys`, [date]);
 }
 
 module.exports = function query($p, log, acc) {
