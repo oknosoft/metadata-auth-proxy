@@ -35,11 +35,13 @@ function patch(o, name) {
 }
 
 // оповещает клиентский поток об изменениях
+// TODO заменить на регистрацию клиента и обход зарегистрированных для поддержки многопоточности
 function notify(abonent, branch, types, port) {
   fetch(`http://localhost:${port}/couchdb/events/mdm_change`, {
     method: 'POST',
     body: JSON.stringify({abonent: abonent.ref, branch: branch.ref, types}),
-  });
+  })
+    .catch((err) => null);
 }
 
 module.exports = function auto_recalc($p, log) {
