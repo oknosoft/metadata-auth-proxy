@@ -210,7 +210,7 @@ class CchPredefined_elmntsManager extends ChartOfCharacteristicManager {
         parent.__define(row.synonym, {
           value: (() => {
             const res = {};
-            row.elmnts._obj.forEach(({elm, value}) => {
+            (row.elmnts._obj || row.elmnts).forEach(({elm, value}) => {
               if(elm !== undefined) {
                 res[elm.valueOf()] = _mgr ? _mgr.get(value, false, false) : value;
               }
