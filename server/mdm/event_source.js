@@ -104,6 +104,7 @@ module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, 
       'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no',
       'Access-Control-Allow-Origin': '*',
     });
     res.write('\n');
