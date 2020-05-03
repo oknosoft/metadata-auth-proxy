@@ -43,12 +43,24 @@ module.exports = function bar($p, log) {
         .then((body) => {
           const doc = JSON.parse(body);
           doc._id = doc._id.replace('_local/', '');
+          let diff;
           return pouch.remote.events.get(doc._id)
             .then((ndoc) => {
               doc._rev = ndoc._rev;
+              for(const fld in doc) {
+                if(fld.startsWith('_')) {
+                  continue;
+                }
+                if(doc[fld] !== ndoc[fld]) {
+                  diff = true;
+                  break;
+                }
+              }
             })
-            .catch(() => null)
-            .then(() => pouch.remote.events.put(doc))
+            .catch(() => {
+              diff = true;
+            })
+            .then(() => diff ? pouch.remote.events.put(doc) : {ok: true, rev: doc.rev || 'new'})
             .then((rsp) => {
               res.end(JSON.stringify(rsp));
             });
