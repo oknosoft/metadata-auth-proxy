@@ -137,7 +137,7 @@ module.exports = function scan($p, log) {
         .then((body) => {
           const doc = JSON.parse(body);
           const code = doc._id.substr(18);
-          if(code.length < 3 || code === 'undefined') {
+          if(code.length < 3 || code === 'undefined' || code.length > 20) {
             return end404(res, `${method} ${path}`);
           }
           const barcode = `bar|${code}`;
