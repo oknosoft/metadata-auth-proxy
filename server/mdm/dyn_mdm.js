@@ -56,7 +56,7 @@ module.exports = {
   },
 
   check(o) {
-    return !restrict.includes(o._manager.class_name) || !this.dedup.size || this.dedup.has(o);
+    return !restrict.includes(o._manager.class_name) || !this.dedup.size || this.dedup.has(o) || o.is_folder || o.predefined_name;
   },
 
   cnns({cnns}) {
