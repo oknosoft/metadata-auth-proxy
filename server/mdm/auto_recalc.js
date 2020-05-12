@@ -34,6 +34,13 @@ function patch(o, name) {
   return v;
 }
 
+// даёт процессору отдохнуть
+function sleep(time = 100, res) {
+  return new Promise((resolve) => {
+    setTimeout(() => resolve(res), time);
+  });
+}
+
 // оповещает клиентский поток об изменениях
 // TODO заменить на регистрацию клиента и обход зарегистрированных для поддержки многопоточности
 function notify(abonent, branch, types, port) {
@@ -275,6 +282,8 @@ module.exports = function auto_recalc($p, log) {
       await fs.writeFileAsync(manifest, JSON.stringify(tags), 'utf8');
       notify(abonent, branch, ctypes, job_prm.server.port);
     }
+
+    return sleep();
   }
 
   async function recalc_templates({abonent, tmplts}) {

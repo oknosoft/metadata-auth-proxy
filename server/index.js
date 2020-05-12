@@ -77,5 +77,5 @@ if (runtime.cluster.isMaster) {
 
 }
 else if(runtime.cluster.isWorker) {
-  worker(runtime);
+  setTimeout(() => worker(runtime), 5000);
 }
