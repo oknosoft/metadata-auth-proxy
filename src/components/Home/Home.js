@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import {withStyles} from '@material-ui/styles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
-import Helmet from 'react-helmet';
+import {Helmet} from 'react-helmet';
 import styles from './styles';
 
 import {htitle, ltitle} from '../App/menu_items';

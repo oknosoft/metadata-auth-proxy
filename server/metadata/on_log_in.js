@@ -25,7 +25,7 @@ module.exports = function on_log_in(log) {
           // грузим из meta
           let res = Promise.resolve();
           cat.forEach((mgr) => {
-            if(mgr.cachable === 'meta') {
+            if(mgr.cachable === 'meta' || mgr.class_name === 'cat.clrs') {
               res = res.then(() => mgr.find_rows_remote({_top: 1000}));
             }
           });
