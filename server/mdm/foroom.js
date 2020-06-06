@@ -6,9 +6,10 @@
  */
 
 const fetch = require('node-fetch');
-const unzip = require('unzip');
 const fs = require('fs');
 const path = require('path');
+const unzip = require('unzipper');
+
 const dir = path.resolve(__dirname, './foroom');
 
 function prm_move(arr, alias) {

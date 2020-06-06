@@ -7,11 +7,12 @@
  */
 
 const fs = require('fs');
+const util = require('util');
 
 if(!fs.readFileAsync) {
-  fs.readFileAsync = require('util').promisify(fs.readFile);
+  fs.readFileAsync = util.promisify(fs.readFile);
 }
 
 if(!fs.writeFileAsync) {
-  fs.writeFileAsync = require('util').promisify(fs.writeFile);
+  fs.writeFileAsync = util.promisify(fs.writeFile);
 }
