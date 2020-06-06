@@ -4,10 +4,6 @@ const {common} = require('./index');
 module.exports = function check_mdm({o, name, abonent, branch, abranches, job_prm}) {
   const zone = abonent.id;
   const {_obj} = o;
-  // из старого mdm, учитываем только direct_zones
-  if(_obj && _obj.direct_zones && _obj.direct_zones.includes(`'${zone}'`)) {
-    return true;
-  }
 
   if(name === 'cat.characteristics') {
     return check_characteristics(o);
@@ -19,7 +15,7 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
     return check_calc_order(o);
   }
   else if(name === 'cch.predefined_elmnts' || name === 'cat.formulas') {
-    return !o.disabled && (o.context !== 2) && (o.is_folder || o.zone === 0 || o.zone == zone);
+    return !o.disabled && (o.context !== 2);
   }
 
   if(abonent.no_mdm && branch.empty() || branch.no_mdm) {

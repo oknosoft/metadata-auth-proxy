@@ -178,6 +178,9 @@ function order (md) {
     else if(class_name === 'formulas') {
       res[5].add(`cat.${class_name}`);
     }
+    else if(class_name === 'choice_params') {
+      res[6].add(`cat.${class_name}`);
+    }
     else{
       res[4].add(`cat.${class_name}`);
     }
