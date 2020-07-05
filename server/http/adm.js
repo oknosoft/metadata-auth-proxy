@@ -11,8 +11,8 @@ module.exports = function ($p, log) {
 
   const {cat, utils} = $p;
 
-  const bar = require('./paperless/bar')($p, log);
-  const scan = require('./paperless/scan')($p, log);
+  const bar = require('paperless/server/bar')($p, log);
+  const scan = require('paperless/server/scan')($p, log);
   const supplier = require('./supplier')($p, log);
   const foroom = require('./foroom')($p, log);
   const stat = require('./calc_stat')($p, log);
