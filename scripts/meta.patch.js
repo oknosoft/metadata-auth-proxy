@@ -7,7 +7,17 @@
  */
 
 const include = [
-  '*',
+  'cch.mdm_groups',
+  'cat.abonents',
+  'cat.branches',
+  'cat.http_apis',
+  'cat.clrs',
+  'cat.servers',
+  'cat.users',
+  'ireg.delivery_schedules',
+  'ireg.delivery_scheme',
+
+  //'*',
   // 'enm.mutual_contract_settlements',
   // 'enm.contract_kinds',
   // 'enm.text_aligns',
@@ -69,7 +79,6 @@ const exclude = [
   'dp.builder_coordinates',
   'dp.builder_price',
   'dp.builder_text',
-  'dp.buyers_order',
   'dp.builder_lay_impost',
   'dp.builder_pen',
   'rep.invoice_execution',
@@ -80,7 +89,7 @@ const exclude = [
   'rep.goods',
 ];
 const minimal = [
-  'doc.purchase_order',
+  //'doc.purchase_order',
 ];
 const writable = [
   'cat.abonents',
@@ -91,32 +100,40 @@ const writable = [
 ];
 const read_only = [];
 
+const preserv_cachable = [
+  'cat.characteristics',
+  'doc.calc_order',
+];
 
-module.exports = function(meta) {
+
+module.exports = function(meta, cache_only) {
   for(const cls in meta) {
     const mgrs = meta[cls];
     if(Array.isArray(mgrs)) {
       continue;
     }
     for(const name in mgrs) {
-      if(!include.includes('*') && !include.includes(`${cls}.${name}`)) {
-        delete mgrs[name];
-      }
-      else if(exclude.includes(`${cls}.${name}`)) {
-        delete mgrs[name];
-      }
-      else if(minimal.includes(`${cls}.${name}`)) {
-        for(const fld in mgrs[name].fields) {
-          if(['parent', 'owner'].includes(fld)) continue;
-          delete mgrs[name].fields[fld];
+
+      if(!cache_only) {
+        if(!include.includes('*') && !include.includes(`${cls}.${name}`)) {
+          delete mgrs[name];
         }
-        for(const fld in mgrs[name].tabular_sections) {
-          delete mgrs[name].tabular_sections[fld];
+        else if(exclude.includes(`${cls}.${name}`)) {
+          delete mgrs[name];
+        }
+        else if(minimal.includes(`${cls}.${name}`)) {
+          for(const fld in mgrs[name].fields) {
+            if(['parent', 'owner'].includes(fld)) continue;
+            delete mgrs[name].fields[fld];
+          }
+          for(const fld in mgrs[name].tabular_sections) {
+            delete mgrs[name].tabular_sections[fld];
+          }
         }
       }
 
-      if(mgrs[name]) {
-        if(/^doc/.test(mgrs[name].cachable)) {
+      if(cls !== 'enm' && mgrs[name]) {
+        if(/^doc/.test(mgrs[name].cachable) && !preserv_cachable.includes(`${cls}.${name}`)) {
           mgrs[name].original_cachable = mgrs[name].cachable;
           mgrs[name].cachable = 'ram';
         }
@@ -132,3 +149,5 @@ module.exports = function(meta) {
     }
   }
 }
+
+module.exports.include = include;

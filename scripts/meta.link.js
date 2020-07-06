@@ -5,10 +5,31 @@
 const path = require('path');
 const fs = require('fs');
 const md5File = require('md5-file');
+
 const localNodeModules = path.resolve(__dirname, '../node_modules');
-const remoteNodeModules = 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\git-osde\\packages';
 const {dependencies} = require(path.resolve(__dirname, '../package.json'));
-const libs = Object.keys(dependencies).filter(v => /^metadata-/.test(v));
+
+// накапливаем пути
+const repos = [
+  {
+    local: 'windowbuilder',
+    remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\windowbuilder-core',
+    dir: 'dist',
+  },
+  {
+    local: 'reports',
+    remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\windowbuilder-reports',
+    dir: 'server',
+  }
+];
+
+for(const local of Object.keys(dependencies).filter(v => /^metadata-/.test(v))) {
+  repos.push({
+    local,
+    remote: `D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\git-osde\\packages\\${local}`,
+    dir: '',
+  });
+}
 
 function fromDir(startPath, filter, callback) {
 
@@ -34,10 +55,11 @@ function fromDir(startPath, filter, callback) {
   };
 };
 
+// исполняем
 let copied;
-for (const lib of libs) {
-  const lpath = path.resolve(localNodeModules, lib);
-  const rpath = path.resolve(remoteNodeModules, lib);
+for(const {local, remote, dir} of repos) {
+  const lpath = path.resolve(localNodeModules, local, dir);
+  const rpath = path.resolve(remote, dir);
   let i = 0;
   fromDir(rpath, /\.(css|js|mjs|md|map|gif|png)$/, (rname, isDir) => {
     const name = rname.replace(rpath, '');
@@ -57,6 +79,8 @@ for (const lib of libs) {
     console.log(`from ${rpath} written ${i} files`);
   }
 }
+
+
 if(!copied){
   console.log(`all files match`);
 }

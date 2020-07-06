@@ -103,8 +103,9 @@ $p.wsql.init((prm) => {
 
         text = `/* eslint-disable */
 module.exports = function meta_init($p) {
-  $p.wsql.alasql('${sql}', []);\n  
-  $p.md.init(${JSON.stringify(_m)});\n  
+  $p.wsql.alasql('USE md; ${patch.include.map((name) => `DROP TABLE IF EXISTS ${name.replace('.', '_')};`).join(' ')}', []);\n
+  $p.wsql.alasql('${sql}', []);\n
+  $p.md.init(${JSON.stringify(_m)});\n
   ${text}};`;
 
         debug('Записываем результат');
@@ -147,16 +148,16 @@ function create_modules(_m) {
   const {MetaEventEmitter,EnumManager,CatManager,DocManager,DataProcessorsManager,ChartOfCharacteristicManager,ChartOfAccountManager,
     InfoRegManager,AccumRegManager,BusinessProcessManager,TaskManager,CatObj,DocObj,TabularSectionRow,DataProcessorObj,
     RegisterRow,BusinessProcessObj,TaskObj} = $p.constructor.classes;
-    
+
   const _define = Object.defineProperties;
 
 `;
 
 
   // менеджеры перечислений
-  for (const name in _m.enm){
-    text += `$p.enm.create('${name}');\n`;
-  }
+  // for (const name in _m.enm){
+  //   text += `$p.enm.create('${name}');\n`;
+  // }
 
   // менеджеры объектов данных, отчетов и обработок
   for (const category in categoties) {
