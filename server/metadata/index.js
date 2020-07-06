@@ -4,13 +4,17 @@
 const MetaEngine = require('metadata-core')
   .plugin(require('metadata-pouchdb'))
   .plugin(require('metadata-abstract-ui'))
-  .plugin(require('./pouch_from_files'));
+  .plugin(require('./pouch_from_files'))
+  .plugin(require('reports/server/accumulation'));
 
 // функция установки параметров сеанса
 const settings = require('../../config/app.settings');
 
 // функция инициализации структуры метаданных
-const meta_init = require('../../src/metadata/init');
+const meta_init = require('windowbuilder/dist/init');
+const proxy_init = require('../../src/metadata/init');
+const patch = require('../../scripts/meta.patch');
+
 const ram_changes = require('./changes_ram');
 const linked_templates = require('./linked_templates');
 const modifiers = require('./modifiers');
@@ -31,6 +35,8 @@ module.exports = function (log, is_common) {
 
   // выполняем скрипт инициализации метаданных
   meta_init($p);
+  proxy_init($p);
+  patch($p.md._m, true);
 
   // сообщяем адаптерам пути, суффиксы и префиксы
   const {wsql, job_prm, adapters: {pouch}, classes, cat, ireg} = $p;
@@ -67,7 +73,7 @@ module.exports = function (log, is_common) {
       log(`loadind to ram: complete`);
     },
     pouch_doc_ram_loaded() {
-      return (is_common ? linked_templates($p) : Promise.resolve())
+      return (is_common ? linked_templates($p) : require('reports/server/windowbuilder/accumulation')($p))
         .then(() => $p.pricing.load_prices())
         .then(() => ram_changes($p, log));
     },

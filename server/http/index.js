@@ -88,7 +88,7 @@ module.exports = function ($p, log, worker) {
               if(parsed.paths[0] === 'couchdb') {
                 return couchdbProxy(req, res);
               }
-              if(parsed.paths[0] === 'adm') {
+              if(['adm', 'r', 'plam'].includes(parsed.paths[0])) {
                 return adm(req, res);
               }
               return end404(res, parsed.paths[0]);

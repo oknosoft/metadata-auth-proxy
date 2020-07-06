@@ -13,6 +13,7 @@ module.exports = function ($p, log) {
 
   const bar = require('paperless/server/bar')($p, log);
   const scan = require('paperless/server/scan')($p, log);
+  const reports = require('reports/server')($p, log);
   const supplier = require('./supplier')($p, log);
   const foroom = require('./foroom')($p, log);
   const stat = require('./calc_stat')($p, log);
@@ -46,10 +47,14 @@ module.exports = function ($p, log) {
 
   return async (req, res) => {
     const {query, path, paths} = req.parsed;
-    res.setHeader('Content-Type', 'application/json');
 
-    try{
-      switch (paths[2]){
+    try {
+      if (paths[0] === 'r' || paths[2] === 'r') {
+        return reports(req, res);
+      }
+
+      res.setHeader('Content-Type', 'application/json');
+      switch (paths[2]) {
       case 'ram':
         return ram_data(req, res);
 
@@ -71,8 +76,7 @@ module.exports = function ($p, log) {
       default:
         end404(res, `${paths[0]}/${paths[1]}/${paths[2]}`);
       }
-    }
-    catch(err){
+    } catch (err) {
       end500({res, err, log});
     }
 
