@@ -5,13 +5,13 @@ const MetaEngine = require('metadata-core')
   .plugin(require('metadata-pouchdb'))
   .plugin(require('metadata-abstract-ui'))
   .plugin(require('./pouch_from_files'))
-  .plugin(require('reports/server/accumulation'));
+  .plugin(require('wb-reports/server/accumulation'));
 
 // функция установки параметров сеанса
 const settings = require('../../config/app.settings');
 
 // функция инициализации структуры метаданных
-const meta_init = require('windowbuilder/dist/init');
+const meta_init = require('wb-core/dist/init');
 const proxy_init = require('../../src/metadata/init');
 const patch = require('../../scripts/meta.patch');
 
@@ -73,7 +73,7 @@ module.exports = function (log, is_common) {
       log(`loadind to ram: complete`);
     },
     pouch_doc_ram_loaded() {
-      return (is_common ? linked_templates($p) : require('reports/server/windowbuilder/accumulation')($p))
+      return (is_common ? linked_templates($p) : require('wb-reports/server/windowbuilder/accumulation')($p))
         .then(() => $p.pricing.load_prices())
         .then(() => ram_changes($p, log));
     },

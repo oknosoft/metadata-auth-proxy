@@ -5,5 +5,5 @@ module.exports = function ($p, log) {
   require('./catalogs/cat_nom')($p, log);
   $p.utils.end = require('../http/end');
   $p.utils.getBody = require('../http/raw-body');
-  require('windowbuilder/dist/node')($p, log);
+  require('wb-core/dist/node')($p, log);
 }

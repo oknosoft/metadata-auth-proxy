@@ -11,9 +11,10 @@ module.exports = function ($p, log) {
 
   const {cat, utils} = $p;
 
-  const bar = require('paperless/server/bar')($p, log);
-  const scan = require('paperless/server/scan')($p, log);
-  const reports = require('reports/server')($p, log);
+  const bar = require('wb-paperless/server/bar')($p, log);
+  const scan = require('wb-paperless/server/scan')($p, log);
+  const reports = require('wb-reports/server')($p, log);
+  const planning = require('wb-planning/server')($p, log);
   const supplier = require('./supplier')($p, log);
   const foroom = require('./foroom')($p, log);
   const stat = require('./calc_stat')($p, log);
@@ -63,6 +64,9 @@ module.exports = function ($p, log) {
 
       case 'scan':
         return scan(req, res);
+
+      case 'plan':
+        return planning(req, res);
 
       case 'supplier':
         return supplier(req, res);

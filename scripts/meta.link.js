@@ -12,15 +12,25 @@ const {dependencies} = require(path.resolve(__dirname, '../package.json'));
 // накапливаем пути
 const repos = [
   {
-    local: 'windowbuilder',
+    local: 'wb-core',
     remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\windowbuilder-core',
     dir: 'dist',
   },
   {
-    local: 'reports',
+    local: 'wb-reports',
     remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\windowbuilder-reports',
     dir: 'server',
-  }
+  },
+  {
+    local: 'wb-paperless',
+    remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\paperless',
+    dir: 'server',
+  },
+  {
+    local: 'wb-planning',
+    remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\windowbuilder-planning',
+    dir: 'server',
+  },
 ];
 
 for(const local of Object.keys(dependencies).filter(v => /^metadata-/.test(v))) {
