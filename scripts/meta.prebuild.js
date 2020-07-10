@@ -139,7 +139,7 @@ function create_modules(_m) {
       bp: {mgr: 'BusinessProcessManager', proto: 'BusinessProcessObj'},
       tsk: {mgr: 'TaskManager', proto: 'TaskObj'},
       doc: {mgr: 'DocManager', proto: 'DocObj', dir: 'documents'},
-      ireg: {mgr: 'InfoRegManager', proto: 'RegisterRow'},
+      ireg: {mgr: 'InfoRegManager', proto: 'RegisterRow', dir: 'ireg'},
       areg: {mgr: 'AccumRegManager', proto: 'RegisterRow'},
       dp: {mgr: 'DataProcessorsManager', proto: 'DataProcessorObj'},
       rep: {mgr: 'DataProcessorsManager', proto: 'DataProcessorObj', dir: 'reports'},

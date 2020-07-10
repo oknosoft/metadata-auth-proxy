@@ -1,9 +1,5 @@
 /**
- *
- *
- * @module index
- *
- * Created by Evgeniy Malyarov on 14.04.2020.
+ * Created 14.04.2020.
  */
 
 const Accumulation = require('./accumulation');

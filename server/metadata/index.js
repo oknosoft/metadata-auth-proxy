@@ -40,6 +40,7 @@ module.exports = function (log, is_common) {
 
   // сообщяем адаптерам пути, суффиксы и префиксы
   const {wsql, job_prm, adapters: {pouch}, classes, cat, ireg} = $p;
+  job_prm.is_common = is_common;
   wsql.set_user_param('user_name', user_node.username);
   if(user_node.suffix) {
     pouch.props._suffix = user_node.suffix;

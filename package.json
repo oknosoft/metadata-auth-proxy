@@ -44,7 +44,7 @@
     "passport-ldapauth": "^2.1.4",
     "passport-vkontakte": "^0.3.3",
     "passport-yandex": "0.0.4",
-    "pg": "^8.2.1",
+    "pg": "^8.3.0",
     "rate-limiter-flexible": "^1.3.2",
     "react-ace": "^8.1.0",
     "react-color": "^2.18.1",
@@ -52,10 +52,10 @@
     "react-treebeard": "^3.2.4",
     "serve-handler": "^6.1.3",
     "unzipper": "^0.10.11",
-    "wb-core": "github:oknosoft/windowbuilder-core#db978c95be111d19c4e2e8811867d46853fd8338",
-    "wb-reports": "github:oknosoft/windowbuilder-reports#782304ae55cefd9e6331a0bd7f57fe2e1bffeeee",
-    "wb-paperless": "github:oknosoft/paperless#160ce7da7ec6765a934186bd90025fc3e5353f4f",
+    "wb-core": "github:oknosoft/windowbuilder-core#f93ac14ecfa1b4b86ab6b8a811c4e581d1e799c2",
+    "wb-paperless": "github:oknosoft/paperless#a5531788dc8c90b31949f8804f434c51a1337fd7",
     "wb-planning": "github:oknosoft/windowbuilder-planning",
+    "wb-reports": "github:oknosoft/windowbuilder-reports#354129baaf50b85e8abd356d355c6f8395988339",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
