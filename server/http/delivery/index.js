@@ -4,7 +4,7 @@
 
 module.exports = function delivery($p, log) {
 
-  const {utils: {end, getBody, moment}, cat: {stores, delivery_areas}, ireg: {delivery_schedules, delivery_scheme}} = $p;
+  const {utils: {getBody, moment}, cat: {stores, delivery_areas}, ireg: {delivery_schedules, delivery_scheme}} = $p;
 
   return async function delivery(req, res) {
 
@@ -16,6 +16,11 @@ module.exports = function delivery($p, log) {
     delivery_area = delivery_areas.get(delivery_area);
     start = moment(start);
     const route = delivery_scheme.route({warehouse, delivery_area});
+    if(!route || !route.length) {
+      const err = new Error(`Нет доставки в район '${delivery_area.name}'`);
+      err.status = 400;
+      throw err;
+    }
     for (let i = 0; i < route.length; i++) {
       const curr = route[i];
       const prev = i > 0 && route[i - 1];
@@ -41,6 +46,13 @@ module.exports = function delivery($p, log) {
     }
     const first = route[0];
     const last = route[route.length - 1];
+
+    if(!last.runs || !last.runs.length) {
+      const err = new Error(`Нет доставки в район '${delivery_area.name}' на ближайшие даты`);
+      err.status = 400;
+      throw err;
+    }
+
     result.duration = Date.now() - result.duration;
     Object.assign(result, {
       start: moment(first.runs[0]).format('YYYY-MM-DD'),

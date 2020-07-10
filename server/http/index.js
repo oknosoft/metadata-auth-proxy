@@ -69,6 +69,10 @@ module.exports = function ($p, log, worker) {
 
         // пытаемся авторизовать пользователя
         return auth(req, res)
+          .catch((err) => {
+            end401({res, err, log});
+            return null;
+          })
           .then((user) => {
             if(user) {
               if(parsed.is_common) {
@@ -98,7 +102,7 @@ module.exports = function ($p, log, worker) {
             }
           })
           .catch((err) => {
-            end401({res, err, log});
+            end500({res, err, log});
           });
 
       })
