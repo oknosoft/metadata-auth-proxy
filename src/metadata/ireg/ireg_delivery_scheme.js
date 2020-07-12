@@ -15,7 +15,9 @@ exports.IregDelivery_schemeManager = class IregDelivery_schemeManager extends Ob
       tmp.push(row);
     });
     if(!tmp.length) {
-      return tmp;
+      const err = new Error(`Нет доставки в район '${delivery_area.name}' со склада '${warehouse.name}'`);
+      err.status = 400;
+      throw err;
     }
     tmp.sort((a, b) => a.chain - b.chain);
     const prev = tmp[0];
@@ -35,7 +37,6 @@ exports.IregDelivery_schemeManager = class IregDelivery_schemeManager extends Ob
         chain: curr.chain,
       });
     }
-
     return res;
   }
 }

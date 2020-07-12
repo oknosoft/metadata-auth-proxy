@@ -14,36 +14,7 @@ module.exports = function delivery($p, log) {
     let {warehouse, delivery_area, start, pickup} = JSON.parse(body);
     warehouse = stores.get(warehouse);
     delivery_area = delivery_areas.get(delivery_area);
-    start = moment(start);
-    const route = delivery_scheme.route({warehouse, delivery_area});
-    if(!route || !route.length) {
-      const err = new Error(`Нет доставки в район '${delivery_area.name}'`);
-      err.status = 400;
-      throw err;
-    }
-    for (let i = 0; i < route.length; i++) {
-      const curr = route[i];
-      const prev = i > 0 && route[i - 1];
-      const {warehouse} = curr;
-      const delivery_area = curr.chain_area.empty() ? curr.delivery_area : curr.chain_area;
-      if(prev) {
-        const dates = new Set();
-        for(const date of prev.runs) {
-          const astart = moment(date).add(warehouse.assembly_days || 0, 'days');
-          delivery_schedules
-            .runs({warehouse, delivery_area})
-            .forEach((date) => astart.isBefore(date) && dates.add(date));
-          if(dates.size > 3) {
-            break;
-          }
-        }
-        curr.runs = Array.from(dates);
-        //curr.runs.sort((a, b) => a - b);
-      }
-      else {
-        curr.runs = delivery_schedules.runs({warehouse, delivery_area}).filter((date) => start.isBefore(date));
-      }
-    }
+    const route = delivery_schedules.apply_schedule(delivery_scheme.route({warehouse, delivery_area}), moment(start));
     const first = route[0];
     const last = route[route.length - 1];
 
