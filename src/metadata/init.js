@@ -658,7 +658,8 @@ class IregDelivery_schedulesManager extends InfoRegManager {
 
   /**
    * Дополняет маршрут доступными датами
-   * @param route
+   * @param route {Array}
+   * @param start {Moment}
    * @return {*}
    */
   apply_schedule(route, start) {
@@ -731,12 +732,13 @@ class IregDelivery_schedulesManager extends InfoRegManager {
         index !== -1 && dates.splice(index, 1);
       }
 
-      //
+      // структура для сортировки
       if(!warehouses.get(warehouse)) {
         warehouses.set(warehouse, new Set());
       }
       warehouses.get(warehouse).add(area);
     }
+
     // сортируем
     for(const [warehouse, areas] of warehouses) {
       const by_area = this.by_store.get(warehouse);

@@ -75,7 +75,7 @@ module.exports = function (log, is_common) {
     },
     pouch_doc_ram_loaded() {
       return (is_common ? linked_templates($p) : require('wb-reports/server/windowbuilder/accumulation')($p))
-        .then(() => $p.pricing.load_prices())
+        //.then(() => $p.pricing.load_prices())
         .then(() => ram_changes($p, log));
     },
   });
