@@ -67,7 +67,8 @@ module.exports = function settings(prm = {}) {
       maxpost: 40 * 1024 * 1024,      // Max size of POST request
       abonents: process.env.ABONENTS ? JSON.parse(process.env.ABONENTS) : [21, 20], // абоненты - источники
       branches: process.env.BRANCHES ? JSON.parse(process.env.BRANCHES) : null,     // список отделов можно ограничить
-      single_db: process.env.SINGLE_DB,                                             // использовать основную базу doc вместо перебора баз абонентов
+      single_db: Boolean(process.env.SINGLE_DB),                                    // использовать основную базу doc вместо перебора баз абонентов
+      no_mdm: Boolean(process.env.NOMDM),
       defer: (process.env.DEFER ? parseFloat(process.env.DEFER) : 200000) + Math.random() * 10000,  // задержка пересчета mdm
       eve_url: process.env.EVEURL || 'http://localhost:5984/pl_events',
       rater: {                        // Request rate locker

@@ -18,7 +18,7 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
     return !o.disabled && (o.context !== 2);
   }
 
-  if(abonent.no_mdm && branch.empty() || branch.no_mdm) {
+  if(abonent.no_mdm && branch.empty() || branch.no_mdm || job_prm.server.no_mdm) {
     return true;
   }
 
