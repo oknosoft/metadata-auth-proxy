@@ -15,7 +15,6 @@ const qs = require('qs');
 const conf = require('../../config/app.settings')();
 const {end401, end404, end500} = require('../http/end');
 const getBody = require('../http/raw-body');
-const common = require('./common');
 const metadata = require('../metadata');
 const local_couchdb = require('./couchdb');
 const Polling = require('./polling');
@@ -33,6 +32,8 @@ module.exports = function (runtime) {
           const polling = new Polling(db, log);
 
           const mdm_changes = require('../mdm/auto_recalc')($p, log);
+
+          const common = require('./common')($p, log, polling);
           require('../mdm/foroom.js')($p, log);
 
           function execute(req, res) {
@@ -51,7 +52,7 @@ module.exports = function (runtime) {
                 parsed.paths = parsed.paths.splice(1);
               }
               //console.log(`${req.method} ${req.url}`, req.body || '');
-              return parsed.paths[0] === 'common' ? common({req, res, $p, polling}) : end404(res, parsed.paths[0]);
+              return parsed.paths[0] === 'common' ? common({req, res}) : end404(res, parsed.paths[0]);
             })
               .catch((err) => {
                 if(!err.status) {

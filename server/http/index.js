@@ -15,8 +15,8 @@ const {end401, end404, end500} = require('./end');
 
 module.exports = function ($p, log, worker) {
 
-  const couchdbProxy = require('./couchdb-proxy')($p, log);
-  const commonProxy = require('./common-proxy');
+  const couchdbProxy = require('./proxy-couchdb')($p, log);
+  const commonProxy = require('./proxy-common');
   const staticProxy = require('./static');
   const adm = require('./adm')($p, log);
   const mdm = require('../mdm')($p, log);

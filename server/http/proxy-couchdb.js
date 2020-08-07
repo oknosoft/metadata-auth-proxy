@@ -1,5 +1,3 @@
-'use strict';
-
 const http = require('http');
 const httpProxy = require('http-proxy');
 const {createHmac} = require('crypto');
