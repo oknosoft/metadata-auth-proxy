@@ -64,7 +64,7 @@ module.exports = function upp_calc_order($p, log) {
           }
         }, 10000);
       })
-      .catch(() => cache.querying = false);
+      .catch((err) => cache.querying = false);
   };
 
   // здесь храним даты последнего расчета, чтобы сократить общение с 1С
