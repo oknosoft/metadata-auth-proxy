@@ -53,7 +53,6 @@ module.exports = function upp_calc_order($p, log) {
         callbacks[cache.querying] = {
           end() {
             cache.querying = false;
-            //cache.prod_date = new Date(res.manufacture_date);
           }
         };
         setTimeout(() => {
@@ -70,11 +69,11 @@ module.exports = function upp_calc_order($p, log) {
   // здесь храним даты последнего расчета, чтобы сократить общение с 1С
   const cache = {
     moment: 0,
-    timer: setTimeout(watchdog, 60000),
-    prod_date: new Date(),
+    timer: setTimeout(watchdog, 70000),
+    manufacture_date: new Date(),
     querying: false,
-    is_actual() {
-      return (this.prod_date > Date.now()) && (Date.now() - this.moment < 300000);
+    is_actual(wait) {
+      return (this.manufacture_date > Date.now()) && (Date.now() - this.moment < (wait ? 320000 : 260000));
     },
     headers: {
       'Accept': 'application/json',
@@ -96,7 +95,7 @@ module.exports = function upp_calc_order($p, log) {
         delete callbacks[cbid];
         cb.end(JSON.stringify(body));
         res.end(JSON.stringify({ok: true}));
-        cache.prod_date = new Date(body.manufacture_date);
+        cache.manufacture_date = new Date(body.manufacture_date);
         cache.moment = Date.now();
         if(cbid === cache.querying) {
           cache.querying = false;
@@ -104,6 +103,14 @@ module.exports = function upp_calc_order($p, log) {
       }
     }
     else {
+
+      if(body.use_cache && (cache.is_actual(true) || cache.querying)) {
+        return res.end(JSON.stringify({
+          ok: true,
+          manufacture_date: cache.manufacture_date,
+        }));
+      }
+
       cbid = utils.generate_guid().replace(/-/g, '');
       // делаем запрос к УПП
       return query_1c(body.ref, cbid)
@@ -119,7 +126,7 @@ module.exports = function upp_calc_order($p, log) {
                 message: 'Сервер 1С не отвечает, повторите запрос позже',
               }));
             }
-          }, 10000);
+          }, 30000);
         })
         .catch((err) => {
           res.statusCode = 500;
