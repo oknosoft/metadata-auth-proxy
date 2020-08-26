@@ -23,7 +23,13 @@ module.exports = function delivery($p, log) {
       }),
     })
       .then((res) => res.json());
-  }
+  };
+
+  const fin500 = () => {
+    const err = new Error(`Сервер 1С не отвечает, повторите запрос позже`);
+    err.status = 500;
+    throw err;
+  };
 
   return async function delivery(req, res) {
 
@@ -34,12 +40,13 @@ module.exports = function delivery($p, log) {
     if(use_cache) {
       try {
         const cache = await from_cache(req);
+        if(cache.error && cache.message) {
+          fin500();
+        }
         start = cache.manufacture_date;
       }
       catch (err) {
-        err = new Error(`Сервер 1С не отвечает, повторите запрос позже`);
-        err.status = 500;
-        throw err;
+        fin500();
       }
     }
     warehouse = stores.get(warehouse);

@@ -17,10 +17,7 @@ module.exports = function upp_calc_order($p, log) {
 
   // async запрос к 1С
   const query_1c = (order_id, cbid) => {
-    return fetch(upp.url, {
-      method: 'POST',
-      headers: cache.headers,
-      body: JSON.stringify({
+	const body = {
         order_id,
         CallBackLink: {
           server: upp.cbserver,
@@ -29,21 +26,32 @@ module.exports = function upp_calc_order($p, log) {
           password: "",
           link: `/couchdb/common/upp_calc_order/${cbid}`,
         }
-      }),
+      };
+	  
+	log({...upp, ...body});
+	
+    return fetch(upp.url, {
+      method: 'POST',
+      headers: cache.headers,
+      body: JSON.stringify(body),
     })
       .then(res => {
         if(res.status > 201) {
           throw new Error(`Ошибка сервера 1С '${res.statusText}'`);
         }
         return res.json();
-      });
+      })
+	  .then(body => {
+		  log(body);
+		  return body;
+	  });
 
   };
 
   // поддерживает актуальным кеш дат из 1С
   const watchdog = () => {
     clearTimeout(cache.timer);
-    cache.timer = setTimeout(watchdog, 60000);
+    cache.timer = setTimeout(watchdog, 30000);
     if(cache.is_actual() || cache.querying) {
       return;
     }
@@ -72,8 +80,8 @@ module.exports = function upp_calc_order($p, log) {
     timer: setTimeout(watchdog, 70000),
     manufacture_date: new Date(),
     querying: false,
-    is_actual(wait) {
-      return (this.manufacture_date > Date.now()) && (Date.now() - this.moment < (wait ? 320000 : 260000));
+    is_actual() {
+      return (this.manufacture_date > new Date()) && (Date.now() - this.moment < 300000);
     },
     headers: {
       'Accept': 'application/json',
@@ -88,7 +96,12 @@ module.exports = function upp_calc_order($p, log) {
     res.setHeader('Content-Type', 'application/json');
 
     let cbid = parsed.paths[2];
+	
+	if(!body) {
+	  return res.end(JSON.stringify({error: true, reason: 'empty body'}));
+	}
 
+	log(body);   
     if(cbid) {
       const cb = callbacks[cbid];
       if(cb) {
@@ -101,10 +114,13 @@ module.exports = function upp_calc_order($p, log) {
           cache.querying = false;
         }
       }
+      else {
+        res.end(JSON.stringify({error: true, reason: 'no cbid in callbacks'}));
+      }
     }
     else {
 
-      if(body.use_cache && (cache.is_actual(true) || cache.querying)) {
+      if(body.use_cache && (cache.is_actual() || cache.querying)) {
         return res.end(JSON.stringify({
           ok: true,
           manufacture_date: cache.manufacture_date,
