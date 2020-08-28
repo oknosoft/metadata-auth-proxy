@@ -82,7 +82,7 @@ module.exports = function settings(prm = {}) {
         }
       },
       upp: {
-        url: process.env.UPPURL || 'https://rd.srvtel.ru:8081/ecookna_upp/hs/api/loadAndCalcOrder',
+        url: process.env.UPPURL,
         username: process.env.UPPUSER,
         password: process.env.UPPPWD,
         order: process.env.UPPORDER || 'b24206f0-d2fa-11ea-b0ca-77ab15ca113c',
