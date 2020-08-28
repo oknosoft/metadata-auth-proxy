@@ -61,7 +61,7 @@ exports.IregDelivery_schedulesManager = class IregDelivery_schedulesManager exte
       return;
     }
     const from = moment().subtract(3, 'days');
-    const to = moment().add(2, 'months');
+    const to = moment().add(3, 'months');
     const elmnts = [];
     for (const row of aattr) {
       // отрезаем старые и слишком новые даты
