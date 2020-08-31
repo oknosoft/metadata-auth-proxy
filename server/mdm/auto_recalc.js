@@ -137,6 +137,11 @@ module.exports = function auto_recalc($p, log) {
      * Пересчет для всех абонентов и всех отделов абонентов
      */
     async recalc() {
+
+      if(job_prm.server.disable_mdm) {
+        return;
+      }
+
       const {timer, recalcing} = this;
       if(timer.id) {
         clearTimeout(timer.id);
