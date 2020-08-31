@@ -7,7 +7,7 @@
  */
 
 const fetch = require('node-fetch');
-const dt = 42000;
+const dt = 47000;
 
 module.exports = function upp_calc_order($p, log) {
 
@@ -83,7 +83,7 @@ module.exports = function upp_calc_order($p, log) {
     manufacture_date: new Date(),
     querying: false,
     is_actual() {
-      return (this.manufacture_date > new Date()) && (Date.now() - this.moment < 320000);
+      return (this.manufacture_date > new Date()) && (Date.now() - this.moment < 400000);
     },
     headers: {
       'Accept': 'application/json',
@@ -99,11 +99,11 @@ module.exports = function upp_calc_order($p, log) {
 
     let cbid = parsed.paths[2];
 
-	if(!body) {
-	  return res.end(JSON.stringify({error: true, reason: 'empty body'}));
-	}
+    if(!body) {
+      return res.end(JSON.stringify({error: true, reason: 'empty body'}));
+    }
 
-	log(body);
+    log(body);
     if(cbid) {
       if(body.manufacture_date) {
         cache.manufacture_date = new Date(body.manufacture_date);
