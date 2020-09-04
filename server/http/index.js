@@ -56,7 +56,7 @@ module.exports = function ($p, log, worker) {
           parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
           parsed.is_event_source = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'events';
           parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
-          parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|static|imgs|index|builder|about|login|settings|b|o|help)$/.test(parsed.paths[0]);
+          parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|dist|static|imgs|index|builder|about|login|settings|b|o|help)$/.test(parsed.paths[0]);
           req.query = qs.parse(parsed.query);
         }
 
