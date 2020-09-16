@@ -23,7 +23,20 @@ function patch(o, name) {
   const v = o.toJSON();
   // единицы измерения храним внутри номенклатуры
   if(name === 'cat.nom') {
-    v.units = o.units;
+  const {
+    storage_unit: {
+      ref,
+      id,
+      name,
+      qualifier_unit,
+      heft,
+      volume,
+      coefficient,
+      rounding_threshold
+    }
+  } = o;
+
+  v.units = `${ref},${id},${name},${qualifier_unit.ref},${heft},${volume},${coefficient},${rounding_threshold}`;
   }
   // физлиц храним внутри пользователей
   else if(name === 'cat.users') {
@@ -334,4 +347,3 @@ module.exports = function auto_recalc($p, log) {
   return changes;
 
 };
-
