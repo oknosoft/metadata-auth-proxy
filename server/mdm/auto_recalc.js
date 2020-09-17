@@ -21,12 +21,9 @@ function patch(o, name) {
     return o;
   }
   const v = o.toJSON();
-  // единицы измерения храним внутри номенклатуры
-  if(name === 'cat.nom') {
-    v.units = o.units;
-  }
+
   // физлиц храним внутри пользователей
-  else if(name === 'cat.users') {
+  if(name === 'cat.users') {
     if(!o.individual_person.empty()) {
       v.person = o.individual_person.toJSON();
     }

@@ -10,7 +10,7 @@ const doc_changes = require('../changes_doc');
 
 module.exports = function ($p, log) {
 
-  const {CatNom, classes: {CatObj}, pricing} = $p;
+  const {CatNom, classes: {CatObj}, pricing, cat: {nom_units}} = $p;
 
   // грузит в ram цены номенклатуры
   pricing.load_prices  = function load_prices() {
@@ -37,6 +37,10 @@ module.exports = function ($p, log) {
     if(this instanceof CatNom && this._data._price) {
       json._price = planify(this._data._price);
     }
+    json.units = nom_units.find_rows({owner: this})
+      .map((v) => `${v.ref},${v.id},${v.name},${v.qualifier_unit.ref},${v.heft},${v.volume},${v.coefficient},${v.rounding_threshold}`)
+      .join('\n');
+
     return json;
   };
 
