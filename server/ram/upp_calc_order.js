@@ -103,11 +103,11 @@ module.exports = function upp_calc_order($p, log) {
       return res.end(JSON.stringify({error: true, reason: 'empty body'}));
     }
 
-    log(body);
     if(cbid) {
       if(body.manufacture_date) {
         cache.manufacture_date = new Date(body.manufacture_date);
         cache.moment = Date.now();
+        log(body);
       }
       const cb = callbacks[cbid];
       if(cb) {

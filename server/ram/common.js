@@ -12,6 +12,7 @@ const check_auth = require('../auth/check_auth');
 module.exports = function common($p, log, polling) {
 
   const upp_calc_order = require('./upp_calc_order')($p, log);
+  const pay = require('./pay')($p, log);
   const {utils} = $p;
 
   return async function common({req, res}) {
@@ -159,6 +160,10 @@ module.exports = function common($p, log, polling) {
 
     case 'upp_calc_order':
       upp_calc_order({req, res});
+      break;
+
+    case 'pay':
+      pay({req, res});
       break;
 
     default:

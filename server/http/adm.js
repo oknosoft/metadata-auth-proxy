@@ -81,7 +81,8 @@ module.exports = function ($p, log) {
       default:
         end404(res, `${paths[0]}/${paths[1]}/${paths[2]}`);
       }
-    } catch (err) {
+    }
+    catch (err) {
       end500({res, err, log});
     }
 

@@ -9,7 +9,7 @@
 const {end401, end404} = require('../http/end');
 const getBody = require('../http/raw-body');
 
-module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, log, auth) {
+module.exports = function event_source({adapters: {pouch}, utils, wsql, cat: {users}}, log, auth) {
 
   const resps = new Set();
 
@@ -33,14 +33,28 @@ module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, 
     },
     nom_price(change) {
 
+    },
+    pay(attr) {
+      const {evt_id, ...othes} = attr;
+      const data = `event: pay\ndata: ${JSON.stringify(othes)}\n`;
+      for(const res of resps) {
+        if(evt && evt.id && res.evt_id !== evt_id) {
+          continue;
+        }
+        res.posti++;
+        res.write(`${data}id: ${res.posti}\n\n`);
+      }
     }
   });
 
 
-  wsql.post_event = (data = {}) => {
+  wsql.post_event = (data = {}, evt) => {
     for(const res of resps) {
+      if(evt && evt.id && res.evt_id !== evt.id) {
+        continue;
+      }
       res.posti++;
-      res.write(`data: ${JSON.stringify(data)}\nid: ${res.posti}\n\n`);
+      res.write(`${evt ? `event: ${evt.event}\n` : ''}data: ${JSON.stringify(data)}\nid: ${res.posti}\n\n`);
     }
   };
 
@@ -99,6 +113,7 @@ module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, 
 
     res.user = user;
     res.posti = 0;
+    res.event_id = utils.generate_guid();
     res.removeHeader('Transfer-Encoding');
     res.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
@@ -108,6 +123,10 @@ module.exports = function event_source({adapters: {pouch}, wsql, cat: {users}}, 
       'Access-Control-Allow-Origin': '*',
     });
     res.write('\n');
+    Promise.resolve().then(() => {
+      res.posti++;
+      res.write(`event: id\ndata: ${res.event_id}\nid: ${res.posti}\n\n`);
+    });
 
     resps.add(res);
     res.socket.on('close', resps.delete.bind(resps, res));

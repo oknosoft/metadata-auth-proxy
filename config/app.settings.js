@@ -89,6 +89,12 @@ module.exports = function settings(prm = {}) {
         order: process.env.UPPORDER || 'b24206f0-d2fa-11ea-b0ca-77ab15ca113c',
         cbserver: process.env.UPPCBSERVER || 'quick.ecookna.ru',// '10.0.158.64',
         cbport: process.env.UPPCBPORT ? parseFloat(process.env.UPPCBPORT) : 80,
+        sber: {
+          username: process.env.SBERUSER || 'eurookna-api',
+          password: process.env.SBERPWD,
+          url: process.env.SBERURL || 'https://securepayments.sberbank.ru/payment/rest/register.do',
+          cburl: process.env.SBERCBURL || 'http://h.oknosoft.ru',
+        }
       },
       couchdb_proxy_direct: 'c003,c004,c005,c006,c007,c012,c100,c200,c221,c076,c077,c078,c079,c112,c177,c178,c180,c181,c182,c183,c184,c185,c186,c187,c188,c189,c207,c208,c209,c210,c211,c212,c213,c214,c215,c216,c217,c218,c219,c220,c222,c223'.split(','), // список хостов, с которых маршрутизируем direct в couchdb (https://c221.oknosoft.com)
       couchdb_proxy_base: 'http://192.168.21', // начальная часть адреса пула серверов в локальной сети
