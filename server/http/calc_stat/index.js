@@ -4,14 +4,14 @@
 
 const Accumulation = require('./accumulation');
 
-module.exports = function calc_stat($p, log) {
+module.exports = function calc_stat($p, log, route) {
 
-  const accumulation = new Accumulation();
-  accumulation.init();
-  const reg = require('./calc_order_reg')($p, log, accumulation);
-  const query = require('./calc_order_query')($p, log, accumulation);
+  const acc = new Accumulation();
+  acc.init();
+  const reg = require('./calc_order_reg')($p, log, acc);
+  const query = require('./calc_order_query')($p, log, acc);
 
-  return function calc_stat(req, res) {
+  route.stat = function calc_stat(req, res) {
     const {path, paths} = req.parsed;
 
     switch (paths[3]){
@@ -24,6 +24,6 @@ module.exports = function calc_stat($p, log) {
     default:
       end404(res, path);
     }
-  }
+  };
 
 }

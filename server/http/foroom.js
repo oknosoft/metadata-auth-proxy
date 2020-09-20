@@ -13,9 +13,9 @@ const fs = require('fs');
 const fname = require('path').resolve(__dirname, '../mdm/foroom/index.json');
 const jsname = require('path').resolve(__dirname, '../mdm/foroom/api.js');
 
-module.exports = function foroom($p, log) {
+module.exports = function foroom($p, log, route) {
 
-  return async function foroom(req, res) {
+  route.foroom =  async function foroom(req, res) {
 
     await compressionHandler(req, res);
 

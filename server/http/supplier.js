@@ -10,11 +10,11 @@ const {end404} = require('./end');
 const getBody = require('./raw-body');
 const fetch = require('node-fetch');
 
-module.exports = function supplier($p, log) {
+module.exports = function supplier($p, log, route) {
 
   const {http_apis, abonents} = $p.cat;
 
-  return async function supplier(req, res) {
+  route.supplier = async function supplier(req, res) {
     const {user, parsed: {path, paths}, method, headers} = req;
     const supplier = http_apis.get(paths[3]);
     if(supplier.is_new() || supplier.empty()) {
@@ -105,5 +105,5 @@ Content-Type: application/json
         });
     }
     end404(res, `unknown supplier`);
-  }
+  };
 }

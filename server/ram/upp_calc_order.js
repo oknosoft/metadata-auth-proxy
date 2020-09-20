@@ -9,7 +9,7 @@
 const fetch = require('node-fetch');
 const dt = 47000;
 
-module.exports = function upp_calc_order($p, log) {
+module.exports = function upp_calc_order($p, log, route) {
 
   const {utils, job_prm: {server: {upp}}} = $p;
 
@@ -92,7 +92,7 @@ module.exports = function upp_calc_order($p, log) {
     },
   };
 
-  return async function calc_order({req, res}) {
+  route.upp_calc_order = async function calc_order({req, res}) {
 
     const {parsed, body} = req;
     res.setHeader('Content-Type', 'application/json');

@@ -10,14 +10,16 @@ const {end404, end500} = require('./end');
 module.exports = function ($p, log) {
 
   const {cat, utils} = $p;
+  const route = {};
 
-  const bar = require('wb-paperless/server/bar')($p, log);
-  const scan = require('wb-paperless/server/scan')($p, log);
-  const reports = require('wb-reports/server')($p, log);
-  const delivery = require('./delivery')($p, log);
-  const supplier = require('./supplier')($p, log);
-  const foroom = require('./foroom')($p, log);
-  const stat = require('./calc_stat')($p, log);
+  const bar = require('wb-paperless/server/bar')($p, log, route);
+  const scan = require('wb-paperless/server/scan')($p, log, route);
+  const reports = require('wb-reports/server')($p, log, route);
+
+  require('./planning')($p, log, route);
+  require('./supplier')($p, log, route);
+  require('./foroom')($p, log, route);
+  require('./calc_stat')($p, log, route);
 
   // формирует json описания продукции заказа
   async function ram_data(req, res) {
@@ -65,21 +67,13 @@ module.exports = function ($p, log) {
       case 'scan':
         return scan(req, res);
 
-      case 'plan':
-      case 'delivery':
-        return delivery(req, res);
-
-      case 'supplier':
-        return supplier(req, res);
-
-      case 'foroom':
-        return foroom(req, res);
-
-      case 'stat':
-        return stat(req, res);
-
       default:
-        end404(res, `${paths[0]}/${paths[1]}/${paths[2]}`);
+        if(route[paths[2]]) {
+          route[paths[2]](req, res);
+        }
+        else {
+          end404(res, `${paths[0]}/${paths[1]}/${paths[2]}`);
+        }
       }
     }
     catch (err) {

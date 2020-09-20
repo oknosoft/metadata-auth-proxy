@@ -11,9 +11,10 @@ const check_auth = require('../auth/check_auth');
 
 module.exports = function common($p, log, polling) {
 
-  const upp_calc_order = require('./upp_calc_order')($p, log);
-  const pay = require('./pay')($p, log);
   const {utils} = $p;
+  const route = {};
+  require('./upp_calc_order')($p, log, route);
+  require('./pay')($p, log, route);
 
   return async function common({req, res}) {
 
@@ -158,26 +159,23 @@ module.exports = function common($p, log, polling) {
       }
       break;
 
-    case 'upp_calc_order':
-      upp_calc_order({req, res});
-      break;
-
-    case 'pay':
-      pay({req, res});
-      break;
-
     default:
-      if(parsed.paths[1].startsWith('_local')) {
-        parsed.paths[1] += `/${parsed.paths[2]}`;
-      }
-      if(req.method === 'GET') {
-        db.get(parsed.paths[1], query).then(end).catch(err);
-      }
-      else if(req.method === 'PUT' && parsed.paths[1].startsWith('_local')) {
-        db.put(req.body, query).then(end).catch(err);
+      if(route[parsed.paths[1]]) {
+        route[parsed.paths[1]]({req, res});
       }
       else {
-        err({status: 404, error: true, message: `path '${parsed.paths[1]}' not available`});
+        if(parsed.paths[1].startsWith('_local')) {
+          parsed.paths[1] += `/${parsed.paths[2]}`;
+        }
+        if(req.method === 'GET') {
+          db.get(parsed.paths[1], query).then(end).catch(err);
+        }
+        else if(req.method === 'PUT' && parsed.paths[1].startsWith('_local')) {
+          db.put(req.body, query).then(end).catch(err);
+        }
+        else {
+          err({status: 404, error: true, message: `path '${parsed.paths[1]}' not available`});
+        }
       }
     }
 

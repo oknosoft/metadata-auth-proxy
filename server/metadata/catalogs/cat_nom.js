@@ -34,13 +34,14 @@ module.exports = function ($p, log) {
 
   CatNom.prototype.toJSON = function toJSON() {
     const json = CatObj.prototype.toJSON.call(this);
-    if(this instanceof CatNom && this._data._price) {
-      json._price = planify(this._data._price);
+    if(this instanceof CatNom) {
+      if(this._data._price) {
+        json._price = planify(this._data._price);
+      }
+      json.units = nom_units.find_rows({owner: this})
+        .map((v) => `${v.ref},${v.id},${v.name},${v.qualifier_unit.ref},${v.heft},${v.volume},${v.coefficient},${v.rounding_threshold}`)
+        .join('\n');
     }
-    json.units = nom_units.find_rows({owner: this})
-      .map((v) => `${v.ref},${v.id},${v.name},${v.qualifier_unit.ref},${v.heft},${v.volume},${v.coefficient},${v.rounding_threshold}`)
-      .join('\n');
-
     return json;
   };
 

@@ -3,8 +3,9 @@
  */
 
 const fetch = require('node-fetch');
+const nearest_date = require('./nearest_date');
 
-module.exports = function delivery($p, log) {
+module.exports = function delivery({$p, log, route, acc}) {
 
   const {
     utils: {getBody, moment},
@@ -31,12 +32,15 @@ module.exports = function delivery($p, log) {
     throw err;
   };
 
-  return async function delivery(req, res) {
+  route.plan = async function delivery(req, res) {
 
     const result = {duration: Date.now()};
 
-    const body = await getBody(req);
-    let {warehouse, delivery_area, start, use_cache} = JSON.parse(body);
+    const doc = JSON.parse(await getBody(req));
+    let {warehouse, delivery_area, start, use_cache} = doc;
+
+    const ndate = await nearest_date(doc, acc);
+
     if(use_cache) {
       try {
         const cache = await from_cache(req);
@@ -73,6 +77,7 @@ module.exports = function delivery($p, log) {
     });
 
     res.end(JSON.stringify(result));
-  }
+  };
+  route.planning = route.plan;
 
 }

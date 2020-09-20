@@ -29,6 +29,6 @@ module.exports = function reg($p, log, acc) {
       doc.manager = req.user.ref;
       await upsert(acc, doc);
     }
-    res.end(JSON.stringify({ok: true,}));
+    res.end(JSON.stringify({ok: true}));
   }
 }

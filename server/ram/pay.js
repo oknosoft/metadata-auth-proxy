@@ -5,7 +5,7 @@
 const fetch = require('node-fetch');
 const querystring = require('querystring');
 
-module.exports = function pay($p, log) {
+module.exports = function pay($p, log, route) {
 
   const {
     utils: {moment},
@@ -23,7 +23,7 @@ module.exports = function pay($p, log) {
       .catch((err) => null);
   }
 
-  return async function pay({req, res}) {
+  route.pay = async function pay({req, res}) {
     const {parsed, body} = req;
     const provider = parsed.paths[2];
     const action = parsed.paths[3];
