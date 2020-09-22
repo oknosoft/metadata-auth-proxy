@@ -44,6 +44,7 @@ const common = [
   'cat.templates',
   'cat.http_apis',
   'cat.work_center_kinds',
+  'cat.work_centers',
 ];
 
 function mdm ($p, log) {

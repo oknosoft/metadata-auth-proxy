@@ -12,6 +12,16 @@ function upsert(acc, {work_center, balance}) {
     [work_center, JSON.stringify(balance)]);
 }
 
+function sort(a, b) {
+  if(a.date < b.date) {
+    return -1;
+  }
+  if(a.date > b.date) {
+    return 1;
+  }
+  return 0;
+}
+
 module.exports = function work_centers_balance({$p, log, route, acc}) {
 
   const {getBody} = $p.utils;
@@ -27,6 +37,7 @@ module.exports = function work_centers_balance({$p, log, route, acc}) {
       arr.push({date, debt, balance, percent: (balance * 100 / debt).round()});
     }
     for(const [work_center, balance] of work_centers) {
+      balance.sort(sort);
       await upsert(acc, {work_center, balance});
     }
     res.end(JSON.stringify({ok: true}));

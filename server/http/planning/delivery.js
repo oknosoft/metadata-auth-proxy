@@ -37,25 +37,18 @@ module.exports = function delivery({$p, log, route, acc}) {
     const result = {duration: Date.now()};
 
     const doc = JSON.parse(await getBody(req));
-    let {warehouse, delivery_area, start, use_cache} = doc;
+    let {warehouse, delivery_area, start, delivery} = doc;
+    start = await nearest_date({doc, acc, moment});
 
-    const ndate = await nearest_date(doc, acc);
-
-    if(use_cache) {
-      try {
-        const cache = await from_cache(req);
-        if(cache.error && cache.message) {
-          fin500();
-        }
-        start = cache.manufacture_date;
-      }
-      catch (err) {
-        fin500();
-      }
-    }
     warehouse = stores.get(warehouse);
     delivery_area = delivery_areas.get(delivery_area);
-    const route = delivery_schedules.apply_schedule(delivery_scheme.route({warehouse, delivery_area}), moment(start));
+    const route = delivery ?
+      delivery_schedules.apply_schedule(delivery_scheme.route({warehouse, delivery_area}), moment(start)) :
+      [{warehouse, delivery_area, runs: [
+          moment(start).add(1, 'd').format('YYYYMMDD'),
+          moment(start).add(2, 'd').format('YYYYMMDD'),
+          moment(start).add(3, 'd').format('YYYYMMDD'),
+        ]}];
     const first = route[0];
     const last = route[route.length - 1];
 
@@ -71,7 +64,7 @@ module.exports = function delivery({$p, log, route, acc}) {
       finish: moment(last.runs[0]).format('YYYY-MM-DD'),
       route: route.map(({warehouse, delivery_area, chain_area, runs}) => ({
         warehouse: warehouse.ref,
-        delivery_area: (chain_area.empty() ? delivery_area : chain_area).ref,
+        delivery_area: ((!chain_area || chain_area.empty()) ? delivery_area : chain_area).ref,
         runs: runs.filter((v, i) => i < 3).map((v) => moment(v).format('YYYY-MM-DD')),
       }))
     });
@@ -79,5 +72,6 @@ module.exports = function delivery({$p, log, route, acc}) {
     res.end(JSON.stringify(result));
   };
   route.planning = route.plan;
+  route.delivery = route.plan;
 
 }
