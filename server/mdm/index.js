@@ -112,6 +112,7 @@ function mdm ($p, log) {
         return await head({res, zone, suffix, by_branch, common});
       }
 
+      // проверяем наличие каталога
       if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
         return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
       }
@@ -139,7 +140,8 @@ function mdm ($p, log) {
             if(suffix !== 'common' && common.includes(name)) {
               continue;
             }
-            stream.add(fs.createReadStream(fname));
+            // если файл существует, добавляем его в поток
+            fs.existsSync(fname) && stream.add(fs.createReadStream(fname));
           }
         }
       }

@@ -282,7 +282,8 @@ module.exports = function auto_recalc($p, log) {
 
     if(ctypes.length) {
       await fs.writeFileAsync(manifest, JSON.stringify(tags), 'utf8');
-      notify(abonent, branch, ctypes, job_prm.server.port);
+      // оповещение пока только для пустого отдела
+      branch.empty() && notify(abonent, branch, ctypes, job_prm.server.port);
     }
 
     return sleep();
