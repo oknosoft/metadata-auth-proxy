@@ -268,7 +268,7 @@ module.exports = function auto_recalc($p, log) {
         const text = JSON.stringify({name, rows}) + '\r\n';
         const tag = tags[name];
         // если данные реально изменены - записываем
-        if(!tag || tag.count !== rows.length || tag.size !== text.length || tag.crc32 !== utils.crc32(text)) {
+        if(!tag || tag.count !== rows.length || tag.size !== text.length || tag.crc32 !== utils.crc32(text) || !fs.existsSync(fname)) {
           tags[name] = {
             count: rows.length,
             size: text.length,

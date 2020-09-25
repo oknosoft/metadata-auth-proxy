@@ -31,6 +31,7 @@ const by_branch = [
 const common = [
   'cch.properties',
   'cat.property_values',
+  'cat.property_values_hierarchy',
   'cat.contact_information_kinds',
   'cat.clrs',
   'cat.units',
