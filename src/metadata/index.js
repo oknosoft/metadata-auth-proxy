@@ -12,7 +12,8 @@ import proxy_login from 'metadata-superlogin/proxy';
 import settings from '../../config/app.settings';
 
 // читаем скрипт инициализации метаданных, полученный в результате выполнения meta:prebuild
-import meta_init from './init';
+const meta_init = require('wb-core/dist/init');
+const proxy_init = require('../../src/metadata/init');
 import modifiers from './modifiers';
 
 // генераторы действий и middleware для redux
@@ -38,6 +39,7 @@ $p.wsql.init(settings);
 
 // со скрипом инициализации метаданных, так же - не затягиваем
 meta_init($p);
+proxy_init($p);
 
 // скрипт инициализации в привязке к store приложения
 export function init(store) {

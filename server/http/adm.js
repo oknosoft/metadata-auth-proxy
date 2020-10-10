@@ -9,7 +9,7 @@ const {end404, end500} = require('./end');
 
 module.exports = function ($p, log) {
 
-  const {cat, utils} = $p;
+  const {cat, cch, utils} = $p;
   const route = {};
 
   const bar = require('wb-paperless/server/bar')($p, log, route);
@@ -33,11 +33,12 @@ module.exports = function ($p, log) {
         doc._id = `${v.class_name}|${v.ref}`;
         docs.push(doc);
       };
-      cat.abonents.alatable.forEach(push);
-      cat.servers.alatable.forEach(push);
-      cat.branches.alatable.forEach(push);
-      cat.users.alatable.forEach(push);
-      cat.scheme_settings.alatable.forEach(push);
+      for(const name of 'property_values,abonents,servers,branches,users,scheme_settings'.split(',')) {
+        cat[name].alatable.forEach(push);
+      }
+      const choice_params = cat.formulas.predefined('choice_params');
+      cat.formulas.alatable.filter((v) => v.is_folder || v.parent == choice_params).forEach(push);
+      cch.properties.alatable.filter((v) => v.is_folder || v.predefined_name === 'clr_grp').forEach(push);
       res.end(JSON.stringify({
         ok: true,
         docs,

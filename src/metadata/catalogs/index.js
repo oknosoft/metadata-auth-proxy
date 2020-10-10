@@ -1,7 +1,12 @@
 // модификаторы справочников
 
-import cat_cashboxes from './cat_cashboxes';
-
 export default function ($p) {
-  cat_cashboxes($p);
+
+  const fld = $p.cat.clrs.metadata('grouping');
+  fld.choice_params = [{
+    name: 'owner',
+    get path() {
+      return $p.cch.properties.predefined('clr_grp');
+    }
+  }];
 }

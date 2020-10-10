@@ -31,9 +31,7 @@ export default function load_ram({pouch, classes, job_prm, cat}) {
           console.log(err);
         });
 
-      return fetch(`${job_prm.server.prefix}/ram/all`, {
-        headers: ram.getBasicAuthHeaders({prefix: pouch.auth_prefix(), ...ram.__opts.auth}),
-      })
+      return pouch.fetch(`${job_prm.server.prefix}/ram/all`)
         .then((res) => res.json())
         .then((res) => {
           pouch.load_changes(res);
