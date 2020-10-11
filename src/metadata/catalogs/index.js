@@ -2,11 +2,17 @@
 
 export default function ($p) {
 
-  const fld = $p.cat.clrs.metadata('grouping');
-  fld.choice_params = [{
-    name: 'owner',
-    get path() {
-      return $p.cch.properties.predefined('clr_grp');
-    }
-  }];
+  const {adapters, cat, cch} = $p;
+
+  // параметры выбора для группировки цветов
+  adapters.pouch.on({
+    pouch_doc_ram_loaded() {
+      const path = cch.properties.predefined('clr_grp');
+      if(path && !path.empty()) {
+        const fld = cat.clrs.metadata('grouping');
+        fld.choice_params = [{name: 'owner', path}];
+      }
+    },
+  });
+
 }

@@ -33,11 +33,11 @@ module.exports = function ($p, log) {
         doc._id = `${v.class_name}|${v.ref}`;
         docs.push(doc);
       };
-      for(const name of 'property_values,abonents,servers,branches,users,scheme_settings'.split(',')) {
+      for(const name of 'property_values,abonents,servers,branches,users,scheme_settings,color_price_groups'.split(',')) {
         cat[name].alatable.forEach(push);
       }
-      const choice_params = cat.formulas.predefined('choice_params');
-      cat.formulas.alatable.filter((v) => v.is_folder || v.parent == choice_params).forEach(push);
+      const modifiers = cat.formulas.predefined('modifiers');
+      cat.formulas.alatable.filter((v) => v.parent != modifiers).forEach(push);
       cch.properties.alatable.filter((v) => v.is_folder || v.predefined_name === 'clr_grp').forEach(push);
       res.end(JSON.stringify({
         ok: true,
