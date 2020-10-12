@@ -49,6 +49,9 @@ module.exports = function settings(prm = {}) {
     // по умолчанию, обращаемся к зоне adm
     zone: process.env.ZONE || 21,
 
+    // время до засыпания
+    idle_timeout: 57 * 60 * 1000,
+
     // расположение rest-сервиса по умолчанию
     get rest_path() {
       return this.server.prefix;

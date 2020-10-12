@@ -178,6 +178,7 @@ exports.CatClrsManager = class CatClrsManager extends Object {
             };
 
             clr.set_grouping(values);
+            row.grouping = clr.grouping.ref;
           }
           res = res.then(() => meta.put(doc));
         }
