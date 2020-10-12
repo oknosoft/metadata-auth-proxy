@@ -9,8 +9,9 @@ module.exports = function pay($p, log, route) {
 
   const {
     utils: {moment},
-    job_prm: {server: {upp, port}},
-    //wsql,
+    job_prm: {server: {upp, port, quick_url}},
+    cat: {branches},
+    doc: {calc_order, credit_card_order},
   } = $p;
 
   // оповещает клиентский поток об изменениях
@@ -47,8 +48,8 @@ module.exports = function pay($p, log, route) {
         amount: 100,
         currency: 643,
         language: 'ru',
-        returnUrl: `${common_url}success/${body.ref}/${body.evt_id}`,
-        failUrl: `${common_url}fail/${body.ref}/${body.evt_id}`,
+        returnUrl: `${common_url}success/${body.ref}/${body.branch}/100`,
+        failUrl: `${common_url}fail/${body.ref}/${body.branch}`,
         //description: 'Описание заказа',
         jsonParams: JSON.stringify({orderNumber: `${body.number_internal || body.number_doc} ${body.client_of_dealer}`}),
         pageView: body.pageView,
@@ -70,13 +71,37 @@ module.exports = function pay($p, log, route) {
         });
     }
     else {
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.end(`<script type="text/javascript">setTimeout(function() {window.close();}, 10);</script>`);
-      const ref = parsed.paths[4];
-      const evt_id = parsed.paths[5];
-      if(action === 'success') {
-        notify({action, ref, evt_id});
+      const fin = () => {
+        res.writeHead(301, {Location: `${quick_url}/doc.calc_order/${parsed.paths[4]}?action=${action}`});
+        res.end();
       }
+      if(action === 'success') {
+        const db = branches.get(parsed.paths[5]).db('doc');
+        const amount = parseFloat(parsed.paths[6]) / 100;
+        const order = calc_order.create({ref: parsed.paths[4]}, false, true);
+        calc_order.adapter.load_obj(order, {db})
+          .then((doc) => {
+            const card_order = credit_card_order.create({
+              organization: doc.organization,
+              partner: doc.partner,
+            });
+            // создадим приходник
+
+            // проведём документ и запустим процесс в 1C
+            fin();
+          })
+          .catch(fin);
+      }
+      else {
+        fin();
+      }
+      // res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      // res.end(`<script type="text/javascript">setTimeout(function() {window.close();}, 10);</script>`);
+      // const ref = parsed.paths[4];
+      // const evt_id = parsed.paths[5];
+      // if(action === 'success') {
+      //   notify({action, ref, evt_id});
+      // }
     }
 
   };

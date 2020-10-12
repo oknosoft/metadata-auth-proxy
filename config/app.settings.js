@@ -67,6 +67,7 @@ module.exports = function settings(prm = {}) {
       port: process.env.PORT || 3016, // Port
       start_common: process.env.START_COMMON,
       common_url: process.env.RAMURL || 'http://localhost:3026',
+      quick_url: process.env.QUICKURL || 'https://quick.ecookna.ru',
       maxpost: 40 * 1024 * 1024,      // Max size of POST request
       abonents: process.env.ABONENTS ? JSON.parse(process.env.ABONENTS) : [21, 20], // абоненты - источники
       branches: process.env.BRANCHES ? JSON.parse(process.env.BRANCHES) : null,     // список отделов можно ограничить

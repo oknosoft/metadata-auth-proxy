@@ -29,16 +29,17 @@ module.exports = function ($p, log) {
     case 'all':
       const docs = [];
       const push = (v) => {
-        const doc = utils._mixin({}, v, null, ['ref', 'acl']);
+        const tmp = JSON.parse(JSON.stringify(v));
+        const doc = utils._mixin({}, tmp, null, ['ref','acl']);
         doc._id = `${v.class_name}|${v.ref}`;
         docs.push(doc);
       };
       for(const name of 'property_values,abonents,servers,branches,users,scheme_settings,color_price_groups'.split(',')) {
-        cat[name].alatable.forEach(push);
+        cat[name].forEach(push);
       }
-      const modifiers = cat.formulas.predefined('modifiers');
-      cat.formulas.alatable.filter((v) => v.parent != modifiers).forEach(push);
-      cch.properties.alatable.filter((v) => v.is_folder || v.predefined_name === 'clr_grp').forEach(push);
+      cch.properties.find_rows({parent: {nin: [cat.formulas.predefined('modifiers'), cat.formulas.predefined('printing_plates')]}}, push);
+      cch.properties.forEach(push);
+
       res.end(JSON.stringify({
         ok: true,
         docs,
