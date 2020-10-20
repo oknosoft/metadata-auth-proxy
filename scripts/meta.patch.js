@@ -103,6 +103,7 @@ const read_only = [];
 const preserv_cachable = [
   'cat.characteristics',
   'doc.calc_order',
+  'doc.credit_card_order',
 ];
 
 

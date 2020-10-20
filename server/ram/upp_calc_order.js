@@ -52,7 +52,7 @@ module.exports = function upp_calc_order($p, log, route) {
   // поддерживает актуальным кеш дат из 1С
   const watchdog = () => {
     clearTimeout(cache.timer);
-    cache.timer = upp.url && upp.username && setTimeout(watchdog, dt);
+    cache.timer = 0; // upp.url && upp.username && setTimeout(watchdog, dt);
     if(cache.is_actual() || cache.querying) {
       return;
     }
@@ -79,7 +79,7 @@ module.exports = function upp_calc_order($p, log, route) {
   // здесь храним даты последнего расчета, чтобы сократить общение с 1С
   const cache = {
     moment: 0,
-    timer: upp.url && upp.username && setTimeout(watchdog, dt),
+    timer: 0, // upp.url && upp.username && setTimeout(watchdog, dt),
     manufacture_date: new Date(),
     querying: false,
     is_actual() {

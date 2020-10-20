@@ -161,7 +161,7 @@ module.exports = function common($p, log, polling) {
 
     default:
       if(route[parsed.paths[1]]) {
-        route[parsed.paths[1]]({req, res});
+        route[parsed.paths[1]]({req, res, fin_err: err});
       }
       else {
         if(parsed.paths[1].startsWith('_local')) {

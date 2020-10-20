@@ -53,7 +53,6 @@ exports.CatClrs = class CatClrs extends Object {
     else {
       return pouch.fetch(props.path.replace(job_prm.local_storage_prefix, `common/_save/cat.clrs`), {
         method: 'POST',
-        headers: new Headers({'Content-Type': 'application/json'}),
         body: JSON.stringify(this),
       })
         .then((res) => res.json())
