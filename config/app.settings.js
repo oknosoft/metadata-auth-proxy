@@ -96,7 +96,7 @@ module.exports = function settings(prm = {}) {
         sber: {
           username: process.env.SBERUSER || 'eurookna-api',
           password: process.env.SBERPWD,
-          url: process.env.SBERURL || 'https://securepayments.sberbank.ru/payment/rest/register.do',
+          url: process.env.SBERURL || 'https://securepayments.sberbank.ru/payment/rest/',
           cburl: process.env.SBERCBURL || 'http://h.oknosoft.ru',
         }
       },
