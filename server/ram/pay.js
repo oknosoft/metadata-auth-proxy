@@ -191,6 +191,7 @@ module.exports = function pay($p, log, route) {
 
     return calc_order.adapter.load_obj(order, {db})
       .then((doc) => {
+
         // создадим приходник
         const card_order = credit_card_order.create({
           ref: attr.card_order,
@@ -222,7 +223,7 @@ module.exports = function pay($p, log, route) {
           .then(() => {
             // запрос к УПП с указанием запустить в работу
             query_1c({ref: doc.ref, id})
-              .cache.remove(id)
+              .then(() => cache.remove(id))
               .catch(log);
           })
           .catch(log);
