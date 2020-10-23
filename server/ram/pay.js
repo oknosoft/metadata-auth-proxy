@@ -145,20 +145,20 @@ module.exports = function pay($p, log, route) {
           body: JSON.stringify(body),
         })
           .then(resolve);
-      }, 20000);
+        }, 20000);
       setTimeout(reject, 90000);
     })
       .then(res => {
         if(res.status > 201) {
-          log(`Ошибка сервера 1С '${res.statusText}'`);
+          throw new Error(`Ошибка сервера 1С: ${res.statusText}`);
         }
         return res.json();
       })
-      .then(body => {
-        log(body);
-        if(body.error_code) {
-          return Promise.reject(body);
+      .then(data => {
+        if(data.error_code) {
+          throw new Error(`loadAndCalcOrder: ${data.error_text}`);
         }
+        log(data);
         return new Promise((resolve, reject) => {
           setTimeout(() => {
             fetch(upp.url.replace('loadAndCalcOrder', 'startOrder'), {
@@ -166,18 +166,25 @@ module.exports = function pay($p, log, route) {
               headers: cache.headers,
               body: JSON.stringify(body),
             })
-              .then((res) => res.json())
-              .then((body) => {
-                log(body);
-                resolve(body);
-              })
-              .catch((err) => {
-                log(err);
-                reject(err);
-              });
+              .then(resolve);
           }, 20000);
           setTimeout(reject, 90000);
-        });
+        })
+          .then(res => {
+            if(res.status > 201) {
+              throw new Error(`Ошибка сервера 1С: ${res.statusText}`);
+            }
+            return res.json();
+          })
+          .then((data) => {
+            if(data.error_code) {
+              throw new Error(`startOrder: ${data.error_text}`);
+            }
+            log(data);
+            // завершаем сессию
+            return cache.remove(id);
+          });
+
       });
   }
 
@@ -223,7 +230,6 @@ module.exports = function pay($p, log, route) {
           .then(() => {
             // запрос к УПП с указанием запустить в работу
             query_1c({ref: doc.ref, id})
-              .then(() => cache.remove(id))
               .catch(log);
           })
           .catch(log);
