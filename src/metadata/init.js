@@ -111,7 +111,7 @@ set extra_fields(v){this._setter_ts('extra_fields',v)}
     if(_data.dbs[cachable]) {
       return _data.dbs[cachable];
     }
-    const name = `${_server.http_local}${owner.id}_${cachable}_${suffix}`;
+    const name = `${_server.http_local || _server.http}${owner.id}_${cachable}_${suffix}`;
     const {auth} = adapter.remote.ram.__opts;
     const opts = {skip_setup: true, auth};
     _data.dbs[cachable] = new $p.classes.PouchDB(name, opts);
