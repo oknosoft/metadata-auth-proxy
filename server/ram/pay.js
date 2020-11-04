@@ -124,67 +124,51 @@ module.exports = function pay($p, log, route) {
   }
 
   // читает заказ в 1С и запускает в работу
-  function query_1c({ref, id}) {
-
-    const body = {
-      order_id: ref,
-      CallBackLink: {
-        server: upp.cbserver,
-        port: upp.cbport,
-        login: '',
-        password: '',
-        link: `/couchdb/common/upp_calc_order/${id}`,
-      }
-    };
+  function query_1c({ref, pay, id}) {
 
     return new Promise((resolve, reject) => {
+      const reset = setTimeout(reject, 90000);
       setTimeout(() => {
-        fetch(upp.url, {
-          method: 'POST',
-          headers: cache.headers,
-          body: JSON.stringify(body),
-        })
-          .then(resolve);
-        }, 20000);
-      setTimeout(reject, 90000);
-    })
-      .then(res => {
-        if(res.status > 201) {
-          throw new Error(`Ошибка сервера 1С: ${res.statusText}`);
-        }
-        return res.json();
-      })
-      .then(data => {
-        if(data.error_code) {
-          throw new Error(`loadAndCalcOrder: ${data.error_text}`);
-        }
-        log(data);
-        return new Promise((resolve, reject) => {
-          setTimeout(() => {
-            fetch(upp.url.replace('loadAndCalcOrder', 'startOrder'), {
-              method: 'POST',
-              headers: cache.headers,
-              body: JSON.stringify(body),
-            })
-              .then(resolve);
-          }, 20000);
-          setTimeout(reject, 90000);
-        })
-          .then(res => {
+        fetch(`${upp.url}cardPay?ref=${pay}`, {headers: cache.headers})
+          .then((res) => {
+            clearTimeout(reset);
             if(res.status > 201) {
-              throw new Error(`Ошибка сервера 1С: ${res.statusText}`);
+              reject(new Error(`Ошибка сервера 1С: ${res.statusText}`));
             }
-            return res.json();
+            else {
+              resolve(res.json());
+            }
           })
-          .then((data) => {
-            if(data.error_code) {
-              throw new Error(`startOrder: ${data.error_text}`);
+      }, 10000);
+    })
+      .then(data => {
+        if(data.error) {
+          throw new Error(`cardPay: ${data.error} ${data.reason}`);
+        }
+      })
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          const reset = setTimeout(reject, 90000);
+          setTimeout(() => {
+            fetch(`${upp.url}quickOrder?ref=${ref}`, {headers: cache.headers})
+              .then((res) => {
+                clearTimeout(reset);
+                if(res.status > 201) {
+                  reject(new Error(`Ошибка сервера 1С: ${res.statusText}`));
+                }
+                else {
+                  resolve(res.json());
+                }
+              })
+          }, 10000);
+        })
+          .then(data => {
+            if(data.error) {
+              throw new Error(`quickOrder: ${data.error} ${data.reason}`);
             }
-            log(data);
             // завершаем сессию
             return cache.remove(id);
           });
-
       });
   }
 
@@ -200,40 +184,41 @@ module.exports = function pay($p, log, route) {
       .then((doc) => {
 
         // создадим приходник
-        const card_order = credit_card_order.create({
-          ref: attr.card_order,
-          organization: doc.organization,
-          partner: doc.partner,
-          department: doc.department,
-          doc_amount: amount,
-          responsible: doc.manager,
-          date: new Date(),
-          number_doc: `${doc.number_internal}-${(Math.random() * 1e6).toFixed(0).substr(0,4)}`,
-          payment_details: [{
-            trans: doc.ref,
-            cash_flow_article: cash_flow_articles.by_name('Оплата покупателя'),
-            amount
-          }],
-        }, false, true);
+        (attr.card_order ? credit_card_order.get(attr.card_order, 'promise') : Promise.resolve(credit_card_order.create()))
+          .then((card_order) => {
+            Object.assign(card_order, {
+              organization: doc.organization,
+              partner: doc.partner,
+              department: doc.department,
+              doc_amount: amount,
+              responsible: doc.manager,
+              date: new Date(),
+              number_doc: `${doc.number_internal}-${(Math.random() * 1e6).toFixed(0).substr(0, 4)}`,
+              payment_details: [{
+                trans: doc.ref,
+                cash_flow_article: cash_flow_articles.by_name('Оплата покупателя'),
+                amount
+              }],
+            });
 
-        return cache.set(id, {card_order: card_order.ref})
-          .then(() => card_order.save(true))
+            return cache.set(id, {card_order: card_order.ref})
+              .then(() => card_order.save(true))
 
-          // проведём документы и запустим процесс в 1C
-          .then(() => doc.save(true, false, undefined, {db}))
-          .then(() => {
-            // реплицируем документы в центральную базу
-            const doc_ids = [`doc.calc_order|${doc.ref}`, `doc.credit_card_order|${card_order.ref}`];
-            doc.production.forEach(({characteristic}) => {!characteristic.empty() && doc_ids.push(`cat.characteristics|${characteristic.ref}`)});
-            //return db.replicate.to(calc_order.adapter.remote.doc, {doc_ids});
-          })
-          .then(() => {
-            // запрос к УПП с указанием запустить в работу
-            query_1c({ref: doc.ref, id})
+              // проведём документы и запустим процесс в 1C
+              .then(() => doc.save(true, false, undefined, {db}))
+              .then(() => {
+                // реплицируем документы в центральную базу
+                const doc_ids = [`doc.calc_order|${doc.ref}`, `doc.credit_card_order|${card_order.ref}`];
+                doc.production.forEach(({characteristic}) => {!characteristic.empty() && doc_ids.push(`cat.characteristics|${characteristic.ref}`)});
+                //return db.replicate.to(calc_order.adapter.remote.doc, {doc_ids});
+              })
+              .then(() => {
+                // запрос к УПП с указанием запустить в работу
+                query_1c({ref: doc.ref, pay: card_order.ref, id})
+                  .catch(log);
+              })
               .catch(log);
           })
-          .catch(log);
-
       });
   }
 

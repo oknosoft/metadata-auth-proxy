@@ -52,8 +52,8 @@
     "react-treebeard": "^3.2.4",
     "serve-handler": "^6.1.3",
     "unzipper": "^0.10.11",
-    "wb-core": "github:oknosoft/windowbuilder-core#d87bb1b21bf742bb0cadec2d1dd9ba3326dcba74",
-    "wb-paperless": "github:oknosoft/paperless#992d57f41951a4079aaa23f732b1f45524fcf278",
+    "wb-core": "github:oknosoft/windowbuilder-core#7575bb82342be5a6c5543088513e1ce7c1b9474d",
+    "wb-paperless": "github:oknosoft/paperless#2017732a76d798044c00381eedd35b5c0c94b357",
     "wb-planning": "github:oknosoft/windowbuilder-planning",
     "wb-reports": "github:oknosoft/windowbuilder-reports#a565e7e96d23563e886606da4df1f693417ce95a",
     "yamljs": "^0.3.0"
