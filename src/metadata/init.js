@@ -795,10 +795,16 @@ class IregDelivery_schedulesManager extends InfoRegManager {
       const delivery_area = curr.chain_area.empty() ? curr.delivery_area : curr.chain_area;
       if(prev) {
         const dates = new Set();
+        const curr_runs = this.runs({warehouse, delivery_area});
         for(const date of prev.runs) {
           const astart = moment(date).add(warehouse.assembly_days || 0, 'days');
-          this.runs({warehouse, delivery_area}).forEach((date) => astart.isBefore(date) && dates.add(date));
-          if(dates.size > 3) {
+          for(const curr_date of curr_runs) {
+            if(astart.isBefore(curr_date)) {
+              dates.add(curr_date);
+              break;
+            }
+          }
+          if(dates.size > 4) {
             break;
           }
         }
