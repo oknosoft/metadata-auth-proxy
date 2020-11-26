@@ -75,16 +75,13 @@ module.exports = function ({cat}, log) {
     // проверяем авторизацию
     const authorization = extractAuth(req);
     if(!authorization) {
-      if(couchdb_proxy_direct) {
-        res.statusCode = 401;
-        res.setHeader('WWW-Authenticate', 'Basic realm="couchdb auth"');
-        res.end('Укажите логин и пароль');
-        return false;
-      }
       if(is_common || is_mdm || is_log || is_event_source) {
         return {};
       }
-      throw new TypeError(`Отсутствует заголовок авторизации '${req.url}'`);
+      res.statusCode = 401;
+      res.setHeader('WWW-Authenticate', 'Basic realm="couchdb auth"');
+      res.end('Укажите логин и пароль');
+      return false;
     }
 
     if(paths[0] === 'auth' && req.method === 'DELETE') {
