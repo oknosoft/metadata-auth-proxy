@@ -184,16 +184,18 @@ module.exports = function pay($p, log, route) {
       .then((doc) => {
 
         // создадим приходник
-        (attr.card_order ? credit_card_order.get(attr.card_order, 'promise') : Promise.resolve(credit_card_order.create()))
+        (attr.card_order ? credit_card_order.get(attr.card_order, 'promise') : credit_card_order.create())
           .then((card_order) => {
+            if(card_order.is_new()) {
+              card_order.date = new Date();
+              card_order.number_doc = `${doc.number_internal}-${(Math.random() * 1e6).toFixed(0).substr(0, 4)}`;
+            }
             Object.assign(card_order, {
               organization: doc.organization,
               partner: doc.partner,
               department: doc.department,
               doc_amount: amount,
               responsible: doc.manager,
-              date: new Date(),
-              number_doc: `${doc.number_internal}-${(Math.random() * 1e6).toFixed(0).substr(0, 4)}`,
               payment_details: [{
                 trans: doc.ref,
                 cash_flow_article: cash_flow_articles.by_name('Оплата покупателя'),
@@ -311,6 +313,7 @@ module.exports = function pay($p, log, route) {
             return pay_cancel(id, attr);
           }
         }
+        log(pay);
       });
   }
 
