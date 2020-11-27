@@ -80,6 +80,7 @@ module.exports = function ({cat}, log) {
       }
       res.statusCode = 401;
       res.setHeader('WWW-Authenticate', 'Basic realm="couchdb auth"');
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
       res.end('Укажите логин и пароль');
       return false;
     }
