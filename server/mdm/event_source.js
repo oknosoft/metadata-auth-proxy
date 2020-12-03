@@ -32,7 +32,7 @@ module.exports = function event_source({adapters: {pouch}, utils, wsql, cat: {us
       }
     },
     nom_price(change) {
-
+      console.log(change);
     },
     pay(attr) {
       const {evt_id, ...othes} = attr;
