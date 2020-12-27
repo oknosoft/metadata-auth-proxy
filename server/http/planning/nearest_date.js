@@ -21,15 +21,19 @@ module.exports = function nearest_date({doc, acc, moment}) {
   return acc.client.query(`select balance from work_centers_balance where work_center in (${simple_work_centers.map(v => `'${v}'`).join(',')});`)
     .then(({rows}) => {
       let date = moment().add(20, 'days').format('YYYY-MM-DD');
+      const start = moment().add(2, 'days').format('YYYY-MM-DD')
       if(rows.length) {
         const counter = rows[0].balance.length;
         for(let i=0; i<counter; i++) {
           let d;
           if(rows.every(({balance}) => {
+            if(!balance[i]) {
+              return false;
+            }
             if(!d) {
               d = balance[i].date;
             }
-            if(balance[i].date !== d) {
+            if(d < start || balance[i].date !== d) {
               return false;
             }
             if(balance[i].percent > 2 && balance[i].debt > 0) {
