@@ -124,33 +124,37 @@ module.exports = function pay($p, log, route) {
   }
 
   // читает заказ в 1С и запускает в работу
-  function query_1c({ref, pay, id}) {
+  function query_1c({ref, pay, id, branch, zone}) {
 
-    return new Promise((resolve, reject) => {
-      const reset = setTimeout(reject, 90000);
-      setTimeout(() => {
-        fetch(`${upp.url}cardPay?ref=${pay}`, {headers: cache.headers})
-          .then((res) => {
-            clearTimeout(reset);
-            if(res.status > 201) {
-              reject(new Error(`Ошибка сервера 1С: ${res.statusText}`));
+    return cache.get(id)
+      .then((attr) => {
+        return attr.pay_1c_registered || new Promise((resolve, reject) => {
+          const reset = setTimeout(reject, 90000);
+          setTimeout(() => {
+            fetch(`${upp.url}cardPay?ref=${pay}&branch=${branch}&zone=${zone}`, {headers: cache.headers})
+              .then((res) => {
+                clearTimeout(reset);
+                if(res.status > 201) {
+                  reject(new Error(`Ошибка сервера 1С: ${res.statusText}`));
+                }
+                else {
+                  resolve(res.json());
+                }
+              })
+          }, 10000);
+        })
+          .then(data => {
+            if(data.error) {
+              throw new Error(`cardPay: ${data.error} ${data.reason}`);
             }
-            else {
-              resolve(res.json());
-            }
-          })
-      }, 10000);
-    })
-      .then(data => {
-        if(data.error) {
-          throw new Error(`cardPay: ${data.error} ${data.reason}`);
-        }
+            return cache.set(id, {pay_1c_registered: true});
+          });
       })
       .then(() => {
         return new Promise((resolve, reject) => {
           const reset = setTimeout(reject, 90000);
           setTimeout(() => {
-            fetch(`${upp.url}quickOrder?ref=${ref}`, {headers: cache.headers})
+            fetch(`${upp.url}quickOrder?ref=${ref}&branch=${branch}&zone=${zone}`, {headers: cache.headers})
               .then((res) => {
                 clearTimeout(reset);
                 if(res.status > 201) {
@@ -176,7 +180,8 @@ module.exports = function pay($p, log, route) {
   function pay_fin(id, attr) {
 
     let {ref, branch, amount} = attr;
-    const db = branches.get(branch).db('doc');
+    branch = branches.get(branch);
+    const db = branch.db('doc');
     const order = calc_order.create({ref}, false, true);
     //amount = parseFloat(amount) / 100;
 
@@ -184,8 +189,12 @@ module.exports = function pay($p, log, route) {
       .then((doc) => {
 
         // создадим приходник
-        (attr.card_order ? credit_card_order.get(attr.card_order, 'promise') : credit_card_order.create())
+        const card_order = credit_card_order.create({ref: attr.card_order}, false, true);
+        // пытаемся прочитать его из базы отдела
+        credit_card_order.adapter.load_obj(card_order, {db})
           .then((card_order) => {
+
+            // синхронно заполняем документ оплаты
             if(card_order.is_new()) {
               card_order.date = new Date();
               card_order.number_doc = `${doc.number_internal}-${(Math.random() * 1e6).toFixed(0).substr(0, 4)}`;
@@ -204,19 +213,20 @@ module.exports = function pay($p, log, route) {
             });
 
             return cache.set(id, {card_order: card_order.ref})
-              .then(() => card_order.save(true))
+              // сохраняем документ оплаты
+              .then(() => card_order.save(true, false, undefined, {db}))
 
-              // проведём документы и запустим процесс в 1C
+              // проводим документ Расчет и запускаем процесс в 1C
               .then(() => doc.save(true, false, undefined, {db}))
-              .then(() => {
-                // реплицируем документы в центральную базу
-                const doc_ids = [`doc.calc_order|${doc.ref}`, `doc.credit_card_order|${card_order.ref}`];
-                doc.production.forEach(({characteristic}) => {!characteristic.empty() && doc_ids.push(`cat.characteristics|${characteristic.ref}`)});
-                //return db.replicate.to(calc_order.adapter.remote.doc, {doc_ids});
-              })
+              // .then(() => {
+              //   // реплицируем документы в центральную базу
+              //   const doc_ids = [`doc.calc_order|${doc.ref}`, `doc.credit_card_order|${card_order.ref}`];
+              //   doc.production.forEach(({characteristic}) => {!characteristic.empty() && doc_ids.push(`cat.characteristics|${characteristic.ref}`)});
+              //   //return db.replicate.to(calc_order.adapter.remote.doc, {doc_ids});
+              // })
               .then(() => {
                 // запрос к УПП с указанием запустить в работу
-                query_1c({ref: doc.ref, pay: card_order.ref, id})
+                query_1c({ref: doc.ref, pay: card_order.ref, id, branch: branch.suffix, zone: branch.owner.id})
                   .catch(log);
               })
               .catch(log);
