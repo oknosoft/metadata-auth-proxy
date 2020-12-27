@@ -16,6 +16,10 @@ module.exports = function pay($p, log, route) {
     adapters: {pouch},
   } = $p;
 
+  if(!upp.sber.password) {
+    return;
+  }
+
   // в этом объекте живут методы чтения и установки сеансов оплаты и watchdog отложенной обработки
   const cache = {
     sessions: {},
