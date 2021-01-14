@@ -38,8 +38,12 @@ module.exports = function ($p, log) {
       if(this._data._price) {
         json._price = planify(this._data._price);
       }
-      json.units = nom_units.find_rows({owner: this})
-        .map((v) => `${v.ref},${v.id},${v.name},${v.qualifier_unit.ref},${v.heft},${v.volume},${v.coefficient},${v.rounding_threshold}`)
+      const owner = this.ref;
+      json.units =nom_units.alatable
+        .filter((v) => v.owner === owner)
+        .map((v) => {
+          return `${v.ref},${v.id},${v.name},${v.qualifier_unit},${v.heft||0},${v.volume||0},${v.coefficient||1},${v.rounding_threshold||0}`;
+        })
         .join('\n');
     }
     return json;

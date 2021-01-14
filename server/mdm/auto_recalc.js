@@ -265,6 +265,8 @@ module.exports = function auto_recalc($p, log) {
             rows.push(patch(o, name));
           }
         });
+        log(`Recaled ${zone}:${suffix === 'common' ? '0000' : suffix} ${name}`);
+
         const text = JSON.stringify({name, rows}) + '\r\n';
         const tag = tags[name];
         // если данные реально изменены - записываем

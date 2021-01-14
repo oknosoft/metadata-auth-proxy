@@ -31,12 +31,7 @@ module.exports = function ($p, log, worker) {
     timeoutMs: 3000 // Promise is rejected, if master doesn't answer for 3 secs
   });
 
-  //
-  // Create your custom server and just call `proxy.web()` to proxy
-  // a web request to the target passed in the options
-  // also you can use `proxy.ws()` to proxy a websockets request
-  //
-  const server = http.createServer(function(req, res) {
+  const handler = function(req, res) {
 
     const {remotePort, remoteAddress} = res.socket;
 
@@ -122,8 +117,15 @@ module.exports = function ($p, log, worker) {
         }
         end500({res, log, err});
       });
-  });
+  };
 
+  //
+  // Create your custom server and just call `proxy.web()` to proxy
+  // a web request to the target passed in the options
+  // also you can use `proxy.ws()` to proxy a websockets request
+  //
+  const server = http.createServer(handler);
   server.listen(conf.server.port);
+
   log(`PROXY listen on port: ${conf.server.port}`);
 };
