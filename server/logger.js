@@ -25,7 +25,7 @@ module.exports = function(runtime) {
 				time.toISOString() +
 				workerKey +
 				"[" + logObject.type + "]: "+
-      (logObject.message instanceof Error ? logObject.message.message : JSON.stringify(logObject.message))
+      (logObject.message instanceof Error ? logObject.message.stack : JSON.stringify(logObject.message))
 		);
 	};
 

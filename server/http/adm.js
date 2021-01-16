@@ -12,10 +12,9 @@ module.exports = function ($p, log) {
   const {cat, cch, utils} = $p;
   const route = {};
 
-  const bar = require('wb-paperless/server/bar')($p, log, route);
-  const scan = require('wb-paperless/server/scan')($p, log, route);
   const reports = require('wb-reports/server')($p, log, route);
 
+  require('wb-paperless/server')($p, log, route);
   require('./planning')($p, log, route);
   require('./supplier')($p, log, route);
   require('./foroom')($p, log, route);
@@ -63,15 +62,9 @@ module.exports = function ($p, log) {
       case 'ram':
         return ram_data(req, res);
 
-      case 'bar':
-        return bar(req, res);
-
-      case 'scan':
-        return scan(req, res);
-
       default:
         if(route[paths[2]]) {
-          route[paths[2]](req, res);
+          return route[paths[2]](req, res);
         }
         else {
           end404(res, `${paths[0]}/${paths[1]}/${paths[2]}`);
