@@ -49,7 +49,7 @@ module.exports = {
     this.dedup.add(obj);
     // если объект является папкой, добавляем всех его детей
     if(obj.is_folder && obj._children) {
-      for(const child of obj._children(true)) {
+      for(const child of obj._children()) {
         this.links(child);
       }
     }
@@ -84,7 +84,7 @@ module.exports = {
     // дополняем предопределенными элементами
     const {cat, job_prm, doc} = objs[0]._manager._owner.$p;
     Object.values(job_prm.nom).forEach((obj) => {
-      this.links(obj);
+      !obj.is_folder && this.links(obj);
     });
 
     // формируем кеш по массиву входящих ссылок
