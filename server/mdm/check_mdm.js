@@ -24,7 +24,7 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
 
   if(!branch.empty()) {
     if(name === 'cat.users') {
-      return o.branch.empty() ? o.subscribers.find(abonent, 'abonent') : (o.branch == branch || o.branch.parent == branch);
+      return o.branch.empty() ? o.subscribers.find({abonent}) : (o.branch == branch || o.branch.parent == branch);
     }
     else if(name === 'cat.branches') {
       return o == branch || branch._parents().includes(o);
@@ -50,7 +50,7 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
   }
   else {
     if(name === 'cat.users') {
-      return o.subscribers.find(abonent, 'abonent');
+      return o.subscribers.find({abonent});
     }
     else if(name === 'cat.branches') {
       return o.owner == abonent || o._children().some((branch) => branch.owner == abonent);
