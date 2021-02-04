@@ -16,7 +16,7 @@ module.exports = function ($p, log) {
   pricing.load_prices  = function load_prices() {
     return this.by_range()
       .then(() => {
-        // затем, подписываемся на изменения doc
+        // затем, подписываемся на изменения doc и meta
         doc_changes($p, log);
       });
   };

@@ -16,6 +16,22 @@ module.exports = function doc_changes({adapters: {pouch}, cat, pricing}, log) {
     }
   });
 
+  pouch.remote.meta.changes({
+    since: 'now',
+    live: true,
+    include_docs: true
+  })
+    .on('change', (change) => {
+      if(change.id.startsWith('cat') && !change.id.startsWith('cat.clrs')) {
+        // информируем мир об изменениях
+        pouch.load_changes({docs: [change.doc]});
+        pouch.emit('ram_change', change);
+      }
+    })
+    .on('error', (err) => {
+      log(`change error ${err}`);
+    });
+
   pouch.remote.doc.changes({
     since: 'now',
     live: true,
