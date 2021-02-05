@@ -79,11 +79,11 @@ module.exports = function settings(prm = {}) {
       rater: {                        // Request rate locker
         all: {                        // Total requests limit
           interval: 4,                // Seconds, collect interval
-          limit: 3000,                // Max requests per interval
+          limit: 2000,                // Max requests per interval - пока не используем
         },
         ip: {                         // Per-ip requests limit
           interval: 1,
-          limit: 300,                 // В диапазоне limit - 2*limit, добавляем задержку 10мс, после 2*limit - 429
+          limit: 100,                 // Если limit > 100, добавляем задержку 20мс
         }
       },
       upp: {

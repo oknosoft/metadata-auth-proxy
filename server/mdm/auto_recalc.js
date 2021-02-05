@@ -13,6 +13,7 @@ const check_mdm = require('./check_mdm');
 const load_predefined = require('./load_predefined');
 const dyn_mdm = require('./dyn_mdm');
 const fetch = require('node-fetch');
+const sleep = require('../sleep');
 require('../http/promisify');
 
 // корректировка данных
@@ -29,13 +30,6 @@ function patch(o, name) {
     }
   }
   return v;
-}
-
-// даёт процессору отдохнуть
-function sleep(time = 100, res) {
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(res), time);
-  });
 }
 
 // оповещает клиентский поток об изменениях

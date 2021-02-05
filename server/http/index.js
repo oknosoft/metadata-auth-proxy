@@ -10,7 +10,7 @@ const http = require('http');
 const url = require('url');
 const qs = require('qs');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
-
+const sleep = require('../sleep');
 const {end401, end404, end500} = require('./end');
 
 module.exports = function ($p, log, worker) {
@@ -37,7 +37,20 @@ module.exports = function ($p, log, worker) {
 
     // проверяем лимит запросов в секунду
     ipLimiter.consume(remoteAddress, 1)
+      .catch((rateLimiterRes) => {
+        if(rateLimiterRes instanceof Error) {
+          rateLimiterRes.error = true;
+          rateLimiterRes.status = 500;
+          end500({res, log, rateLimiterRes});
+          return rateLimiterRes;
+        }
+        return sleep(20);
+      })
       .then((rateLimiterRes) => {
+
+        if(rateLimiterRes instanceof Error) {
+          return ;
+        }
 
         const parsed = req.parsed = url.parse(req.url);
         parsed.paths = parsed.pathname.replace('/', '').split('/');
@@ -100,22 +113,6 @@ module.exports = function ($p, log, worker) {
             end500({res, err, log});
           });
 
-      })
-      .catch((rateLimiterRes) => {
-        let err;
-        if(rateLimiterRes instanceof Error) {
-          err = rateLimiterRes;
-          err.error = true;
-          err.status = 500;
-        }
-        else {
-          err = {
-            error: true,
-            status: 429,
-            message: `Too many requests`,
-          };
-        }
-        end500({res, log, err});
       });
   };
 
