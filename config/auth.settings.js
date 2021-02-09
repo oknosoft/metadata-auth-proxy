@@ -25,6 +25,13 @@ module.exports = {
     passReqToCallback: true,
     scope: ['https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
   },
+  saml: {
+    authPrefix: 'SAML ',
+    server: {
+      url: process.env.SAML_URL || 'https://adfs.oknagc.ru/adfs/ls',
+      slo: process.env.SAML_SLO || 'https://adfs.oknagc.ru/adfs/ls/?wa=wsignout1.0',
+    }
+  },
   ldap: {
     authPrefix: 'LDAP ',
     server: {
