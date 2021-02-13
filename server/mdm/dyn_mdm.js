@@ -81,23 +81,32 @@ module.exports = {
     if(!Array.isArray(objs)) {
       objs = Object.values(objs);
     }
+
+    let res = Promise.resolve();
+
     // дополняем предопределенными элементами
     const {cat, job_prm, doc} = objs[0]._manager._owner.$p;
     Object.values(job_prm.nom).forEach((obj) => {
-      !obj.is_folder && this.links(obj);
+      if(!obj.is_folder) {
+        res = res.then(() => this.links(obj));
+      };
     });
 
     // формируем кеш по массиву входящих ссылок
     for(const obj of objs) {
-      this.links(obj);
+      res = res.then(() => this.links(obj));
     }
-    // дополняем кеш ссылками соединений
-    objs.length && this.cnns(cat);
-    // чистим кеш заказов-шаблонов и характеристик
-    this.templates.clear();
-    for(const tmpl of tmplts) {
-      this.templates.add(tmpl);
-    }
+
+    return res
+      // дополняем кеш ссылками соединений
+      .then(() => objs.length && this.cnns(cat))
+      .then(() => {
+        // чистим кеш заказов-шаблонов и характеристик
+        this.templates.clear();
+        for(const tmpl of tmplts) {
+          this.templates.add(tmpl);
+        }
+      });
   },
 
 };

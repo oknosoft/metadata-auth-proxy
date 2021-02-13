@@ -174,7 +174,8 @@ module.exports = function auto_recalc($p, log) {
               }
             }
           });
-          dyn_mdm.prepare(Array.from(objs), Array.from(tmplts));
+
+          await dyn_mdm.prepare(Array.from(objs), Array.from(tmplts));
 
           const abranches = [];
           branches.find_rows({owner: abonent}, (o) => abranches.push(o));
