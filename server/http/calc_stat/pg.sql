@@ -35,10 +35,11 @@ CREATE TABLE public.calc_stat
     doc uuid NOT NULL,
     nom uuid NOT NULL,
     sys uuid NOT NULL,
+    partner uuid,
     quantity real,
     s real,
     amount real,
-    CONSTRAINT calc_stat_pkey PRIMARY KEY (date, state, department, manager, doc, nom, sys)
+    CONSTRAINT cstat_pkey PRIMARY KEY (date, state, department, manager, doc, nom, sys)
 )
 WITH (OIDS = FALSE);
 
