@@ -70,9 +70,6 @@ module.exports = function (log, is_common) {
     pouch_data_page(page) {
       log(`loadind to ram: page №${page.page} (${page.page * page.limit} from ${page.total_rows})`);
     },
-    pouch_complete_loaded(page) {
-      log(`loadind to ram: complete`);
-    },
     pouch_doc_ram_loaded() {
       return (is_common ? linked_templates($p) : require('wb-reports/server/windowbuilder/accumulation')($p))
         //.then(() => $p.pricing.load_prices())

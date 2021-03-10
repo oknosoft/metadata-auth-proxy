@@ -68,6 +68,11 @@ module.exports = function auto_recalc($p, log) {
     recalcing: false,
 
     /**
+     * флаг загруженности данных
+     */
+    loaded: false,
+
+    /**
      * очередь изменений
      */
     queue: {
@@ -307,9 +312,18 @@ module.exports = function auto_recalc($p, log) {
   }
 
   // инициируем стартовый пересчет
-  setTimeout(changes.register.bind(changes), job_prm.server.defer / 2);
+  pouch.once('pouch_complete_loaded', () => {
+    setTimeout(() => {
+      changes.loaded = true;
+      changes.register();
+    }, job_prm.server.defer / 2);
+  });
 
-  pouch.on('nom_price', changes.register.bind(changes, 'cat.nom'));
+  pouch.on('nom_price', () => {
+    if(changes.loaded) {
+      changes.register('cat.nom');
+    }
+  });
 
   // регистрируем для будущего пересчета
   pouch.on('ram_change', (change) => {
