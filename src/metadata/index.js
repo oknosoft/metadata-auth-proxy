@@ -64,7 +64,7 @@ export function init(store) {
         .then(() => load_ram({pouch, classes, job_prm, cat}));
     },
     pouch_doc_ram_loaded() {
-      pouch.emit('pouch_complete_loaded');
+      !pouch.props.user_node && pouch.emit('pouch_complete_loaded');
     },
   });
 

@@ -10,7 +10,7 @@ const doc_changes = require('../changes_doc');
 
 module.exports = function ($p, log) {
 
-  const {CatNom, classes: {CatObj}, pricing, cat: {nom_units}} = $p;
+  const {CatNom, classes: {CatObj}, pricing, adapters, cat: {nom_units}} = $p;
 
   // грузит в ram цены номенклатуры
   pricing.load_prices  = function load_prices() {
@@ -18,6 +18,7 @@ module.exports = function ($p, log) {
       .then(() => {
         // затем, подписываемся на изменения doc и meta
         doc_changes($p, log);
+        adapters.pouch.emit('pouch_complete_loaded');
       });
   };
 
