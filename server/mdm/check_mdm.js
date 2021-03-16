@@ -22,61 +22,43 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
     return true;
   }
 
-  if(!branch.empty()) {
-    if(name === 'cat.users') {
-      return o.branch.empty() ? o.subscribers.find({abonent}) : (o.branch == branch || o.branch.parent == branch);
-    }
-    else if(name === 'cat.branches') {
-      return o == branch || branch._parents().includes(o);
-    }
-    else if(name === 'cat.partners') {
-      const rows = o.is_folder ? o._children().concat(o) : [o];
-      return rows.some((o) => branch.partners.find({acl_obj: o}));
-    }
-    else if(name === 'cat.organizations') {
-      return branch.organizations.find({acl_obj: o});
-    }
-    else if(name === 'cat.contracts') {
-      return branch.partners.find({acl_obj: o.owner}) && branch.organizations.find({acl_obj: o.organization});
-    }
-    else if(name === 'cat.divisions') {
-      const rows = o._children().concat(o);
-      return rows.some((o) => branch.divisions.find({acl_obj: o}));
-    }
-    else if(name === 'cat.cashboxes' || name === 'cat.stores') {
-      const rows = o.department._children().concat(o.department);
-      return rows.some((o) => branch.divisions.find({acl_obj: o}));
-    }
-  }
-  else {
+  if(branch.empty()) {
     if(name === 'cat.users') {
       return o.subscribers.find({abonent});
     }
     else if(name === 'cat.branches') {
       return o.owner == abonent || o._children().some((branch) => branch.owner == abonent);
     }
-    else if(name === 'cat.partners') {
-      const rows = o.is_folder ? o._children().concat(o) : [o];
-      return rows.some((o) => abranches.some((branch) => branch.partners.find({acl_obj: o})));
+  }
+  else {
+    if(name === 'cat.users') {
+      return o.branch.empty() ? o.subscribers.find({abonent}) : (o.branch == branch || o.branch.parent == branch);
     }
-    else if(name === 'cat.organizations') {
-      return abranches.some((branch) => branch.organizations.find({acl_obj: o}));
-    }
-    else if(name === 'cat.contracts') {
-      return abranches.some((branch) => branch.partners.find({acl_obj: o.owner}) && branch.organizations.find({acl_obj: o.organization}));
-    }
-    else if(name === 'cat.divisions') {
-      const rows = o._children().concat(o);
-      return rows.some((o) => abranches.some((branch) => branch.divisions.find({acl_obj: o})));
-    }
-    else if(name === 'cat.cashboxes' || name === 'cat.stores') {
-      const rows = o.department._children().concat(o.department);
-      return rows.some((o) => abranches.some((branch) => branch.divisions.find({acl_obj: o})));
+    else if(name === 'cat.branches') {
+      return o == branch || branch._parents().includes(o);
     }
   }
+  if(name === 'cat.partners') {
+    const rows = o.is_folder ? o._children().concat(o) : [o];
+    return rows.some((acl_obj) => abranches.some((branch) => branch.partners.find({acl_obj})));
+  }
+  else if(name === 'cat.organizations') {
+    return abranches.some((branch) => branch.organizations.find({acl_obj: o}));
+  }
+  else if(name === 'cat.contracts') {
+    return abranches.some((branch) => branch.partners.find({acl_obj: o.owner}) && branch.organizations.find({acl_obj: o.organization}));
+  }
+  else if(name === 'cat.divisions') {
+    const rows = o._children().concat(o);
+    return rows.some((acl_obj) => abranches.some((branch) => branch.divisions.find({acl_obj})));
+  }
+  else if(name === 'cat.cashboxes' || name === 'cat.stores') {
+    const rows = o.department._children().concat(o.department);
+    return rows.some((acl_obj) => abranches.some((branch) => branch.divisions.find({acl_obj})));
+  }
+
   return dyn_mdm.check(o);
 }
-
 
 
 function check_characteristics(o) {

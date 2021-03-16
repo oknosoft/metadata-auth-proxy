@@ -182,14 +182,12 @@ module.exports = function auto_recalc($p, log) {
 
           await dyn_mdm.prepare(Array.from(objs), Array.from(tmplts));
 
-          const abranches = [];
-          branches.find_rows({owner: abonent}, (o) => abranches.push(o));
 
           // пересчет корня текущего абонента
           await recalc({
             abonent,
             branch: branches.get(),
-            abranches,
+            abranches: branches.find_rows({owner: abonent}),
             suffix: 'common',
             types,
           });
@@ -214,7 +212,7 @@ module.exports = function auto_recalc($p, log) {
             await recalc({
               abonent,
               branch,
-              abranches,
+              abranches: [branch].concat(branch._children()),
               suffix: branch.suffix,
               types,
             });
@@ -222,6 +220,7 @@ module.exports = function auto_recalc($p, log) {
         }
       }
       catch (e) {
+        log(e);
         this.register(types);
       }
 
@@ -245,7 +244,14 @@ module.exports = function auto_recalc($p, log) {
     }
 
     const manifest = resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}/manifest.json`);
-    const tags = fs.existsSync(manifest) ? JSON.parse(await fs.readFileAsync(manifest, 'utf8')) : {};
+    let tags = {};
+    if(fs.existsSync(manifest)) {
+      try {
+        tags = JSON.parse(await fs.readFileAsync(manifest, 'utf8'));
+      }
+      catch (e) {}
+    }
+
     for(const name of types) {
       const mgr = md.mgr_by_class_name(name);
       if(mgr) {
@@ -329,12 +335,17 @@ module.exports = function auto_recalc($p, log) {
   pouch.on('ram_change', (change) => {
     try {
       const class_name = change.id.split('|')[0];
-      changes.register(['cat.branches', 'cat.abonents'].includes(class_name) ? '' : class_name);
-      if(class_name === 'cch.predefined_elmnts') {
-        const {types} = change.doc.type;
-        types && types.forEach((type) => {
-          type.includes('.') && changes.register(type);
-        });
+      if(['cat.branches', 'cat.abonents'].includes(class_name)) {
+        changes.register();
+      }
+      else {
+        changes.register(class_name);
+        if(class_name === 'cch.predefined_elmnts') {
+          const {types} = change.doc.type;
+          types && types.forEach((type) => {
+            type.includes('.') && changes.register(type);
+          });
+        }
       }
     }
     catch (e) {}

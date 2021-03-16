@@ -14,11 +14,13 @@ module.exports = function ($p, log) {
 
   // грузит в ram цены номенклатуры
   pricing.load_prices  = function load_prices() {
+    log('load_prices: start');
     return this.by_range()
       .then(() => {
         // затем, подписываемся на изменения doc и meta
         doc_changes($p, log);
         adapters.pouch.emit('pouch_complete_loaded');
+        log('load_prices: ready');
       });
   };
 
