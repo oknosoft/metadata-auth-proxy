@@ -2,8 +2,8 @@ const handler = require('serve-handler');
 // const compression = require('compression');
 // const {promisify} = require('util');
 // const compressionHandler = promisify(compression());
-const paths = require('../../config/paths');
-const render_path = process.env.RENDER_PATH || paths.appBuild;
+
+const render_path = process.env.RENDER_PATH || '';
 
 module.exports = async (req, res) => {
   //await compressionHandler(req, res);

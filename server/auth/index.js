@@ -8,9 +8,7 @@ const cache = require('./cache');
 // контекст авторизации
 const auth = {
   settings: require('../../config/auth.settings'),
-  providers: {
-
-  },
+  providers: {},
 };
 const oauth = require('./oauth')(auth);
 
@@ -24,7 +22,7 @@ function decodeBase64 (str) {
 }
 
 function extractAuth(req) {
-  let {authorization, impersonation} = req.headers;
+  let {authorization, impersonation, cookie} = req.headers;
   if(authorization) {
     //authorization = authorization.replace('Basic', 'LDAP');
     for(const provider in auth.providers) {

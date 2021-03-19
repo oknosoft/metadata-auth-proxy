@@ -10,11 +10,11 @@ const http = require('http');
 const url = require('url');
 const qs = require('qs');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
-const sleep = require('../sleep');
 const {end401, end404, end500} = require('./end');
 
 module.exports = function ($p, log, worker) {
 
+  const {utils} = $p;
   const couchdbProxy = require('./proxy-couchdb')($p, log);
   const commonProxy = require('./proxy-common');
   const staticProxy = require('./static');
@@ -44,7 +44,7 @@ module.exports = function ($p, log, worker) {
           end500({res, log, rateLimiterRes});
           return rateLimiterRes;
         }
-        return sleep(20);
+        return utils.sleep(20);
       })
       .then((rateLimiterRes) => {
 

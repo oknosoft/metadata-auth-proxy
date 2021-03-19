@@ -13,7 +13,6 @@ const check_mdm = require('./check_mdm');
 const load_predefined = require('./load_predefined');
 const dyn_mdm = require('./dyn_mdm');
 const fetch = require('node-fetch');
-const sleep = require('../sleep');
 require('../http/promisify');
 
 // корректировка данных
@@ -294,7 +293,7 @@ module.exports = function auto_recalc($p, log) {
       branch.empty() && notify(abonent, branch, ctypes, job_prm.server.port);
     }
 
-    return sleep();
+    return utils.sleep();
   }
 
   async function recalc_templates({abonent, tmplts}) {
