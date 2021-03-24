@@ -168,7 +168,7 @@ function order (md) {
   ];
 
   for(const class_name of md.classes().cat) {
-    if(['abonents', 'servers', 'nom_units', 'individuals', 'meta_fields', 'meta_objs'].includes(class_name)) {
+    if(['abonents', 'servers', 'nom_units', 'meta_fields', 'meta_objs'].includes(class_name)) {
       continue;
     }
     else if(['property_values', 'property_values_hierarchy', 'contact_information_kinds', 'currencies'].includes(class_name)) {
