@@ -6,6 +6,8 @@
  * Created by Evgeniy Malyarov on 02.06.2019.
  */
 
+const {old_doc_ram, preserv_cachable} = require('../../scripts/meta.patch');
+
 module.exports = function on_log_in(log) {
   return function on_log_in({pouch, classes, job_prm, cat, ireg}) {
     const {auth} = pouch.remote.ram.__opts;
@@ -36,11 +38,8 @@ module.exports = function on_log_in(log) {
           // грузим из doc_ram
           let res = Promise.resolve();
           const handler = (mgr) => {
-            if(/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
-              if([
-                //'cat.branches',
-                //'cat.divisions',
-                'cat.characteristics'].includes(mgr.class_name)) {
+            if(old_doc_ram.includes(mgr.class_name) || /^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
+              if(preserv_cachable.includes(mgr.class_name)) {
                 return;
               }
               cat.abonents.forEach((abonent) => {

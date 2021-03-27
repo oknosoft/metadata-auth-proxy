@@ -102,8 +102,24 @@ const read_only = [];
 
 const preserv_cachable = [
   'cat.characteristics',
+  'cat.leads',
+  'cat.projects',
   'doc.calc_order',
   'doc.credit_card_order',
+];
+
+const old_doc_ram = [
+  'ireg.margin_coefficients',
+  'cat.partner_bank_accounts',
+  'cat.contracts',
+  'cat.cashboxes',
+  'cat.parameters_keys',
+  'cat.partners',
+  'cat.choice_params',
+  'cat.divisions',
+  'cat.stores',
+  'cat.nom_prices_types',
+  'cat.branches',
 ];
 
 
@@ -152,3 +168,6 @@ module.exports = function(meta, cache_only) {
 }
 
 module.exports.include = include;
+module.exports.preserv_cachable = preserv_cachable;
+module.exports.old_doc_ram = old_doc_ram;
+
