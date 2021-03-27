@@ -55,7 +55,7 @@ function extractAuth(req) {
   }
 }
 
-module.exports = function ({cat}, log) {
+module.exports = function ({cat, job_prm}, log) {
 
   /**
    * Получает на вход httpRequest и возвращает Promise с идентификатором пользователя или reject, усли авторизоваться не удалось
@@ -111,6 +111,11 @@ module.exports = function ({cat}, log) {
     }
     if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
       throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
+    }
+    if(job_prm.server.restrict_archive &&
+        !user.acl_objs._obj.some((row) => row.type == 'ПросмотрАрхивов') &&
+        !user.acl_objs._obj.some((row) => row.type == 'СогласованиеРасчетовЗаказов')) {
+      throw new TypeError(`Пользователю '${user.name}' запрещен доступ к базе архива`);
     }
     // олицетворение - вход от имени другого пользователя
     const impersonation = authorization.impersonation || cache.ext(authorization.key);

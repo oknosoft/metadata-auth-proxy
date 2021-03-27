@@ -65,7 +65,8 @@ module.exports = function settings(prm = {}) {
     server: {
       prefix: '/adm/api',             // Mount path, no trailing slash
       port: process.env.PORT || 3016, // Port
-      start_common: process.env.START_COMMON,
+      start_common: Boolean(process.env.START_COMMON),
+      restrict_archive: Boolean(process.env.RESTRICT_ARCHIVE),
       common_url: process.env.RAMURL || 'http://localhost:3026',
       quick_url: process.env.QUICKURL || 'https://quick.ecookna.ru',
       maxpost: 40 * 1024 * 1024,      // Max size of POST request
