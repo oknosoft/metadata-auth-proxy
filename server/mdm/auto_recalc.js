@@ -93,6 +93,11 @@ module.exports = function auto_recalc($p, log) {
      * @param type {string|array|undefined}
      */
     register(type) {
+      // пока всё не загружено, ничего не регистрируем
+      if(!this.loaded) {
+        return;
+      }
+
       const queue = this.queue.get();
       if(!type) {
         for (const types of load_order) {
@@ -324,11 +329,7 @@ module.exports = function auto_recalc($p, log) {
     }, job_prm.server.defer / 2);
   });
 
-  pouch.on('nom_price', () => {
-    if(changes.loaded) {
-      changes.register('cat.nom');
-    }
-  });
+  pouch.on('nom_price', changes.register.bind(changes, 'cat.nom'));
 
   // регистрируем для будущего пересчета
   pouch.on('ram_change', (change) => {
