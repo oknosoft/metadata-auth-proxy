@@ -22,7 +22,7 @@ function decodeBase64 (str) {
 }
 
 function extractAuth(req) {
-  let {authorization, impersonation, cookie} = req.headers;
+  let {authorization, impersonation, cookie, zone, branch, year} = req.headers;
   if(authorization) {
     //authorization = authorization.replace('Basic', 'LDAP');
     for(const provider in auth.providers) {
@@ -44,6 +44,9 @@ function extractAuth(req) {
               password: decoded[2],
               method: auth.providers[provider],
               impersonation,
+              zone,
+              branch,
+              year,
             };
           }
         }
@@ -101,6 +104,7 @@ module.exports = function ({cat, job_prm}, log) {
       }
       cache.put(authorization.key, token, authorization.impersonation);
     }
+
     let user = cat.users.by_auth(token);
     if(!user) {
       if(is_common) {
@@ -117,8 +121,12 @@ module.exports = function ({cat, job_prm}, log) {
         !user.acl_objs._obj.some((row) => row.type == 'СогласованиеРасчетовЗаказов')) {
       throw new TypeError(`Пользователю '${user.name}' запрещен доступ к базе архива`);
     }
+
+    // TODO: учесть branch, zone и year из заголовков
+
     // олицетворение - вход от имени другого пользователя
     const impersonation = authorization.impersonation || cache.ext(authorization.key);
+    // TODO: учесть вложенность отдела абонента
     if(user.roles.includes('doc_full') && impersonation) {
       user = cat.users.by_id(impersonation);
       if(!user) {
