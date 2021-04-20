@@ -10,11 +10,18 @@ const http = require('http');
 const url = require('url');
 const qs = require('qs');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
+const https = require('https');
+const httpProxy = require('http-proxy');
 const {end401, end404, end500} = require('./end');
+
+const proxy = {
+  http: httpProxy.createProxyServer({xfwd: true}),
+  https: httpProxy.createProxyServer({xfwd: true, agent: https.globalAgent, secure: false}),
+};
 
 module.exports = function ($p, log, worker) {
 
-  const {utils} = $p;
+  const {utils, cat: {abonents}} = $p;
   const couchdbProxy = require('./proxy-couchdb')($p, log);
   const commonProxy = require('./proxy-common');
   const staticProxy = require('./static');
@@ -31,7 +38,23 @@ module.exports = function ($p, log, worker) {
     timeoutMs: 3000 // Promise is rejected, if master doesn't answer for 3 secs
   });
 
-  const handler = function(req, res) {
+  function proxy_by_year(req, res) {
+    const {year, zone} = req.headers;
+    if(zone && year) {
+      const abonent = abonents.by_id(zone);
+      if(!abonent.is_new()) {
+        const yrow = abonent.servers.find({key: parseFloat(year)});
+        if(yrow && yrow.proxy) {
+          const proxy_server = proxy[yrow.proxy.startsWith('https://') ? 'https' : 'http'];
+          delete req.headers.year;
+          proxy_server.web(req, res, {target: yrow.proxy});
+          return true;
+        }
+      }
+    }
+  }
+
+  function handler(req, res) {
 
     const {remotePort, remoteAddress} = res.socket;
 
@@ -54,6 +77,11 @@ module.exports = function ($p, log, worker) {
 
         const parsed = req.parsed = url.parse(req.url);
         parsed.paths = parsed.pathname.replace('/', '').split('/');
+
+        // стартовая маршрутизация по году и зоне
+        if(proxy_by_year(req, res)) {
+          return ;
+        }
 
         const {host} = req.headers;
         if(conf.server.couchdb_proxy_direct.some((name) => host.startsWith(name))) {
