@@ -41,14 +41,17 @@ module.exports = function ($p, log, worker) {
   function proxy_by_year(req, res) {
     const {year, zone} = req.headers;
     if(zone && year) {
-      const abonent = abonents.by_id(zone);
-      if(!abonent.is_new()) {
-        const yrow = abonent.servers.find({key: parseFloat(year)});
-        if(yrow && yrow.proxy) {
-          const proxy_server = proxy[yrow.proxy.startsWith('https://') ? 'https' : 'http'];
-          delete req.headers.year;
-          proxy_server.web(req, res, {target: yrow.proxy});
-          return true;
+      const key = parseFloat(year);
+      if(key !== new Date().getFullYear()) {
+        const abonent = abonents.by_id(zone);
+        if(!abonent.is_new()) {
+          const yrow = abonent.servers.find({key});
+          if(yrow && yrow.proxy) {
+            const proxy_server = proxy[yrow.proxy.startsWith('https://') ? 'https' : 'http'];
+            delete req.headers.year;
+            proxy_server.web(req, res, {target: yrow.proxy});
+            return true;
+          }
         }
       }
     }

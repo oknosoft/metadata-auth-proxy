@@ -30,6 +30,7 @@ const by_branch = [
 // эти общие - их не режем и грузим сразу
 const common = [
   'cch.properties',
+  'cat.abonents',
   'cat.property_values',
   'cat.property_values_hierarchy',
   'cat.contact_information_kinds',
@@ -168,10 +169,10 @@ function order (md) {
   ];
 
   for(const class_name of md.classes().cat) {
-    if(['abonents', 'servers', 'nom_units', 'meta_fields', 'meta_objs'].includes(class_name)) {
+    if(['servers', 'nom_units', 'meta_fields', 'meta_objs'].includes(class_name)) {
       continue;
     }
-    else if(['property_values', 'property_values_hierarchy', 'contact_information_kinds', 'currencies'].includes(class_name)) {
+    else if(['abonents', 'property_values', 'property_values_hierarchy', 'contact_information_kinds', 'currencies'].includes(class_name)) {
       res[1].add(`cat.${class_name}`);
     }
     else if(class_name === 'users') {
