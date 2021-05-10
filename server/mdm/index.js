@@ -13,6 +13,7 @@ const {resolve} = require('path');
 const merge2 = require('merge2');
 const manifest = require('./manifest');
 const head = require('./head');
+const current_branch = require('./current_branch');
 require('../http/promisify');
 
 // эти режем по отделу
@@ -51,7 +52,7 @@ const common = [
 
 function mdm ($p, log) {
 
-  const {md, cat: {branches, templates}, utils, job_prm, adapters: {pouch}} = $p;
+  const {md, cat: {branches, templates, users}, utils, job_prm, adapters: {pouch}} = $p;
   // порядок загрузки, чтобы при загрузке меньше оборванных ссылок
   const load_order = order(md);
 
@@ -118,6 +119,7 @@ function mdm ($p, log) {
       if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
         return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
       }
+      // пишем манифест в head
       await manifest({res, zone, suffix, by_branch, common});
 
       const tags = {};
@@ -147,6 +149,7 @@ function mdm ($p, log) {
           }
         }
       }
+      suffix === 'common' && current_branch({stream, branches, users, headers, utils});
       stream.pipe(res);
       res.on('close', () => stream.destroy());
     }
