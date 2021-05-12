@@ -117,6 +117,8 @@ module.exports = function ({cat, job_prm}, log) {
       throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
     }
     if(job_prm.server.restrict_archive &&
+        !user.roles.includes('doc_full') &&
+        !user.roles.includes('_admin') &&
         !user.acl_objs._obj.some((row) => row.type == 'ПросмотрАрхивов') &&
         !user.acl_objs._obj.some((row) => row.type == 'СогласованиеРасчетовЗаказов')) {
       throw new TypeError(`Пользователю '${user.name}' запрещен доступ к базе архива`);

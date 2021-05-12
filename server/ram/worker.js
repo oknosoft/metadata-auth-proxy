@@ -41,7 +41,7 @@ module.exports = function (runtime) {
             const start = (req.method === 'POST' || req.method === 'PUT') ? getBody(req) : Promise.resolve();
 
             return start.then((body) => {
-              const {remotePort, remoteAddress} = res.socket;
+              //const {remotePort, remoteAddress} = res.socket;
               const parsed = req.parsed = url.parse(req.url);
               parsed.paths = parsed.pathname.replace('/', '').split('/').map(decodeURIComponent);
               req.query = qs.parse(decodeURIComponent(parsed.query));

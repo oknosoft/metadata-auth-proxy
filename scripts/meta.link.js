@@ -22,13 +22,18 @@ const repos = [
     dir: 'server',
   },
   {
-    local: 'wb-paperless',
-    remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\paperless',
+    local: 'wb-planning',
+    remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\windowbuilder-planning',
     dir: 'server',
   },
   {
-    local: 'wb-planning',
-    remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\windowbuilder-planning',
+    local: 'wb-parametric',
+    remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\windowbuilder-parametric',
+    dir: 'server',
+  },
+  {
+    local: 'wb-paperless',
+    remote: 'D:\\WORK\\0KNOSOFT\\UniServer\\www\\builder2\\paperless',
     dir: 'server',
   },
 ];

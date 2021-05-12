@@ -12,8 +12,8 @@ module.exports = function ($p, log) {
   const {cat, cch, utils} = $p;
   const route = {};
 
-  const reports = require('wb-reports/server')($p, log, route);
-
+  require('wb-reports')($p, log, route);
+  require('wb-parametric')($p, log, route);
   require('wb-paperless/server')($p, log, route);
   require('./planning')($p, log, route);
   require('./supplier')($p, log, route);
@@ -54,7 +54,10 @@ module.exports = function ($p, log) {
 
     try {
       if (paths[0] === 'r' || paths[2] === 'r') {
-        return reports(req, res);
+        return route.r(req, res);
+      }
+      if (paths[0] === 'prm' || paths[2] === 'prm') {
+        return route.prm(req, res);
       }
 
       res.setHeader('Content-Type', 'application/json');

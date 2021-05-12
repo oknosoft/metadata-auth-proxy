@@ -62,7 +62,7 @@ module.exports = function ($p, log, worker) {
     const {remotePort, remoteAddress} = res.socket;
 
     // проверяем лимит запросов в секунду
-    ipLimiter.consume(remoteAddress, 1)
+    ipLimiter.consume(`${req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || remoteAddress}`, 1)
       .catch((rateLimiterRes) => {
         if(rateLimiterRes instanceof Error) {
           rateLimiterRes.error = true;
@@ -131,7 +131,7 @@ module.exports = function ($p, log, worker) {
               if(parsed.paths[0] === 'couchdb') {
                 return couchdbProxy(req, res);
               }
-              if(['adm', 'r', 'plan'].includes(parsed.paths[0])) {
+              if(['adm', 'r', 'prm', 'plan'].includes(parsed.paths[0])) {
                 return adm(req, res);
               }
               return end404(res, parsed.paths[0]);
