@@ -60,7 +60,7 @@ module.exports = function ($p, log) {
         return route.prm(req, res);
       }
 
-      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
       switch (paths[2]) {
       case 'ram':
         return ram_data(req, res);

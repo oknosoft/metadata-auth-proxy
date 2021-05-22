@@ -6,4 +6,6 @@ module.exports = function ($p, log) {
   require('wb-core/dist/node')($p, log);
   require('./catalogs/cat_users')($p, log);
   require('./catalogs/cat_nom')($p, log);
+
+  $p.patchCatUsers();
 }
