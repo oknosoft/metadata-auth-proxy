@@ -42,7 +42,7 @@ module.exports = function ($p, log, worker) {
     const {year, zone} = req.headers;
     if(zone && year) {
       const key = parseFloat(year);
-      if(key !== new Date().getFullYear()) {
+      if(key !== conf.server.year) {
         const abonent = abonents.by_id(zone);
         if(!abonent.is_new()) {
           const yrow = abonent.servers.find({key});

@@ -74,6 +74,7 @@ module.exports = function settings(prm = {}) {
       branches: process.env.BRANCHES ? JSON.parse(process.env.BRANCHES) : null,     // список отделов можно ограничить
       single_db: Boolean(process.env.SINGLE_DB),                                    // использовать основную базу doc вместо перебора баз абонентов
       no_mdm: Boolean(process.env.NOMDM),
+      year: process.env.YEAR ? parseFloat(process.env.YEAR) : new Date().getFullYear(),
       disable_mdm: Boolean(process.env.DISABLEMDM),
       defer: (process.env.DEFER ? parseFloat(process.env.DEFER) : 200000) + Math.random() * 10000,  // задержка пересчета mdm
       eve_url: process.env.EVEURL || 'http://localhost:5984/pl_events',
