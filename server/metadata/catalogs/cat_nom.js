@@ -10,15 +10,21 @@ const doc_changes = require('../changes_doc');
 
 module.exports = function ($p, log) {
 
-  const {CatNom, classes: {CatObj}, pricing, adapters, cat: {nom_units}} = $p;
+  const {CatNom, classes: {CatObj}, pricing, adapters, cat: {nom_units}, utils} = $p;
 
   // грузит в ram цены номенклатуры
   pricing.load_prices  = function load_prices() {
     log('load_prices: start');
+    const start = Date.now();
     return this.by_range()
-      .then(() => {
+      .then(async () => {
         // затем, подписываемся на изменения doc и meta
         doc_changes($p, log);
+
+        while (Date.now() - start < 16000) {
+          await utils.sleep(1000);
+        }
+
         adapters.pouch.emit('pouch_complete_loaded');
         log('load_prices: ready');
       });

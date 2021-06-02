@@ -184,7 +184,7 @@ module.exports = function auto_recalc($p, log) {
             }
           });
 
-          await dyn_mdm.prepare(Array.from(objs), Array.from(tmplts));
+          await dyn_mdm.prepare(Array.from(objs), Array.from(tmplts), $p);
 
 
           // пересчет корня текущего абонента

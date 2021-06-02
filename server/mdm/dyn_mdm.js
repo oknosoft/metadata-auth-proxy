@@ -75,7 +75,7 @@ module.exports = {
   // кеш для внешних модулей
   templates: new Set(),
 
-  prepare(objs, tmplts) {
+  prepare(objs, tmplts, {cat, job_prm, doc}) {
     // чистим кеш ссылок
     this.dedup.clear();
     if(!Array.isArray(objs)) {
@@ -85,7 +85,6 @@ module.exports = {
     let res = Promise.resolve();
 
     // дополняем предопределенными элементами
-    const {cat, job_prm, doc} = objs[0]._manager._owner.$p;
     Object.values(job_prm.nom).forEach((obj) => {
       if(!obj.is_folder) {
         res = res.then(() => this.links(obj));
