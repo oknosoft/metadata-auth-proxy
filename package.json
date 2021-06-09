@@ -53,7 +53,7 @@
     "wb-paperless": "github:oknosoft/paperless#server",
     "wb-planning": "github:oknosoft/windowbuilder-planning",
     "wb-reports": "github:oknosoft/windowbuilder-reports#ceed09bcab90ac11b78e9e8fd13100ae8fd6da68",
-    "wb-parametric": "github:oknosoft/windowbuilder-parametric#e680852402cbcd31b152626dd8d13fec7173cdab",
+    "wb-parametric": "github:oknosoft/windowbuilder-parametric#4c560d71373e0dd1e669ca07c82aa89616f810b3",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
