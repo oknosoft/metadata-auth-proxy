@@ -76,7 +76,7 @@ module.exports = function ({cat, job_prm}, log) {
     // проверяем авторизацию
     const authorization = extractAuth(req);
     if(!authorization) {
-      if(is_common || is_mdm || is_log || is_event_source) {
+      if(is_common || (is_mdm && paths.includes('common')) || is_log || is_event_source) {
         return {};
       }
       res.statusCode = 401;
