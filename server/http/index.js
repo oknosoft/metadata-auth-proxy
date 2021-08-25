@@ -128,7 +128,7 @@ module.exports = function ($p, log, worker) {
                   return end401({res, err: {message: `host ${host} for admins only, role 'doc_full' required`}, log});
                 }
               }
-              if(parsed.paths[0] === 'couchdb') {
+              if(['couchdb', '_session'].includes(parsed.paths[0])) {
                 return couchdbProxy(req, res);
               }
               if(['adm', 'r', 'prm', 'plan'].includes(parsed.paths[0])) {
