@@ -43,7 +43,7 @@ function notify(abonent, branch, types, port) {
 
 module.exports = function auto_recalc($p, log) {
 
-  const {cat: {branches, abonents, templates}, doc: {calc_order}, utils, job_prm, md, adapters: {pouch}} = $p;
+  const {cat: {branches, abonents, templates}, doc: {calc_order}, cch: {mdm_groups}, utils, job_prm, md, adapters: {pouch}} = $p;
   const {by_branch, order} = require('./index');
   const load_order = order(md);
 
@@ -271,7 +271,7 @@ module.exports = function auto_recalc($p, log) {
 
         const rows = [];
         (name === 'cch.predefined_elmnts' ? await load_predefined(pouch.remote.ram) : mgr).forEach((o) => {
-          if(check_mdm({o, name, abonent, branch, abranches, job_prm})) {
+          if(check_mdm({o, name, abonent, branch, abranches, job_prm}) && mdm_groups.check({o, name, abonent, branch})) {
             rows.push(patch(o, name));
           }
         });
