@@ -57,6 +57,9 @@ module.exports = function ({cat, job_prm, utils}, log) {
       server = url.parse(`${job_prm.server.couchdb_proxy_base}.${parseInt(headers.host.split('.')[0].replace(/[^+\d]/g, ''), 10)}:5984`);
     }
     else {
+      if(!query && !path.endsWith('/') && !path.includes('_session')) {
+        path += '/';
+      }
       let parts = new RegExp(`/${client_prefix}(.*?)/`).exec(path);
       if((parts && parts[0] === 'meta') || path.includes(`/${client_prefix}meta`)) {
         parts = [zone, 'ram'];
@@ -148,10 +151,19 @@ module.exports = function ({cat, job_prm, utils}, log) {
       upstreamReq.end();
     }
     else {
-      proxy.web(req, res, {
-        target: `${server.href.replace(new RegExp(server.path + '$'), '')}${path.replace('/couchdb/', '/')}`,
-        ignorePath: true,
-      });
+      const target = `${server.href.replace(new RegExp(server.path + '$'), '')}${path.replace('/couchdb/', '/')}`;
+
+      // let original = res.write;
+      // const chunks = [];
+      // res.write = function (chunk, encoding, callback) {
+      //   chunks.push(chunk);
+      //   original.apply(res, arguments);
+      // };
+      // res.on('finish', () => {
+      //   console.log(target, chunks.toString());
+      // });
+
+      proxy.web(req, res, {target, ignorePath: true});
     }
   };
 
