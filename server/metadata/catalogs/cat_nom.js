@@ -35,7 +35,18 @@ module.exports = function ($p, log) {
     for(const cx in price) {
       _price[cx] = {};
       for(const pt in price[cx]) {
-        _price[cx][pt] = price[cx][pt].map(({date, currency, price}) => ({date, currency: currency.valueOf(), price}));
+        _price[cx][pt] = price[cx][pt].map(({
+    date,
+    currency,
+    price
+  }) => ({
+    date,
+    currency: currency.valueOf(),
+    price
+  })).sort(function(a, b) {
+
+          return new Date(b.date) - new Date(a.date);
+        });
       }
     }
     return _price;
