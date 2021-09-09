@@ -32,21 +32,12 @@ module.exports = function ($p, log) {
 
   function planify(price) {
     const _price = {};
-    for(const cx in price) {
+    for (const cx in price) {
       _price[cx] = {};
-      for(const pt in price[cx]) {
-        _price[cx][pt] = price[cx][pt].map(({
-    date,
-    currency,
-    price
-  }) => ({
-    date,
-    currency: currency.valueOf(),
-    price
-  })).sort(function(a, b) {
-
-          return new Date(b.date) - new Date(a.date);
-        });
+      for (const pt in price[cx]) {
+        _price[cx][pt] = price[cx][pt]
+          .map(({date, currency, price}) => ({date, currency: currency.valueOf(), price}))
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
       }
     }
     return _price;

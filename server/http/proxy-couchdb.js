@@ -38,7 +38,7 @@ module.exports = function ({cat, job_prm, utils}, log) {
     log(err.message || err, 'error');
   });
 
-  return async function couchdbProxy(req, res) {
+  return async function couchdbProxy(req, res, auth) {
     // You can define here your custom logic to handle the request
     // and then proxy the request.
 
@@ -162,6 +162,14 @@ module.exports = function ({cat, job_prm, utils}, log) {
       // res.on('finish', () => {
       //   console.log(target, chunks.toString());
       // });
+      if(path.includes('_session') && auth) {
+        res.on('finish', () => {
+          const cookie = res.getHeader('set-cookie');
+          if(cookie) {
+            auth.reg_cookie(cookie.join(';'), user);
+          }
+        });
+      }
 
       proxy.web(req, res, {target, ignorePath: true});
     }

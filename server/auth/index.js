@@ -21,6 +21,16 @@ function decodeBase64 (str) {
   return Buffer.from(str, 'base64').toString();
 }
 
+function cookieKey(cookie) {
+  const values = cookie ? cookie.split('; ') : [];
+  for(const elm of values) {
+    const cv = elm.split('=');
+    if(cv[0] === 'AuthSession' && cv[1]) {
+      return cv[1];
+    }
+  }
+}
+
 function extractAuth(req) {
   let {authorization, impersonation, cookie, zone, branch, year} = req.headers;
   if(authorization) {
@@ -56,6 +66,10 @@ function extractAuth(req) {
       }
     }
   }
+  else if (cookie) {
+    const key = cookieKey(cookie);
+    return {key, method() {}};
+  }
 }
 
 module.exports = function ({cat, job_prm}, log) {
@@ -65,7 +79,7 @@ module.exports = function ({cat, job_prm}, log) {
    * @param req
    * @return {Promise<string>}
    */
-  return async (req, res) => {
+  const method = async (req, res) => {
 
     const {paths, is_common, is_mdm, is_log, is_event_source, couchdb_proxy_direct} = req.parsed;
 
@@ -154,5 +168,15 @@ module.exports = function ({cat, job_prm}, log) {
     else {
       return req.user = user;
     }
-  }
+  };
+
+  method.reg_cookie = (cookie, user) => {
+    const key = cookieKey(cookie);
+    if(key && user.ids.count()) {
+      cache.put(key, user.ids.get(0).identifier);
+    }
+  };
+
+  return method;
 }
+

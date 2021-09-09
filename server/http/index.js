@@ -129,7 +129,7 @@ module.exports = function ($p, log, worker) {
                 }
               }
               if(['couchdb', '_session'].includes(parsed.paths[0])) {
-                return couchdbProxy(req, res);
+                return couchdbProxy(req, res, auth);
               }
               if(['adm', 'r', 'prm', 'plan'].includes(parsed.paths[0])) {
                 return adm(req, res);
