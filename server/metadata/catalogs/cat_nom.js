@@ -10,7 +10,7 @@ const doc_changes = require('../changes_doc');
 
 module.exports = function ($p, log) {
 
-  const {CatNom, classes: {CatObj}, pricing, adapters, cat: {nom_units}, utils} = $p;
+  const {CatNom, classes: {CatObj}, pricing, adapters, cat: {nom_units}, utils, job_prm} = $p;
 
   // грузит в ram цены номенклатуры
   pricing.load_prices  = function load_prices() {
@@ -35,9 +35,16 @@ module.exports = function ($p, log) {
     for (const cx in price) {
       _price[cx] = {};
       for (const pt in price[cx]) {
+        let i = job_prm.price_depth;
         _price[cx][pt] = price[cx][pt]
           .map(({date, currency, price}) => ({date, currency: currency.valueOf(), price}))
-          .sort((a, b) => new Date(b.date) - new Date(a.date));
+          .sort((a, b) => {
+            return b.date - a.date;
+          })
+          .filter(() => {
+            i--;
+            return i >= 0;
+          });
       }
     }
     return _price;

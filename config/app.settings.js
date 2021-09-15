@@ -62,6 +62,9 @@ module.exports = function settings(prm = {}) {
       geonames: 'oknosoft',
     },
 
+    // глубина истории цен
+    price_depth: 3,
+
     server: {
       prefix: '/adm/api',             // Mount path, no trailing slash
       port: process.env.PORT || 3016, // Port
