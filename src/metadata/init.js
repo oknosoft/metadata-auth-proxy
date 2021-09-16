@@ -310,45 +310,35 @@ set parent(v){this._setter('parent',v)}
 $p.CatClrs = CatClrs;
 class CatClrsManager extends CatManager {
 
-  // ищет по цветам снаружи-изнутри
-  by_in_out({clr_in, clr_out}) {
-    const {wsql, utils: {blank}} = this._owner.$p;
-    // скомпилированный запрос
-    if(!this._by_in_out) {
-      this._by_in_out = wsql.alasql.compile('select top 1 ref from ? where clr_in = ? and clr_out = ? and (not ref = ?)');
-    }
-    // ищем в справочнике цветов
-    return this._by_in_out([this.alatable, clr_in.valueOf(), clr_out.valueOf(), blank.guid]);
-  }
 
-  // ищет инверсный
-  inverted(clr) {
-    if(clr.clr_in == clr.clr_out || clr.clr_in.empty() || clr.clr_out.empty()) {
-      return clr;
-    }
-    const ares = this.by_in_out({clr_in: clr.clr_out, clr_out: clr.clr_in});
-    return ares.length ? this.get(ares[0]) : clr;
-  }
-
-  // создаёт при необходимости составной цвет
-  create_composite({clr_in, clr_out, with_inverted = true}) {
+  /**
+   * создаёт при необходимости составной цвет
+   * @param clr_in {guid}
+   * @param clr_out {guid}
+   * @param [with_inverted] {Boolean}
+   * @param [ref] {guid}
+   * @return {Promise<CatClrs>}
+   */
+  create_composite({clr_in, clr_out, with_inverted = true, ref}) {
     const {job_prm, utils: {blank}} = this._owner.$p;
     if(!clr_in || clr_in == blank.guid || !clr_out || clr_out == blank.guid) {
       return Promise.reject(new TypeError('Для составного цвета не задан цвет снаружи или изнутри'));
     }
     clr_in = this.get(clr_in);
     clr_out = this.get(clr_out);
-    const ares = this.by_in_out({clr_in, clr_out});
+    const by_in_out = this.by_in_out({clr_in, clr_out});
     const res = with_inverted ? this.create_composite({clr_in: clr_out, clr_out: clr_in, with_inverted: false}) : Promise.resolve();
     return res.then(() => (
-      ares.length ?
-        Promise.resolve(this.get(ares[0])) :
+      by_in_out.empty() ?
         this.create({
+          ref,
           clr_in,
           clr_out,
           name: `${clr_in.name} \\ ${clr_out.name}`,
           parent: job_prm.builder.composite_clr_folder
         })
+        :
+        Promise.resolve(by_in_out)
     ))
       .then((clr) => clr._modified ? clr.save() : clr)
       .then((clr) => (with_inverted ? {clr, inverted: this.inverted(clr)} : clr));

@@ -29,9 +29,10 @@ function patch(o, name) {
     }
   }
   //прочищаем спецификацию характеристики со статусом Шаблон
-  if (name === 'cat.characteristics') {
-  if (o.obj_delivery_state == o.obj_delivery_state._manager.Шаблон) {
-  v.specification.length = 0;
+  else if(name === 'cat.characteristics') {
+    if(o.obj_delivery_state == o.obj_delivery_state._manager.Шаблон) {
+      v.specification.length = 0;
+    }
   }
   return v;
 }
