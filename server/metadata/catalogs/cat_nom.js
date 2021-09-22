@@ -10,7 +10,11 @@ const doc_changes = require('../changes_doc');
 
 module.exports = function ($p, log) {
 
-  const {CatNom, classes: {CatObj}, pricing, adapters, cat: {nom_units}, utils, job_prm} = $p;
+  const {CatNom, classes: {CatObj}, pricing, adapters: {pouch}, cat: {nom_units}, utils, job_prm} = $p;
+
+  function load_prices_direct() {
+
+  }
 
   // грузит в ram цены номенклатуры
   pricing.load_prices  = function load_prices() {
@@ -21,11 +25,11 @@ module.exports = function ($p, log) {
         // затем, подписываемся на изменения doc и meta
         doc_changes($p, log);
 
-        while (Date.now() - start < 16000) {
+        while (Date.now() - start < 8000) {
           await utils.sleep(1000);
         }
 
-        adapters.pouch.emit('pouch_complete_loaded');
+        pouch.emit('pouch_complete_loaded');
         log('load_prices: ready');
       });
   };
@@ -38,9 +42,7 @@ module.exports = function ($p, log) {
         let i = job_prm.price_depth;
         _price[cx][pt] = price[cx][pt]
           .map(({date, currency, price}) => ({date, currency: currency.valueOf(), price}))
-          .sort((a, b) => {
-            return b.date - a.date;
-          })
+          .sort((a, b) => b.date - a.date)
           .filter(() => {
             i--;
             return i >= 0;

@@ -68,7 +68,7 @@ function extractAuth(req) {
   }
   else if (cookie) {
     const key = cookieKey(cookie);
-    return {key, method() {}};
+    return key ? {key, method() {}} : undefined;
   }
 }
 

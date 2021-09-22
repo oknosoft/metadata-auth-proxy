@@ -166,7 +166,7 @@ module.exports = function ({cat, job_prm, utils}, log) {
         res.on('finish', () => {
           const cookie = res.getHeader('set-cookie');
           if(cookie) {
-            auth.reg_cookie(cookie.join(';'), user);
+            auth.reg_cookie(cookie.join('; '), user);
           }
         });
       }
