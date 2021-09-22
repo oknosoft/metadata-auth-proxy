@@ -47,7 +47,7 @@ exports.IregDelivery_schedulesManager = class IregDelivery_schedulesManager exte
               break;
             }
           }
-          if(dates.size > 4) {
+          if(dates.size > 20) {
             break;
           }
         }
