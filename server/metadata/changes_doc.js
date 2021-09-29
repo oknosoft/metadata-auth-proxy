@@ -41,8 +41,7 @@ module.exports = function doc_changes({adapters: {pouch}, cat, pricing}, log) {
     .on('change', (change) => {
       if(change.id.startsWith('doc.nom_prices_setup')) {
         // обновляем цены
-        pricing.by_doc(change.doc);
-        pouch.emit('nom_price', change);
+        pricing.deffered_load_prices(log);
       }
       else if(change.id.startsWith('doc')) {
         // информируем мир об изменениях

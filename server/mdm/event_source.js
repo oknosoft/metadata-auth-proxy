@@ -31,8 +31,10 @@ module.exports = function event_source({adapters: {pouch}, utils, wsql, cat: {us
         res.write(`${data}id: ${res.posti}\n\n`);
       }
     },
-    nom_price(change) {
-      console.log(change);
+    // после пересчета цен
+    nom_price() {
+      // ничего не делаем, по замыслу, браузер должен узнать об изменениях автоматом, после пересчета образа номенклатуры будет вызван mdm_change()
+      console.log('nom_price');
     },
     pay(attr) {
       const {evt_id, ...othes} = attr;

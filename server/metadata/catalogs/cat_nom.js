@@ -12,15 +12,10 @@ module.exports = function ($p, log) {
 
   const {CatNom, classes: {CatObj}, pricing, adapters: {pouch}, cat: {nom_units}, utils, job_prm} = $p;
 
-  function load_prices_direct() {
-
-  }
-
   // грузит в ram цены номенклатуры
   pricing.load_prices  = function load_prices() {
-    log('load_prices: start');
     const start = Date.now();
-    return this.by_range()
+    return this.by_range({log})
       .then(async () => {
         // затем, подписываемся на изменения doc и meta
         doc_changes($p, log);
