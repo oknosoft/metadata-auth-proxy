@@ -1,6 +1,6 @@
 {
   "name": "metadata-auth-proxy",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Сервис авторизавции и MDM, а так же - администрирования баз и пользователей",
   "repository": {
     "type": "git",
@@ -49,7 +49,7 @@
     "react-treebeard": "^3.2.4",
     "serve-handler": "^6.1.3",
     "unzipper": "^0.10.11",
-    "wb-core": "github:oknosoft/windowbuilder-core#2d0f8171e58be2d2cb9019e27fef64a1ec585b5e",
+    "wb-core": "github:oknosoft/windowbuilder-core#d2462f206cc897e69c71d21ea44e7f4b7f7c3d75",
     "wb-paperless": "github:oknosoft/paperless#server",
     "wb-planning": "github:oknosoft/windowbuilder-planning",
     "wb-reports": "github:oknosoft/windowbuilder-reports#ceed09bcab90ac11b78e9e8fd13100ae8fd6da68",
