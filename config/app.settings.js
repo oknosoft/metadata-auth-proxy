@@ -32,6 +32,10 @@ module.exports = function settings(prm = {}) {
       return is_node ? this.couch_local : `/couchdb/${local_storage_prefix}`;
     },
 
+    get couch_doc() {
+      return is_node ? process.env.COUCHDOC : '';
+    },
+
     // без автономного режима
     couch_direct: true,
 
