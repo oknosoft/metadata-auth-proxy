@@ -21,16 +21,18 @@ function upsert(acc, {date, state, department, partner, manager, doc, nom, sys, 
 module.exports = function reg($p, log, acc) {
   const {blank} = $p.utils;
   return async function reg(req, res) {
-    const body = await getBody(req);
-    const docs = JSON.parse(body);
-    const date = new Date();
-    for(const doc of docs) {
-      doc.date = date;
-      doc.manager = req.user.ref;
-      if(!doc.partner) {
-        doc.partner = blank.guid;
+    if(acc.client && acc.client.query) {
+      const body = await getBody(req);
+      const docs = JSON.parse(body);
+      const date = new Date();
+      for(const doc of docs) {
+        doc.date = date;
+        doc.manager = req.user.ref;
+        if(!doc.partner) {
+          doc.partner = blank.guid;
+        }
+        await upsert(acc, doc);
       }
-      await upsert(acc, doc);
     }
     res.end(JSON.stringify({ok: true}));
   }
