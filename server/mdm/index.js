@@ -66,6 +66,11 @@ function mdm ($p, log) {
       let suffix = paths[3];
       let branch = user && user.branch;
 
+      const {abonents} = job_prm.server;
+      if(!abonents.some((id) => id == zone)) {
+        return end500({res, err: {status: 406, message: `Текущий proxy обслуживает зоны ${abonents.join(', ')}, но запрошена зона ${zone}`}, log});
+      }
+
       if(suffix === 'templates') {
         // возвращаем характеристики шаблона
         const fname = resolve(__dirname, `./cache/${zone}/0000/doc.calc_order.${paths[4]}.json`);
