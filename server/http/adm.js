@@ -12,6 +12,7 @@ module.exports = function ($p, log) {
   const {cat, cch, utils} = $p;
   const route = {};
 
+  // подключаем плагины
   require('wb-reports')($p, log, route);
   require('wb-parametric')($p, log, route);
   require('wb-paperless/server')($p, log, route);
