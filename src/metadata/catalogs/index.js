@@ -1,8 +1,12 @@
 // модификаторы справочников
 
+import clrs from './cat_clrs';
+
 export default function ($p) {
 
-  const {adapters, cat, cch} = $p;
+  const {adapters, cat, cch, CatClrs} = $p;
+
+  clrs($p);
 
   // параметры выбора для группировки цветов
   adapters.pouch.on({
