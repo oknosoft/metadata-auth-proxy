@@ -197,7 +197,7 @@ module.exports = function auto_recalc($p, log) {
           await recalc({
             abonent,
             branch: branches.get(),
-            abranches: branches.find_rows({owner: abonent}),
+            abranches: branches.find_rows({owner: abonent, _top: 10000}),
             suffix: 'common',
             types,
           });
