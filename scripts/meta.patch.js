@@ -11,7 +11,6 @@ const include = [
   'cat.abonents',
   'cat.branches',
   'cat.http_apis',
-  'cat.clrs',
   'cat.servers',
   'cat.users',
   'ireg.delivery_schedules',

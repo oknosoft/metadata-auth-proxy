@@ -25,5 +25,5 @@ module.exports = function ram_changes($p, log) {
     });
 
   log(`loadind to ram: complete`);
-  !pouch.props.user_node && pouch.emit('pouch_complete_loaded');
+  pouch.emit('pouch_complete_loaded');
 }
