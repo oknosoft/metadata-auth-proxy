@@ -322,7 +322,7 @@ module.exports = function auto_recalc($p, log) {
       if(text !== old) {
         await fs.writeFileAsync(fname, text, 'utf8');
         const mname = fname.replace('.json', '.manifest');
-        await fs.writeFileAsync(mname, utils.crc32(text), 'utf8');
+        await fs.writeFileAsync(mname, utils.crc32(text).toString(), 'utf8');
       }
     }
   }
