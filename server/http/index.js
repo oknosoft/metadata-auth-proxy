@@ -87,17 +87,12 @@ module.exports = function ($p, log, worker) {
         }
 
         const {host} = req.headers;
-        if(conf.server.couchdb_proxy_direct.some((name) => host.startsWith(name))) {
-          parsed.couchdb_proxy_direct = true;
-        }
-        else {
-          parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
-          parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
-          parsed.is_event_source = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'events';
-          parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
-          parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|dist|static|imgs|index|builder|about|login|settings|b|o|help)$/.test(parsed.paths[0]);
-          req.query = qs.parse(parsed.query);
-        }
+        parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
+        parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
+        parsed.is_event_source = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'events';
+        parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
+        parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|dist|static|imgs|index|builder|about|login|settings|b|o|help)$/.test(parsed.paths[0]);
+        req.query = qs.parse(parsed.query);
 
         if(parsed.is_static) {
           return staticProxy(req, res, conf);
@@ -119,14 +114,6 @@ module.exports = function ($p, log, worker) {
               }
               if(parsed.is_mdm) {
                 return mdm(req, res, conf);
-              }
-              if(parsed.couchdb_proxy_direct) {
-                if(user.roles && user.roles.includes('doc_full')) {
-                  return couchdbProxy(req, res);
-                }
-                else {
-                  return end401({res, err: {message: `host ${host} for admins only, role 'doc_full' required`}, log});
-                }
               }
               if(['couchdb', '_session'].includes(parsed.paths[0])) {
                 return couchdbProxy(req, res, auth);

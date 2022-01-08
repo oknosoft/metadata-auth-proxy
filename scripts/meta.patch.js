@@ -13,7 +13,8 @@ const include = [
   'cat.http_apis',
   'cat.servers',
   'cat.users',
-  'ireg.delivery_schedules',
+  'ireg.i18n',
+  'ireg.delivery_scheme',
   'ireg.delivery_scheme',
 
   //'*',
@@ -107,20 +108,6 @@ const preserv_cachable = [
   'doc.credit_card_order',
 ];
 
-const old_doc_ram = [
-  'ireg.margin_coefficients',
-  'cat.partner_bank_accounts',
-  'cat.contracts',
-  'cat.cashboxes',
-  'cat.parameters_keys',
-  'cat.partners',
-  'cat.choice_params',
-  'cat.divisions',
-  'cat.stores',
-  'cat.nom_prices_types',
-  'cat.branches',
-];
-
 
 module.exports = function(meta, cache_only) {
   for(const cls in meta) {
@@ -168,5 +155,4 @@ module.exports = function(meta, cache_only) {
 
 module.exports.include = include;
 module.exports.preserv_cachable = preserv_cachable;
-module.exports.old_doc_ram = old_doc_ram;
 

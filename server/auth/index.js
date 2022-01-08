@@ -81,7 +81,7 @@ module.exports = function ({cat, job_prm}, log) {
    */
   const method = async (req, res) => {
 
-    const {paths, is_common, is_mdm, is_log, is_event_source, couchdb_proxy_direct} = req.parsed;
+    const {paths, is_common, is_mdm, is_log, is_event_source} = req.parsed;
 
     if(paths[0] === 'auth' && !['ldap','couchdb'].includes(paths[1])) {
       return oauth(req, res);

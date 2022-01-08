@@ -9,7 +9,7 @@
 module.exports = function doc_changes({adapters: {pouch}, cat, pricing}, log) {
 
   // получаем список метаданных, кешируемых в doc
-  const cnames = ['doc.nom_prices_setup', 'doc.calc_order', 'ireg.margin_coefficients'];
+  const cnames = ['doc.calc_order'];
   cat.forEach((mgr) => {
     if(mgr.class_name !=='cat.characteristics' && (/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable))) {
       cnames.push(mgr.class_name);
@@ -39,11 +39,7 @@ module.exports = function doc_changes({adapters: {pouch}, cat, pricing}, log) {
     selector: {class_name: {$in: cnames}}
   })
     .on('change', (change) => {
-      if(change.id.startsWith('doc.nom_prices_setup')) {
-        // обновляем цены
-        pricing.deffered_load_prices(log);
-      }
-      else if(change.id.startsWith('doc')) {
+      if(change.id.startsWith('doc')) {
         // информируем мир об изменениях
         pouch.emit('doc_change', change);
       }

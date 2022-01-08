@@ -7,8 +7,7 @@
  */
 
 
-module.exports = function ram_changes($p, log) {
-  const {pouch} = $p.adapters;
+module.exports = function ram_changes({adapters: {pouch}, pricing}, log) {
 
   pouch.local.ram.changes({
     since: 'now',
@@ -16,14 +15,21 @@ module.exports = function ram_changes($p, log) {
     include_docs: true,
   })
     .on('change', (change) => {
-      // обновляем ram
-      pouch.load_changes({docs: [change.doc]});
-      pouch.emit('ram_change', change);
+
+      if(change.id.startsWith('doc.nom_prices_setup')) {
+        // обновляем цены
+        pricing.deffered_load_prices(log);
+      }
+      else {
+        // обновляем ram
+        pouch.load_changes({docs: [change.doc]});
+        pouch.emit('ram_change', change);
+      }
     })
     .on('error', (err) => {
       log(`change error ${err}`);
     });
 
-  log(`loadind to ram: complete`);
+  log(`load to ram: complete`);
   pouch.emit('pouch_complete_loaded');
 }

@@ -4,7 +4,6 @@
 const MetaEngine = require('metadata-core')
   .plugin(require('metadata-pouchdb'))
   .plugin(require('metadata-abstract-ui'))
-  .plugin(require('./pouch_from_files'))
   .plugin(require('wb-reports/server/accumulation'));
 
 // функция установки параметров сеанса
@@ -66,14 +65,13 @@ module.exports = function (log, is_common) {
       log(`login error ${err}`);
     },
     pouch_load_start(page) {
-      log('loadind to ram: start');
+      log('load to ram: start');
     },
     pouch_data_page(page) {
-      log(`loadind to ram: page №${page.page} (${page.page * page.limit} from ${page.total_rows})`);
+      log(`load to ram: page №${page.page} (${page.page * page.limit} from ${page.total_rows})`);
     },
     pouch_doc_ram_loaded() {
-      return (is_common ? linked_templates($p) : require('wb-reports/server/windowbuilder/accumulation')($p))
-        //.then(() => $p.pricing.load_prices())
+      return (is_common ? linked_templates($p, log) : require('wb-reports/server/windowbuilder/accumulation')($p))
         .then(() => ram_changes($p, log));
     },
   });

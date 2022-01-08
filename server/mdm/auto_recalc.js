@@ -176,16 +176,26 @@ module.exports = function auto_recalc($p, log) {
           // рассчитаем динамический mdm по табчасти acl_objs текущего абонента
           const objs = new Set();
           const tmplts = new Set();
+          if(abonent.no_mdm) {
+            // добавляем все шаблоны
+            calc_order.find_rows({obj_delivery_state: 'Шаблон'}, (obj) => {
+              objs.add(obj);
+              tmplts.add(obj)
+            });
+          }
+          // добавляем только шаблоны абонента
           abonent.acl_objs.forEach(({obj}) => {
             if(obj) {
               objs.add(obj);
-              if(obj._manager === calc_order && obj.obj_delivery_state == 'Шаблон') {
-                tmplts.add(obj);
-              }
-              else if(obj._manager === templates) {
-                obj.templates.forEach(({template}) => {
-                  tmplts.add(template.calc_order);
-                });
+              if(!abonent.no_mdm) {
+                if(obj._manager === calc_order && obj.obj_delivery_state == 'Шаблон') {
+                  tmplts.add(obj);
+                }
+                else if(obj._manager === templates) {
+                  obj.templates.forEach(({template}) => {
+                    tmplts.add(template.calc_order);
+                  });
+                }
               }
             }
           });

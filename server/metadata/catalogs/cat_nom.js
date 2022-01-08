@@ -25,7 +25,7 @@ module.exports = function ($p, log) {
         }
 
         pouch.emit('pouch_complete_loaded');
-        log('load_prices: ready');
+        log('load prices: ready');
       });
   };
 

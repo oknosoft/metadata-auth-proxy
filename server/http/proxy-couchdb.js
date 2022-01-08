@@ -6,7 +6,7 @@ const {name, version} = require('../../package.json');
 const {user_node, zone, client_prefix} = require('../../config/app.settings')();
 const keepAliveAgent = new http.Agent({ keepAlive: true });
 const getBody = require('./raw-body');
-const {end404} = require('./end');
+const {end404, end401} = require('./end');
 
 const headerFields = {
   username: 'X-Auth-CouchDB-UserName',
@@ -32,7 +32,7 @@ const proxy = httpProxy.createProxyServer({
 
 proxy.on('proxyRes', setVia);
 
-module.exports = function ({cat, job_prm, utils}, log) {
+module.exports = function ({cat, job_prm, utils, adapters: {pouch}}, log) {
 
   proxy.on('error', (err) => {
     log(err.message || err, 'error');
@@ -42,7 +42,7 @@ module.exports = function ({cat, job_prm, utils}, log) {
     // You can define here your custom logic to handle the request
     // and then proxy the request.
 
-    let {parsed: {query, path, couchdb_proxy_direct}, headers, user}  = req;
+    let {parsed: {query, path}, headers, user}  = req;
 
     const { username, roles, token } = headerFields;
     headerFields.clear(headers);
@@ -52,81 +52,87 @@ module.exports = function ({cat, job_prm, utils}, log) {
       headers[token] = sign(headers[username], user_node.secret);
     }
 
+    if(path.includes('/_utils') && !(user.roles.includes('doc_full') || user.roles.includes('_admin'))) {
+      return end401({res, err: {message: `patn '/_utils' for admins only, role 'doc_full' required`}, log});
+    }
+
     let server;
-    if(couchdb_proxy_direct) {
-      server = url.parse(`${job_prm.server.couchdb_proxy_base}.${parseInt(headers.host.split('.')[0].replace(/[^+\d]/g, ''), 10)}:5984`);
+    if(!query && !path.endsWith('/') && !path.includes('_session')) {
+      path += '/';
+    }
+    let parts = new RegExp(`/${client_prefix}(.*?)/`).exec(path);
+    if((parts && parts[0] === 'meta') || path.includes(`/${client_prefix}meta`)) {
+      parts = [zone, 'ram'];
+    }
+    else if(parts && parts[1]) {
+      parts = parts[1].split('_');
+    }
+    else if(['/couchdb/', '/couchdb/_session', '/_session'].includes(path)) {
+      parts = [zone, ''];
     }
     else {
-      if(!query && !path.endsWith('/') && !path.includes('_session')) {
-        path += '/';
-      }
-      let parts = new RegExp(`/${client_prefix}(.*?)/`).exec(path);
-      if((parts && parts[0] === 'meta') || path.includes(`/${client_prefix}meta`)) {
-        parts = [zone, 'ram'];
-      }
-      else if(parts && parts[1]) {
-        parts = parts[1].split('_');
-      }
-      else if(['/couchdb/', '/couchdb/_session', '/_session'].includes(path)) {
-        parts = [zone, ''];
-      }
-      else {
-        return end404(res, path);
-      }
-      const abonent = cat.abonents.by_id(parts[0]);
+      return end404(res, path);
+    }
+    const abonent = cat.abonents.by_id(parts[0]);
 
-      let {branch} = user || {};
-      // если пользователю разрешен доступ к корню и в заголовке передали branch - перенаправляем на базу отдела
-      if(user && utils.is_guid(headers.branch) && user.branch.empty()) {
-        if(cat.branches.by_ref[headers.branch]) {
-          branch = cat.branches.by_ref[headers.branch];
-        }
-        if(branch && branch.suffix && parts[1] === 'doc') {
-          path = path.replace('_doc/', `_doc_${branch.suffix}/`);
-        }
+    let {branch} = user || {};
+    // если пользователю разрешен доступ к корню и в заголовке передали branch - перенаправляем на базу отдела
+    if(user && utils.is_guid(headers.branch) && user.branch.empty()) {
+      if(cat.branches.by_ref[headers.branch]) {
+        branch = cat.branches.by_ref[headers.branch];
       }
-      else if(job_prm.server.branches && job_prm.server.branches.length === 1) {
-        cat.branches.find_rows({suffix: job_prm.server.branches[0]}, (o) => {
-          branch = o;
-          path = path.replace('_doc/', `_doc_${branch.suffix}/`);
-          return false;
-        });
+      if(branch && branch.suffix && parts[1] === 'doc') {
+        path = path.replace('_doc/', `_doc_${branch.suffix}/`);
       }
-
-      server = branch && branch.server;
-      if(!job_prm.server.branches || job_prm.server.branches.length !== 1) {
-        switch (parts[1]) {
-        case 'doc':
-          while (server.empty() && !branch.parent.empty()) {
-            branch = branch.parent;
-            server = branch.server;
-          }
-          if(server.empty()) {
-            server = abonent.server;
-          }
-          break;
-
-        case 'ram':
-        case '':
-          server = abonent.server;
-          break;
-
-        default:
-          const row = abonent.ex_bases.find({name: parts[1]});
-          server = row ? row.server : abonent.server;
-        }
-      }
-
-      if(!server && abonent) {
-        server = abonent.server;
-      }
-
-      if(server.empty()) {
-        throw new TypeError(`Не найден сервер для зоны '${parts[0]}'`);
-      }
-      server = url.parse(server.http);
+    }
+    else if(job_prm.server.branches && job_prm.server.branches.length === 1) {
+      cat.branches.find_rows({suffix: job_prm.server.branches[0]}, (o) => {
+        branch = o;
+        path = path.replace('_doc/', `_doc_${branch.suffix}/`);
+        return false;
+      });
     }
 
+    server = branch && branch.server;
+    if(!job_prm.server.branches || job_prm.server.branches.length !== 1) {
+      switch (parts[1]) {
+      case 'doc':
+        while (server.empty() && !branch.parent.empty()) {
+          branch = branch.parent;
+          server = branch.server;
+        }
+        if(server.empty()) {
+            server = abonent.server;
+        }
+        break;
+
+      case 'ram':
+        const tmp = url.parse(pouch.remote.ram.name);
+        tmp.pathname = '';
+        server = {http: url.format(tmp) , empty(){}};
+        path = path.replace(`_${parts[0]}_`, `_${zone}_`);
+        break;
+
+      case 'log':
+      case '':
+        server = abonent.server;
+        break;
+
+      default:
+        const row = abonent.ex_bases.find({name: parts[1]});
+        server = row ? row.server : abonent.server;
+      }
+    }
+
+    if(!server && abonent) {
+      server = abonent.server;
+    }
+
+    if(server.empty()) {
+      throw new TypeError(`Не найден сервер для зоны '${parts[0]}'`);
+    }
+
+    server = url.parse(server.http);
     if(query && query.includes('feed=longpoll')) {
       const upstreamReq = http.request({
         method: req.method,
@@ -152,16 +158,6 @@ module.exports = function ({cat, job_prm, utils}, log) {
     }
     else {
       const target = `${server.href.replace(new RegExp(server.path + '$'), '')}${path.replace('/couchdb/', '/')}`;
-
-      // let original = res.write;
-      // const chunks = [];
-      // res.write = function (chunk, encoding, callback) {
-      //   chunks.push(chunk);
-      //   original.apply(res, arguments);
-      // };
-      // res.on('finish', () => {
-      //   console.log(target, chunks.toString());
-      // });
       if(path.includes('_session') && auth) {
         res.on('finish', () => {
           const cookie = res.getHeader('set-cookie');
