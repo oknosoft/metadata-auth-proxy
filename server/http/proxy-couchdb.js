@@ -52,11 +52,10 @@ module.exports = function ({cat, job_prm, utils, adapters: {pouch}}, log) {
       headers[token] = sign(headers[username], user_node.secret);
     }
 
-    if(path.includes('/_utils') && !(user.roles.includes('doc_full') || user.roles.includes('_admin'))) {
-      return end401({res, err: {message: `patn '/_utils' for admins only, role 'doc_full' required`}, log});
+    if((path.includes('/_utils') || path.includes('/_users')) && !(user.roles.includes('doc_full') || user.roles.includes('_admin'))) {
+      return end401({res, err: {message: `patn ${path} for admins only, role 'doc_full' required`}, log});
     }
-
-    let server;
+    
     if(!query && !path.endsWith('/') && !path.includes('_session')) {
       path += '/';
     }
@@ -93,7 +92,7 @@ module.exports = function ({cat, job_prm, utils, adapters: {pouch}}, log) {
       });
     }
 
-    server = branch && branch.server;
+    let server = branch && branch.server;
     if(!job_prm.server.branches || job_prm.server.branches.length !== 1) {
       switch (parts[1]) {
       case 'doc':
