@@ -33,31 +33,6 @@ module.exports = function on_log_in(log) {
             }
           });
           return res;
-        })
-        .then(() => {
-          // грузим из doc_ram
-          let res = Promise.resolve();
-          // const handler = (mgr) => {
-          //   if(/^doc/.test(mgr.cachable) || /^doc/.test(mgr.metadata().original_cachable)) {
-          //     if(preserv_cachable.includes(mgr.class_name)) {
-          //       return;
-          //     }
-          //     cat.abonents.forEach((abonent) => {
-          //       if(job_prm.server.abonents.includes(abonent.id)) {
-          //         const filter = {_top: 100000};
-          //         if(mgr.class_name === 'cat.scheme_settings') {
-          //           filter.user = '';
-          //         }
-          //         res = res
-          //           .then(() => pouch.find_rows(mgr, filter, job_prm.server.single_db ? pouch.remote.doc : abonent.db('doc')))
-          //           .catch(log);
-          //       }
-          //     });
-          //   }
-          // };
-          // cat.forEach(handler);
-          // ireg.forEach(handler);
-          return res;
         });
   };
 }

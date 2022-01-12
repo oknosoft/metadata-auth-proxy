@@ -68,7 +68,7 @@ function extractAuth(req) {
   }
   else if (cookie) {
     const key = cookieKey(cookie);
-    return key ? {key, method() {}} : undefined;
+    return key ? {key, method: auth.providers.couchdb} : undefined;
   }
 }
 
@@ -114,6 +114,9 @@ module.exports = function ({cat, job_prm}, log) {
       }
       catch (e) {}
       if(!token) {
+        if(is_common || (is_mdm && paths.includes('common')) || is_log || is_event_source) {
+          return {};
+        }
         throw new TypeError(`Неверный логин/пароль '${authorization.username}' для провайдера '${authorization.provider}'`);
       }
       cache.put(authorization.key, token, authorization.impersonation);
