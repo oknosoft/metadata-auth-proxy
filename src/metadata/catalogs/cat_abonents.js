@@ -12,6 +12,7 @@ exports.CatAbonents = class CatAbonents extends Object {
       ref,
       id,
       name,
+      no_mdm,
       servers: servers._obj.map(({key, proxy, name}) => ({key, proxy, name})),
     };
   }

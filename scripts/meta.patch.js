@@ -14,7 +14,7 @@ const include = [
   'cat.servers',
   'cat.users',
   'ireg.i18n',
-  'ireg.delivery_scheme',
+  'ireg.delivery_schedules',
   'ireg.delivery_scheme',
 
   //'*',
