@@ -7,7 +7,7 @@ exports.CatAbonents = class CatAbonents extends Object {
   }
 
   toJSON() {
-    const {ref, id, name, servers} = this;
+    const {ref, id, name, no_mdm, servers} = this;
     return {
       ref,
       id,

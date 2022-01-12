@@ -455,7 +455,7 @@ set servers(v){this._setter_ts('servers',v)}
   }
 
   toJSON() {
-    const {ref, id, name, servers} = this;
+    const {ref, id, name, no_mdm, servers} = this;
     return {
       ref,
       id,
