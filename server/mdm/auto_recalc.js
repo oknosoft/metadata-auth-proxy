@@ -202,7 +202,6 @@ module.exports = function auto_recalc($p, log) {
 
           await dyn_mdm.prepare(Array.from(objs), Array.from(tmplts), $p);
 
-
           // пересчет корня текущего абонента
           await recalc({
             abonent,
@@ -215,6 +214,18 @@ module.exports = function auto_recalc($p, log) {
           // пересчет продукций текущих шаблонов
           if(types.includes('doc.calc_order')) {
             await recalc_templates({abonent, tmplts});
+          }
+          else {
+            const tt = types
+              .filter(t => {
+                if(t.startsWith('doc.calc_order')) {
+                  return tmplts.has(calc_order.get(t.substr(15)));
+                }
+              })
+              .map(t => calc_order.get(t.substr(15)));
+            if(tt.length) {
+              await recalc_templates({abonent, tmplts: tt});
+            }
           }
 
           for(const bref in branches.by_ref) {
@@ -353,6 +364,12 @@ module.exports = function auto_recalc($p, log) {
       const class_name = change.id.split('|')[0];
       if(['cat.branches', 'cat.abonents'].includes(class_name)) {
         changes.register();
+      }
+      else if(class_name === 'cat.characteristics' && change.doc.obj_delivery_state === 'Шаблон') {
+        changes.register(`doc.calc_order|${change.doc.calc_order}`);
+      }
+      else if(class_name === 'doc.calc_order' && change.doc.obj_delivery_state === 'Шаблон') {
+        changes.register(`doc.calc_order|${change.doc.ref}`);
       }
       else {
         changes.register(class_name);
