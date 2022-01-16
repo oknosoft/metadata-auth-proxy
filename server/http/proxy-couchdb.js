@@ -32,11 +32,13 @@ const proxy = httpProxy.createProxyServer({
 
 proxy.on('proxyRes', setVia);
 
-module.exports = function ({cat, job_prm, utils, adapters: {pouch}}, log) {
+module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
 
   proxy.on('error', (err) => {
     log(err.message || err, 'error');
   });
+
+  const svgs = require('./svgs')({doc, pouch, utils}, log);
 
   return async function couchdbProxy(req, res, auth) {
     // You can define here your custom logic to handle the request
@@ -55,7 +57,7 @@ module.exports = function ({cat, job_prm, utils, adapters: {pouch}}, log) {
     if((path.includes('/_utils') || path.includes('/_users')) && !(user.roles.includes('doc_full') || user.roles.includes('_admin'))) {
       return end401({res, err: {message: `patn ${path} for admins only, role 'doc_full' required`}, log});
     }
-    
+
     if(!query && !path.endsWith('/') && !path.includes('_session')) {
       path += '/';
     }
@@ -96,12 +98,20 @@ module.exports = function ({cat, job_prm, utils, adapters: {pouch}}, log) {
     if(!job_prm.server.branches || job_prm.server.branches.length !== 1) {
       switch (parts[1]) {
       case 'doc':
+        // if(job_prm.server.single_db) {
+        //   const tmp = url.parse(pouch.remote.doc.name);
+        //   tmp.pathname = '';
+        //   server = {http: url.format(tmp) , empty(){}};
+        // }
+        // else {
+        //
+        // }
         while (server.empty() && !branch.parent.empty()) {
           branch = branch.parent;
           server = branch.server;
         }
         if(server.empty()) {
-            server = abonent.server;
+          server = abonent.server;
         }
         break;
 
@@ -157,6 +167,11 @@ module.exports = function ({cat, job_prm, utils, adapters: {pouch}}, log) {
     }
     else {
       const target = `${server.href.replace(new RegExp(server.path + '$'), '')}${path.replace('/couchdb/', '/')}`;
+
+      if(svgs({req, parts, query, target}, res)) {
+        return;
+      }
+
       if(path.includes('_session') && auth) {
         res.on('finish', () => {
           const cookie = res.getHeader('set-cookie');

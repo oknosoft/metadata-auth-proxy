@@ -32,10 +32,15 @@ const by_branch = [
 const common = [
   'cch.properties',
   'cat.abonents',
+  'cat.price_groups',
   'cat.property_values',
   'cat.property_values_hierarchy',
   'cat.contact_information_kinds',
+  'cat.cash_flow_articles',
   'cat.clrs',
+  'cat.color_price_groups',
+  'cat.delivery_areas',
+  'cat.delivery_directions',
   'cat.units',
   'cat.countries',
   'cat.currencies',
@@ -44,10 +49,14 @@ const common = [
   'cat.destinations',
   'cat.nom_groups',
   'cat.nom_kinds',
+  'cat.elm_visualization',
   'cat.templates',
   'cat.http_apis',
   'cat.work_center_kinds',
   'cat.work_centers',
+  'cat.stages',
+  'cat.project_categories',
+  'cat.lead_src',
 ];
 
 function mdm ($p, log) {

@@ -71,7 +71,8 @@ module.exports = function (log, is_common) {
       log(`load to ram: page №${page.page} (${page.page * page.limit} from ${page.total_rows})`);
     },
     pouch_doc_ram_loaded() {
-      return (is_common ? linked_templates($p, log) : require('wb-reports/server/windowbuilder/accumulation')($p))
+      return linked_templates($p, log)
+        .then(() => is_common ? null : require('wb-reports/server/windowbuilder/accumulation')($p))
         .then(() => ram_changes($p, log));
     },
   });

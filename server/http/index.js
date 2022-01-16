@@ -6,11 +6,11 @@
  * Created by Evgeniy Malyarov on 03.06.2019.
  */
 
-const http = require('http');
 const url = require('url');
 const qs = require('qs');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
 const https = require('https');
+const http = require('http');
 const httpProxy = require('http-proxy');
 const {end401, end404, end500} = require('./end');
 
