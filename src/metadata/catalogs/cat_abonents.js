@@ -17,3 +17,11 @@ exports.CatAbonents = class CatAbonents extends Object {
     };
   }
 };
+
+exports.CatAbonentsManager = class CatAbonentsManager extends Object {
+
+  get current() {
+    const {session_zone, zone} = $p.job_prm;
+    return this.by_id(session_zone || zone);
+  }
+};

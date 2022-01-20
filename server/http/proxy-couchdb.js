@@ -1,10 +1,8 @@
-const http = require('http');
-const httpProxy = require('http-proxy');
+const {createProxyServer} = require('http-proxy');
 const {createHmac} = require('crypto');
 const url = require('url');
 const {name, version} = require('../../package.json');
 const {user_node, zone, client_prefix} = require('../../config/app.settings')();
-const keepAliveAgent = new http.Agent({ keepAlive: true });
 const getBody = require('./raw-body');
 const {end404, end401} = require('./end');
 
@@ -24,21 +22,34 @@ const headerFields = {
   }
 };
 
-// Create a proxy server with custom application logic
-const proxy = httpProxy.createProxyServer({
-  xfwd: true,
-  agent: keepAliveAgent,
-});
+const _http = {
+  'http:': require('http'),
+  'https:': require('https'),
+};
+const _agent = {
+  'http:': new _http['http:'].Agent({keepAlive: true}),
+  'https:': new _http['https:'].Agent({keepAlive: true, rejectUnauthorized: false}),
+};
+const _proxy = {
+  'http:': createProxyServer({xfwd: true, agent: _agent['http:']}),
+  'https:': createProxyServer({xfwd: true, agent: _agent['https:'], changeOrigin: true}),
+};
 
-proxy.on('proxyRes', setVia);
 
 module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
 
-  proxy.on('error', (err) => {
+  _proxy['http:'].on('proxyRes', setVia);
+  _proxy['https:'].on('proxyRes', setVia);
+
+  _proxy['http:'].on('error', (err) => {
+    log(err.message || err, 'error');
+  });
+  _proxy['https:'].on('error', (err) => {
     log(err.message || err, 'error');
   });
 
   const svgs = require('./svgs')({doc, pouch, utils}, log);
+  const templates = require('./templates')({cat, pouch, utils}, log);
 
   return async function couchdbProxy(req, res, auth) {
     // You can define here your custom logic to handle the request
@@ -55,7 +66,7 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     }
 
     if((path.includes('/_utils') || path.includes('/_users')) && !(user.roles.includes('doc_full') || user.roles.includes('_admin'))) {
-      return end401({res, err: {message: `patn ${path} for admins only, role 'doc_full' required`}, log});
+      return end401({res, err: {message: `path ${path} for admins only, role 'doc_full' required`}, log});
     }
 
     if(!query && !path.endsWith('/') && !path.includes('_session')) {
@@ -95,17 +106,15 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     }
 
     let server = branch && branch.server;
-    if(!job_prm.server.branches || job_prm.server.branches.length !== 1) {
+    if(job_prm.server.single_db) {
+      const tmp = new url.URL(pouch.remote.doc.name);
+      tmp.pathname = job_prm.local_storage_prefix;
+      server = {http: tmp.toString(), empty(){}};
+      path = path.replace(`_${parts[0]}_`, `_${zone}_`);
+    }
+    else if(!job_prm.server.branches || job_prm.server.branches.length !== 1) {
       switch (parts[1]) {
       case 'doc':
-        // if(job_prm.server.single_db) {
-        //   const tmp = url.parse(pouch.remote.doc.name);
-        //   tmp.pathname = '';
-        //   server = {http: url.format(tmp) , empty(){}};
-        // }
-        // else {
-        //
-        // }
         while (server.empty() && !branch.parent.empty()) {
           branch = branch.parent;
           server = branch.server;
@@ -116,9 +125,9 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
         break;
 
       case 'ram':
-        const tmp = url.parse(pouch.remote.ram.name);
-        tmp.pathname = '';
-        server = {http: url.format(tmp) , empty(){}};
+        const tmp = new url.URL(pouch.remote.doc.name);
+        tmp.pathname = job_prm.local_storage_prefix;
+        server = {http: tmp.toString(), empty(){}};
         path = path.replace(`_${parts[0]}_`, `_${zone}_`);
         break;
 
@@ -141,15 +150,15 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
       throw new TypeError(`Не найден сервер для зоны '${parts[0]}'`);
     }
 
-    server = url.parse(server.http);
+    server = new url.URL(server.http);
     if(query && query.includes('feed=longpoll')) {
-      const upstreamReq = http.request({
+      const upstreamReq = _http[server.protocol].request({
         method: req.method,
         headers: headers,
         hostname: server.hostname,
         port: parseInt(server.port, 10),
         path: path.replace('/couchdb/', '/'),
-        agent: keepAliveAgent,
+        agent: _agent[server.protocol],
       }, (upstreamRes) => {
         for(const header in upstreamRes.headers) {
           (header.startsWith('x-couch') || header === 'server') && res.setHeader(header, upstreamRes.headers[header]);
@@ -166,9 +175,9 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
       upstreamReq.end();
     }
     else {
-      const target = `${server.href.replace(new RegExp(server.path + '$'), '')}${path.replace('/couchdb/', '/')}`;
+      const target = `${server.href.replace(new RegExp(server.pathname + '$'), '')}${path.replace('/couchdb/', '/')}`;
 
-      if(svgs({req, parts, query, target}, res)) {
+      if(svgs({req, res, parts, query, target}) || templates({req, res, target})) {
         return;
       }
 
@@ -181,7 +190,7 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
         });
       }
 
-      proxy.web(req, res, {target, ignorePath: true});
+      _proxy[server.protocol].web(req, res, {target, ignorePath: true});
     }
   };
 
