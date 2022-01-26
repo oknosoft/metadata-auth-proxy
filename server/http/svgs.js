@@ -6,8 +6,6 @@
  * Created by Evgeniy Malyarov on 16.01.2022.
  */
 
-const getBody = require('./raw-body');
-
 module.exports = function ({doc, pouch, utils}, log) {
 
   return function svgs({req, res, query, target}) {
@@ -26,9 +24,8 @@ module.exports = function ({doc, pouch, utils}, log) {
         res.end(JSON.stringify({ok: true, keys}));
       }
       else {
-        getBody(req)
-          .then(async (data) => {
-            const o = await pouch.fetch(target).then(r => r.json());
+        Promise.resolve().then(async () => {
+            const o = await pouch.fetch(target.replace(`?${query}`, '')).then(r => r.json());
             const refs = [];
             if(o.production) {
               for(const {characteristic} of o.production) {
@@ -37,19 +34,19 @@ module.exports = function ({doc, pouch, utils}, log) {
                 }
               }
               const fin = paths[paths.length-1] + `?${query}`;
-              const {docs} = await pouch.fetch(target.replace(fin, '_find'), {
+              const {rows} = await pouch.fetch(target.replace(fin, '_all_docs'), {
                 method: 'POST',
                 body: JSON.stringify({
-                  selector: {_id: {$in: refs}},
-                  fields: ['_id', 'svg']
+                  keys: refs,
+                  include_docs: true,
                 })
               }).then(r => r.json());
               for(const {characteristic} of o.production) {
                 if(!utils.is_empty_guid(characteristic)) {
                   const _id = `cat.characteristics|${characteristic}`;
-                  const row = docs.find((v) => v._id === _id);
+                  const row = rows.find((v) => v.value && v.id === _id);
                   if(row) {
-                    keys.push({ref: characteristic, svg: row.svg, obj_delivery_state: 'Шаблон'});
+                    keys.push({ref: characteristic, svg: row.doc.svg, obj_delivery_state: row.doc.obj_delivery_state});
                   }
                 }
               }
