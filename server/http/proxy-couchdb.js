@@ -125,7 +125,7 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
         break;
 
       case 'ram':
-        const tmp = new url.URL(pouch.remote.doc.name);
+        const tmp = new url.URL(pouch.remote.ram.name);
         tmp.pathname = job_prm.local_storage_prefix;
         server = {http: tmp.toString(), empty(){}};
         path = path.replace(`_${parts[0]}_`, `_${zone}_`);
