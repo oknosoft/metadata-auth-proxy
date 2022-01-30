@@ -2,6 +2,11 @@ const dyn_mdm = require('./dyn_mdm');
 const {common} = require('./index');
 
 module.exports = function check_mdm({o, name, abonent, branch, abranches, job_prm}) {
+
+  if(!o) {
+    return false;
+  }
+
   const zone = abonent.id;
   const {_obj} = o;
 
