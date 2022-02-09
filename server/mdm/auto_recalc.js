@@ -49,7 +49,7 @@ function notify(abonent, branch, types, port) {
 
 module.exports = function auto_recalc($p, log) {
 
-  const {cat: {branches, abonents, templates}, doc: {calc_order}, cch: {mdm_groups}, utils, job_prm, md, adapters: {pouch}} = $p;
+  const {cat: {branches, abonents, templates}, doc: {calc_order}, cch: {mdm_groups}, utils, job_prm, md, adapters: {pouch}, pricing} = $p;
   const {by_branch, order} = require('./index');
   const load_order = order(md);
 
@@ -167,6 +167,17 @@ module.exports = function auto_recalc($p, log) {
       log(`Recalcing ${types.length > 6 ? types.length.toFixed() + ' types' : types.join(',')}`);
 
       try {
+
+        if(types.includes('doc.nom_prices_setup')) {
+          // обновляем цены
+          await pricing.deffered_load_prices(log, true);
+          const index = types.indexOf('doc.nom_prices_setup');
+          types.splice(index, 1);
+          if(!types.includes('cat.nom')) {
+            types.push('cat.nom');
+          }
+        }
+
         for(const aref in abonents.by_ref) {
           const abonent = abonents.by_ref[aref];
           if(!job_prm.server.abonents.includes(abonent.id)) {
@@ -356,7 +367,7 @@ module.exports = function auto_recalc($p, log) {
     }, job_prm.server.defer / 2);
   });
 
-  pouch.on('nom_price', changes.register.bind(changes, 'cat.nom'));
+  pouch.on('nom_price', () => log('nom_price'));
 
   // регистрируем для будущего пересчета
   pouch.on('ram_change', (change) => {
