@@ -76,7 +76,7 @@ module.exports = function ($p, log) {
       }
     }
     catch (err) {
-      end500({res, err, log});
+      end500({req, res, err, log});
     }
 
   };

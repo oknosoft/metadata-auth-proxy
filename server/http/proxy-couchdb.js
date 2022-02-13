@@ -66,7 +66,7 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     }
 
     if((path.includes('/_utils') || path.includes('/_users')) && !(user.roles.includes('doc_full') || user.roles.includes('_admin'))) {
-      return end401({res, err: {message: `path ${path} for admins only, role 'doc_full' required`}, log});
+      return end401({req, res, err: {message: `path ${path} for admins only, role 'doc_full' required`}, log});
     }
 
     if(!query && !path.endsWith('/') && !path.includes('_session')) {

@@ -59,7 +59,7 @@ module.exports = function (runtime) {
                   err.status = 500;
                 }
                 err.error = true;
-                end500({res, log, err});
+                end500({req, res, log, err});
               });
           }
 

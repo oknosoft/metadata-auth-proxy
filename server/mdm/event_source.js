@@ -89,11 +89,11 @@ module.exports = function event_source({adapters: {pouch}, utils, wsql, cat: {us
           return end404(res, paths[2]);
         }
         else if(!res.finished) {
-          return end401({res, err: paths[2], log});
+          return end401({req, res, err: paths[2], log});
         }
       })
       .catch((err) => {
-        end401({res, err, log});
+        end401({req, res, err, log});
       });
   }
 
@@ -110,7 +110,7 @@ module.exports = function event_source({adapters: {pouch}, utils, wsql, cat: {us
 
     const user = users.by_ref[req.parsed.paths[2]];
     if(!user || user.is_new() || user.empty()) {
-      return end401({res, err: req.parsed.paths[2], log});
+      return end401({req, res, err: req.parsed.paths[2], log});
     }
 
     res.user = user;

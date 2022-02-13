@@ -67,7 +67,7 @@ module.exports = function ($p, log, worker) {
         if(rateLimiterRes instanceof Error) {
           rateLimiterRes.error = true;
           rateLimiterRes.status = 500;
-          end500({res, log, rateLimiterRes});
+          end500({req, res, log, rateLimiterRes});
           return rateLimiterRes;
         }
         return utils.sleep(20);
@@ -104,7 +104,7 @@ module.exports = function ($p, log, worker) {
         // пытаемся авторизовать пользователя
         return auth(req, res)
           .catch((err) => {
-            end401({res, err, log});
+            end401({req, res, err, log});
             return null;
           })
           .then((user) => {
@@ -124,11 +124,11 @@ module.exports = function ($p, log, worker) {
               return end404(res, parsed.paths[0]);
             }
             else if(!res.finished) {
-              return end401({res, err: parsed.paths[0], log});
+              return end401({req, res, err: parsed.paths[0], log});
             }
           })
           .catch((err) => {
-            end500({res, err, log});
+            end500({req, res, err, log});
           });
 
       });

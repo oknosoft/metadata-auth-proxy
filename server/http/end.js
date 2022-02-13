@@ -21,9 +21,16 @@ function end(res, body) {
   }
 }
 
+function ip({req, res, err}) {
+  if(req) {
+    err.ip = `${req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || res.socket.remoteAddress}`;
+  }
+  return [err, 'error'];
+}
+
 module.exports = {
-  end401({res, err, log}) {
-    log(err, 'error');
+  end401({req, res, err, log}) {
+    log(...ip({req, res, err}));
     end(res, {
       error: true,
       status: 401,
@@ -38,8 +45,8 @@ module.exports = {
       message: `path '${path}' not available`,
     });
   },
-  end500({res, err, log}) {
-    log(err, 'error');
+  end500({req, res, err, log}) {
+    log(...ip({req, res, err}));
     end(res, {
       error: true,
       status: err.status || 500,

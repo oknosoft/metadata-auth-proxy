@@ -77,7 +77,7 @@ function mdm ($p, log) {
 
       const {abonents} = job_prm.server;
       if(!abonents.some((id) => id == zone)) {
-        return end500({res, err: {status: 406, message: `Текущий proxy обслуживает зоны ${abonents.join(', ')}, но запрошена зона ${zone}`}, log});
+        return end500({req, res, err: {status: 406, message: `Текущий proxy обслуживает зоны ${abonents.join(', ')}, но запрошена зона ${zone}`}, log});
       }
 
       if(suffix === 'templates') {
@@ -117,7 +117,7 @@ function mdm ($p, log) {
 
       // если данные не общие, проверяем пользователя
       if(suffix !== 'common' && !user) {
-        return end500({res, err: {status: 403, message: 'Пользователь не авторизован'}, log});
+        return end500({req, res, err: {status: 403, message: 'Пользователь не авторизован'}, log});
       }
 
       // дополнительные маршруты
@@ -168,7 +168,7 @@ function mdm ($p, log) {
       res.on('close', () => stream.destroy());
     }
     catch(err){
-      end500({res, err, log});
+      end500({req, res, err, log});
     }
 
   };
