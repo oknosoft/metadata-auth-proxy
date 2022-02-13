@@ -213,6 +213,32 @@ module.exports = function auto_recalc($p, log) {
 
           await dyn_mdm.prepare(Array.from(objs), Array.from(tmplts), $p);
 
+          // пересчет продукций текущих шаблонов
+          if(types.includes('doc.calc_order')) {
+            await recalc_templates({abonent, tmplts});
+          }
+          else {
+            const rm = [], tt = new Set();
+            for(const t of types) {
+              if(t.startsWith('doc.calc_order')) {
+                rm.push(t);
+                const tmpl = calc_order.get(t.substr(15));
+                if(tmplts.has(tmpl)) {
+                  tt.add(tmpl);
+                };
+              }
+            }
+            if(rm.length) {
+              for(const t of rm) {
+                types.splice(types.indexOf(t), 1);
+              }
+              types.push('doc.calc_order');
+            }
+            if(tt.size) {
+              await recalc_templates({abonent, tmplts: tt});
+            }
+          }
+
           // пересчет корня текущего абонента
           await recalc({
             abonent,
@@ -221,23 +247,6 @@ module.exports = function auto_recalc($p, log) {
             suffix: 'common',
             types,
           });
-
-          // пересчет продукций текущих шаблонов
-          if(types.includes('doc.calc_order')) {
-            await recalc_templates({abonent, tmplts});
-          }
-          else {
-            const tt = types
-              .filter(t => {
-                if(t.startsWith('doc.calc_order')) {
-                  return tmplts.has(calc_order.get(t.substr(15)));
-                }
-              })
-              .map(t => calc_order.get(t.substr(15)));
-            if(tt.length) {
-              await recalc_templates({abonent, tmplts: tt});
-            }
-          }
 
           for(const bref in branches.by_ref) {
             const branch = branches.by_ref[bref];
