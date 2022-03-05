@@ -44,7 +44,7 @@ function notify(abonent, branch, types, port) {
     method: 'POST',
     body: JSON.stringify({abonent: abonent.ref, branch: branch.ref, types}),
   })
-    .catch((err) => null);
+    .catch(() => null);
 }
 
 module.exports = function auto_recalc($p, log) {
@@ -96,7 +96,7 @@ module.exports = function auto_recalc($p, log) {
 
     /**
      * Регистрирует изменения одного или всех типов данных
-     * @param type {string|array|undefined}
+     * @param [type] {string|array|undefined}
      */
     register(type) {
       // пока всё не загружено, ничего не регистрируем
@@ -225,7 +225,7 @@ module.exports = function auto_recalc($p, log) {
                 const tmpl = calc_order.get(t.substr(15));
                 if(tmplts.has(tmpl)) {
                   tt.add(tmpl);
-                };
+                }
               }
             }
             if(rm.length) {
@@ -280,11 +280,7 @@ module.exports = function auto_recalc($p, log) {
 
   };
 
-  async function recalc({abonent, branch, abranches, suffix, types}) {
-
-    const zone = abonent.id;
-    const ctypes = [];
-
+  function mkpaths(zone, suffix = 'common') {
     // путь кеша текущей зоны
     if(!fs.existsSync(resolve(__dirname, `./cache/${zone}`))) {
       fs.mkdirSync(resolve(__dirname, `./cache/${zone}`));
@@ -293,6 +289,14 @@ module.exports = function auto_recalc($p, log) {
     if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
       fs.mkdirSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`));
     }
+  }
+
+  async function recalc({abonent, branch, abranches, suffix, types}) {
+
+    const zone = abonent.id;
+    const ctypes = [];
+
+    mkpaths(zone, suffix);
 
     const manifest = resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}/manifest.json`);
     let tags = {};
@@ -351,16 +355,19 @@ module.exports = function auto_recalc($p, log) {
   async function recalc_templates({abonent, tmplts}) {
     const name = 'cat.characteristics';
     for (const tmpl of tmplts) {
-      const fname = resolve(__dirname, `./cache/${abonent.id}/0000/doc.calc_order.${tmpl.ref}.json`);
+
       const rows = [];
       tmpl.production.forEach(({characteristic: o}) => {
         !o.empty() && rows.push(patch(o, name));
       });
       const text = JSON.stringify({name, rows}) + '\r\n';
+
+      const fname = resolve(__dirname, `./cache/${abonent.id}/0000/doc.calc_order.${tmpl.ref}.json`);
       const old = fs.existsSync(fname) && await fs.readFileAsync(fname, 'utf8');
 
       // если данные реально изменены - записываем
       if(text !== old) {
+        mkpaths(abonent.id);
         await fs.writeFileAsync(fname, text, 'utf8');
         const mname = fname.replace('.json', '.manifest');
         await fs.writeFileAsync(mname, utils.crc32(text).toString(), 'utf8');
