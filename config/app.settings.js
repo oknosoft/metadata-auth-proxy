@@ -113,7 +113,7 @@ module.exports = function settings(prm = {}) {
 
     workers: {
       count: process.env.WORKERS_COUNT ? parseFloat(process.env.WORKERS_COUNT) : 1,  // Total threads
-      reloadAt: 3,              // Hour all threads are restarted
+      reloadAt: process.env.RELOAD_AT ? parseFloat(process.env.RELOAD_AT) : 3,       // Hour all threads are restarted
       reloadOverlap: 40e3,      // Gap between restarts of simultaneous threads
       killDelay: 10e3           // Delay between shutdown msg to worker and kill, ms
     },
