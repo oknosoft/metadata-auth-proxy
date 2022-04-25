@@ -248,6 +248,10 @@ module.exports = function auto_recalc($p, log) {
             types,
           });
 
+          if(types.length && types.every((name) => !by_branch.includes(name))) {
+            continue;
+          }
+
           for(const bref in branches.by_ref) {
             const branch = branches.by_ref[bref];
 
@@ -340,6 +344,7 @@ module.exports = function auto_recalc($p, log) {
           await fs.writeFileAsync(fname, text, 'utf8');
           ctypes.push(name);
         }
+        await utils.sleep(10);
       }
     }
 
@@ -349,7 +354,7 @@ module.exports = function auto_recalc($p, log) {
       branch.empty() && notify(abonent, branch, ctypes, job_prm.server.port);
     }
 
-    return utils.sleep();
+    return utils.sleep(10);
   }
 
   async function recalc_templates({abonent, tmplts}) {
