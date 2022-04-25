@@ -62,7 +62,7 @@ module.exports = function ($p, log, worker) {
     const {remotePort, remoteAddress} = res.socket;
 
     // проверяем лимит запросов в секунду
-    ipLimiter.consume(`${req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || remoteAddress}`, 1)
+    ipLimiter.consume(`${req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || remoteAddress}:${remotePort}`, 1)
       .catch((rateLimiterRes) => {
         if(rateLimiterRes instanceof Error) {
           rateLimiterRes.error = true;
