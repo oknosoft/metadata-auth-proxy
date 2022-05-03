@@ -58,11 +58,11 @@ module.exports = function ($p, log, worker) {
   }
 
   function handler(req, res) {
-
-    const {remotePort, remoteAddress} = res.socket;
-
     // проверяем лимит запросов в секунду
-    ipLimiter.consume(`${req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || remoteAddress}:${remotePort}`, 1)
+    const {remotePort, remoteAddress} = res.socket;
+    const {headers} = req;
+    const key = headers.authorization || `${headers['x-forwarded-for'] || headers['x-real-ip'] || remoteAddress}:${remotePort}`;
+    ipLimiter.consume(key, 1)
       .catch((rateLimiterRes) => {
         if(rateLimiterRes instanceof Error) {
           rateLimiterRes.error = true;
@@ -70,13 +70,19 @@ module.exports = function ($p, log, worker) {
           end500({req, res, log, rateLimiterRes});
           return rateLimiterRes;
         }
-        return utils.sleep(20);
+        return utils.sleep(20).then(() => rateLimiterRes);
       })
-      .then((rateLimiterRes) => {
+      .then(async (rateLimiterRes) => {
 
         if(rateLimiterRes instanceof Error) {
           return ;
         }
+        if (rateLimiterRes?.remainingPoints < 2) {
+          await utils.sleep(Math.abs(rateLimiterRes.remainingPoints || 1) * 10);
+        }
+        // if(rateLimiterRes?.remainingPoints) {
+        //   log(`${key}: ${rateLimiterRes.remainingPoints}`);
+        // }
 
         const parsed = req.parsed = url.parse(req.url);
         parsed.paths = parsed.pathname.replace('/', '').split('/');
@@ -86,7 +92,6 @@ module.exports = function ($p, log, worker) {
           return ;
         }
 
-        const {host} = req.headers;
         parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
         parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
         parsed.is_event_source = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'events';

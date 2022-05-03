@@ -92,8 +92,8 @@ module.exports = function settings(prm = {}) {
           limit: 2000,                // Max requests per interval - пока не используем
         },
         ip: {                         // Per-ip requests limit
-          interval: 1,
-          limit: 8,                   // Если запросов за секунду > 8, добавляем задержку 20мс
+          interval: 3,
+          limit: 8,                   // Если запросов за 3 секундs > 8, добавляем задержку
         }
       },
       upp: {
