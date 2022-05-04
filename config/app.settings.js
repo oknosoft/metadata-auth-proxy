@@ -93,7 +93,7 @@ module.exports = function settings(prm = {}) {
         },
         ip: {                         // Per-ip requests limit
           interval: 3,
-          limit: 8,                   // Если запросов за 3 секундs > 8, добавляем задержку
+          limit: 9,                   // Если запросов за 3 секундs > 9, добавляем задержку
         }
       },
       upp: {
