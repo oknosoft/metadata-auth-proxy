@@ -1,9 +1,7 @@
 /**
+ * handler запросов http
  *
- *
- * @module index
- *
- * Created by Evgeniy Malyarov on 03.06.2019.
+ * Created 03.06.2019.
  */
 
 const url = require('url');
@@ -92,11 +90,9 @@ module.exports = function ($p, log, worker) {
         if (rateLimiterRes?.remainingPoints < 2) {
           await utils.sleep(Math.abs(rateLimiterRes.remainingPoints - 2) * 10);
         }
-        if(rateLimiterRes?.remainingPoints) {
-          log(`${key}: ${rateLimiterRes.remainingPoints}`);
-        }
-
-
+        // if(rateLimiterRes?.remainingPoints) {
+        //   log(`${key}: ${rateLimiterRes.remainingPoints}`);
+        // }
 
         // стартовая маршрутизация по году и зоне
         if(proxy_by_year(req, res)) {
