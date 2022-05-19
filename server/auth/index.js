@@ -153,13 +153,13 @@ module.exports = function ({cat, job_prm}, log) {
     // олицетворение - вход от имени другого пользователя
     const impersonation = authorization.impersonation || cache.ext(authorization.key);
     // TODO: учесть вложенность отдела абонента
-    if(user.roles.includes('doc_full') && impersonation) {
-      user = cat.users.by_id(impersonation);
+    if(impersonation && (user.roles.includes('doc_full') || user.roles.includes('impersonation'))) {
+      user = cat.users.get(impersonation);
       if(!user) {
         throw new TypeError(`Пользователь '${impersonation}' отсутствует в справочнике 'Пользователи'`);
       }
       if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
-        throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
+        throw new TypeError(`Пользователю '${user.name || impersonation}' запрещен вход в программу`);
       }
     }
 
