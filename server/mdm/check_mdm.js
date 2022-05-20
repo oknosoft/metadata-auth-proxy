@@ -40,7 +40,7 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
       return o.branch.empty() ? o.subscribers.find({abonent}) : (o.branch == branch || o.branch.parent == branch);
     }
     else if(name === 'cat.branches') {
-      return o == branch || branch._parents().includes(o);
+      return o._hierarchy(branch) || branch._parents().includes(o);
     }
   }
   if(name === 'cat.partners') {
