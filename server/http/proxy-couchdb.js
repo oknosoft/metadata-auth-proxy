@@ -89,7 +89,7 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
 
     let {branch} = user || {};
     // если пользователю разрешен доступ к корню и в заголовке передали branch - перенаправляем на базу отдела
-    if(user && utils.is_guid(headers.branch) && user.branch.empty()) {
+    if(user && utils.is_guid(headers.branch) && (branch.empty() || cat.branches.by_ref[headers.branch]?._hierarchy(branch))) {
       if(cat.branches.by_ref[headers.branch]) {
         branch = cat.branches.by_ref[headers.branch];
       }
