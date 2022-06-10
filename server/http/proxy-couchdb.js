@@ -94,13 +94,13 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
         branch = cat.branches.by_ref[headers.branch];
       }
       if(branch && branch.suffix && parts[1] === 'doc') {
-        path = path.replace('_doc/', `_doc_${branch.suffix}/`);
+        path = path.replace(/_do(c|c_[A-Za-z0-9_]{4})\//, `_doc_${branch.suffix}/`);
       }
     }
     else if(job_prm.server.branches && job_prm.server.branches.length === 1) {
       cat.branches.find_rows({suffix: job_prm.server.branches[0]}, (o) => {
         branch = o;
-        path = path.replace('_doc/', `_doc_${branch.suffix}/`);
+        path = path.replace(/_do(c|c_[A-Za-z0-9_]{4})\//, `_doc_${branch.suffix}/`);
         return false;
       });
     }
