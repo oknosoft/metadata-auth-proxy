@@ -79,7 +79,7 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     else if(parts && parts[1]) {
       parts = parts[1].split('_');
     }
-    else if(['/couchdb/', '/couchdb/_session', '/_session'].includes(path)) {
+    else if(['/couchdb/', '/couchdb/_utils/', '/couchdb/_users/', '/couchdb/_session', '/_session'].includes(path)) {
       parts = [zone, ''];
     }
     else {
