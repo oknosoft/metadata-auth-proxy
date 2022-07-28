@@ -65,11 +65,13 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
       headers[token] = sign(headers[username], user_node.secret);
     }
 
-    if((path.includes('/_utils') || path.includes('/_users')) && !(user.roles.includes('doc_full') || user.roles.includes('_admin'))) {
+    const admin = user.roles.includes('doc_full') || user.roles.includes('_admin');
+
+    if((path.includes('/_utils') || path.includes('/_users')) && !admin) {
       return end401({req, res, err: {message: `path ${path} for admins only, role 'doc_full' required`}, log});
     }
 
-    if(!query && !path.endsWith('/') && !path.includes('_session')) {
+    if(!query && !/(\.js|\.css|\.png|\.woff|_\w{3,}|\/)$/.test(path) && !path.includes('_session')) {
       path += '/';
     }
     let parts = new RegExp(`/${client_prefix}(.*?)/`).exec(path);
@@ -79,7 +81,7 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     else if(parts && parts[1]) {
       parts = parts[1].split('_');
     }
-    else if(['/couchdb/', '/couchdb/_utils/', '/couchdb/_users/', '/couchdb/_session', '/_session'].includes(path)) {
+    else if(['/couchdb/', '/couchdb/_session', '/_session'].includes(path) || admin) {
       parts = [zone, ''];
     }
     else {
