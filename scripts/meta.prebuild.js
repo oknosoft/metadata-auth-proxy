@@ -55,11 +55,10 @@ $p.wsql.init((prm) => {
 
 }, ($p) => {
 
-  const db = new MetaEngine.classes.PouchDB(config.couch_local + 'meta',
-    {
-      auth: config.user_node,
-      skip_setup: true,
-    });
+  const db = new MetaEngine.classes.PouchDB(config.couch_local + 'meta', {
+    skip_setup: true,
+    auth: config.user_node,
+  });
 
   debug(`Читаем описание метаданных из CouchDB ${config.couch_local}`);
   return db.info()
@@ -86,7 +85,7 @@ $p.wsql.init((prm) => {
       delete _m._rev;
 
       // фильтруем и корректируем метаданные
-      patch(_m);
+      patch(_m, $p);
 
       return $p.md.init(_m);
     })
