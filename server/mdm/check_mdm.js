@@ -14,6 +14,9 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
     return check_characteristics(o);
   }
   if(common.includes(name)) {
+    if(name === 'cat.clrs') {
+      return o.ref && o.name && o.name !== ' \\ ';
+    }
     return name === 'cat.abonents' ? job_prm.server.abonents.includes(o.id) : true;
   }
   else if(name === 'doc.calc_order') {
