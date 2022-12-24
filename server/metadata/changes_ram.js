@@ -30,4 +30,4 @@ module.exports = function ram_changes({adapters: {pouch}, pricing}, log, is_comm
     .on('error', (err) => {
       log(`change error ${err}`);
     });
-}
+};

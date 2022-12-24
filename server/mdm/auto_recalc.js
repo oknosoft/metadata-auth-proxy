@@ -173,7 +173,7 @@ module.exports = function auto_recalc($p, log) {
       const types = Array.from(queue);
       this.queue.swap = !this.queue.swap;
       queue.clear();
-      log(`Recalcing ${types.length > 6 ? types.length.toFixed() + ' types' : types.join(',')}`);
+      log(`Recalculating ${types.length > 6 ? types.length.toFixed() + ' types' : types.join(',')}`);
 
       try {
 
@@ -282,6 +282,7 @@ module.exports = function auto_recalc($p, log) {
             });
           }
         }
+        log(`Recalcied ${types.length > 6 ? types.length.toFixed() + ' types' : types.join(',')}`);
       }
       catch (e) {
         log(e);
@@ -342,7 +343,7 @@ module.exports = function auto_recalc($p, log) {
           register: ireg.predefined_elmnts,
         }) : mgr).forEach((o) => {
           if(check_mdm({o, name, abonent, branch, abranches, job_prm}) && mdm_groups.check({o, name, abonent, branch})) {
-            rows.push(patch(o, name));
+            rows.push(patch(o, name, abonent, branch));
           }
         });
         //log(`Recaled ${zone}:${suffix === 'common' ? '0000' : suffix} ${name}`);
@@ -378,7 +379,7 @@ module.exports = function auto_recalc($p, log) {
 
       const rows = [];
       tmpl.production.forEach(({characteristic: o}) => {
-        !o.empty() && rows.push(patch(o, name));
+        !o.empty() && rows.push(patch(o, name, abonent));
       });
       const text = JSON.stringify({name, rows}) + '\r\n';
 
