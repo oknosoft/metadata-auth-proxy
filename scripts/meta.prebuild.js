@@ -275,7 +275,7 @@ function obj_constructor_text(_m, category, name, categoties) {
     text += `\n$p.${category}.create('${name}', ${managerName}, ${extModule[managerName]._freeze ? 'true' : 'false'});\n`;
   }
   else{
-    text += `$p.${category}.create('${name}');\n`;
+    text += `if(!$p.${category}.${name}) {$p.${category}.create('${name}')}\n`;
   }
 
   return text;
