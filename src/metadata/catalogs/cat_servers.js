@@ -1,6 +1,12 @@
 
 exports.CatServers = class CatServers extends Object {
 
+  /**
+   * Возвращает базу PouchDB абонента
+   * @param abonent {CatAbonents}
+   * @param cachable {String}
+   * @return {PouchDB}
+   */
   db(abonent, cachable) {
     if(!this._dbs) {
       this._dbs = new Map();

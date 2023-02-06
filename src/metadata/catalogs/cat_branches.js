@@ -1,6 +1,10 @@
 
 exports.CatBranches = class CatBranches extends Object {
 
+  /**
+   * Сервер текущего отдела
+   * @type {CatServers}
+   */
   get _server() {
     const {owner, parent, server} = this;
     if(!server.empty()) {
@@ -12,6 +16,11 @@ exports.CatBranches = class CatBranches extends Object {
     return owner.server;
   }
 
+  /**
+   * База couchdb текущего отдела
+   * @param cachable {String}
+   * @return {PouchDB}
+   */
   db(cachable) {
     let {_data, _manager: {adapter, _owner: {$p}}, _server, owner, suffix} = this;
     if(!_data.dbs) {
