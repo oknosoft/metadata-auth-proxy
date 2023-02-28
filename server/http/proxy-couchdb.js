@@ -65,11 +65,13 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
       headers[token] = sign(headers[username], user_node.secret);
     }
 
-    if((path.includes('/_utils') || path.includes('/_users')) && !(user.roles.includes('doc_full') || user.roles.includes('_admin'))) {
+    const admin = user.roles.includes('doc_full') || user.roles.includes('_admin');
+
+    if((path.includes('/_utils') || path.includes('/_users')) && !admin) {
       return end401({req, res, err: {message: `path ${path} for admins only, role 'doc_full' required`}, log});
     }
 
-    if(!query && !path.endsWith('/') && !path.includes('_session')) {
+    if(!query && !/(\.js|\.css|\.png|\.woff|_\w{3,}|\/)$/.test(path) && !path.includes('_session')) {
       path += '/';
     }
     let parts = new RegExp(`/${client_prefix}(.*?)/`).exec(path);
@@ -79,7 +81,7 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     else if(parts && parts[1]) {
       parts = parts[1].split('_');
     }
-    else if(['/couchdb/', '/couchdb/_session', '/_session'].includes(path)) {
+    else if(['/couchdb/', '/couchdb/_session', '/_session'].includes(path) || admin) {
       parts = [zone, ''];
     }
     else {
@@ -89,18 +91,18 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
 
     let {branch} = user || {};
     // если пользователю разрешен доступ к корню и в заголовке передали branch - перенаправляем на базу отдела
-    if(user && utils.is_guid(headers.branch) && user.branch.empty()) {
+    if(user && utils.is_guid(headers.branch) && (branch.empty() || cat.branches.by_ref[headers.branch]?._hierarchy(branch))) {
       if(cat.branches.by_ref[headers.branch]) {
         branch = cat.branches.by_ref[headers.branch];
       }
       if(branch && branch.suffix && parts[1] === 'doc') {
-        path = path.replace('_doc/', `_doc_${branch.suffix}/`);
+        path = path.replace(/_do(c|c_[A-Za-z0-9]{4})\//, `_doc_${branch.suffix}/`);
       }
     }
     else if(job_prm.server.branches && job_prm.server.branches.length === 1) {
       cat.branches.find_rows({suffix: job_prm.server.branches[0]}, (o) => {
         branch = o;
-        path = path.replace('_doc/', `_doc_${branch.suffix}/`);
+        path = path.replace(/_do(c|c_[A-Za-z0-9]{4})\//, `_doc_${branch.suffix}/`);
         return false;
       });
     }

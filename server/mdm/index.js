@@ -27,6 +27,7 @@ const by_branch = [
   'cat.organizations',
   'cat.cashboxes',
   'cat.stores',
+  'cch.predefined_elmnts',
 ];
 // эти общие - их не режем и грузим сразу
 const common = [

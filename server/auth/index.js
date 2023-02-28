@@ -4,6 +4,7 @@
 
 const user_pass_regexp = /^([^:]*):(.*)$/;
 const cache = require('./cache');
+const {end500} = require('../http/end');
 
 // контекст авторизации
 const auth = {
@@ -13,17 +14,17 @@ const auth = {
 const oauth = require('./oauth')(auth);
 
 // создаём методы провайдеров
-for(const provider of auth.settings.providers) {
+for (const provider of auth.settings.providers) {
   auth.providers[provider] = require(`./${provider}`);
 }
 
-function decodeBase64 (str) {
+function decodeBase64(str) {
   return Buffer.from(str, 'base64').toString();
 }
 
 function cookieKey(cookie) {
   const values = cookie ? cookie.split('; ') : [];
-  for(const elm of values) {
+  for (const elm of values) {
     const cv = elm.split('=');
     if(cv[0] === 'AuthSession' && cv[1]) {
       return cv[1];
@@ -35,11 +36,11 @@ function extractAuth(req) {
   let {authorization, impersonation, cookie, zone, branch, year} = req.headers;
   if(authorization) {
     //authorization = authorization.replace('Basic', 'LDAP');
-    for(const provider in auth.providers) {
+    for (const provider in auth.providers) {
       const settings = auth.settings[provider];
       const {authPrefix} = settings;
       if(authorization.startsWith(authPrefix)) {
-        try{
+        try {
           const key = authorization.substr(authPrefix.length);
           const decoded = user_pass_regexp.exec(decodeBase64(key));
           if(decoded) {
@@ -59,14 +60,13 @@ function extractAuth(req) {
               year,
             };
           }
-        }
-        catch (e) {
+        } catch (e) {
 
         }
       }
     }
   }
-  else if (cookie) {
+  else if(cookie) {
     const key = cookieKey(cookie);
     return key ? {key, method: auth.providers.couchdb} : undefined;
   }
@@ -83,7 +83,14 @@ module.exports = function ({cat, job_prm}, log) {
 
     const {paths, is_common, is_mdm, is_log, is_event_source} = req.parsed;
 
-    if(paths[0] === 'auth' && !['ldap','couchdb'].includes(paths[1])) {
+    if(job_prm.server.browser_only) {
+      const agent = req.headers['user-agent']?.toLowerCase();
+      if((paths[0] !== '_session') && (!agent || agent.includes('1c') || agent.includes('couchdb'))) {
+        return end500({req, res, err: {status: 403, message: `This endpoint for browser-only requests, got ${agent}`}, log});
+      }
+    }
+
+    if(paths[0] === 'auth' && !['ldap', 'couchdb'].includes(paths[1])) {
       return oauth(req, res);
     }
 
@@ -146,13 +153,13 @@ module.exports = function ({cat, job_prm}, log) {
     // олицетворение - вход от имени другого пользователя
     const impersonation = authorization.impersonation || cache.ext(authorization.key);
     // TODO: учесть вложенность отдела абонента
-    if(user.roles.includes('doc_full') && impersonation) {
-      user = cat.users.by_id(impersonation);
+    if(impersonation && (user.roles.includes('doc_full') || user.roles.includes('impersonation'))) {
+      user = cat.users.get(impersonation);
       if(!user) {
         throw new TypeError(`Пользователь '${impersonation}' отсутствует в справочнике 'Пользователи'`);
       }
       if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
-        throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
+        throw new TypeError(`Пользователю '${user.name || impersonation}' запрещен вход в программу`);
       }
     }
 

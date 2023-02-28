@@ -1,9 +1,7 @@
 /**
+ * handler запросов http
  *
- *
- * @module index
- *
- * Created by Evgeniy Malyarov on 03.06.2019.
+ * Created 03.06.2019.
  */
 
 const url = require('url');
@@ -58,11 +56,23 @@ module.exports = function ($p, log, worker) {
   }
 
   function handler(req, res) {
-
+    // проверяем лимит запросов в секунду
     const {remotePort, remoteAddress} = res.socket;
 
-    // проверяем лимит запросов в секунду
-    ipLimiter.consume(`${req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || remoteAddress}`, 1)
+    const parsed = req.parsed = url.parse(req.url);
+    parsed.paths = parsed.pathname.replace('/', '').split('/');
+    parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
+    parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
+    parsed.is_event_source = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'events';
+    parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
+    parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|dist|static|imgs|index|builder|about|login|settings|b|o|help)$/.test(parsed.paths[0]);
+
+    const {headers} = req;
+    let key = headers.authorization || `${headers['x-forwarded-for'] || headers['x-real-ip'] || remoteAddress}`;
+    if(!headers.authorization && (parsed.is_common || (parsed.is_mdm && parsed.paths.includes('common')) || parsed.is_log || parsed.is_event_source)) {
+      key += `:${remotePort}`;
+    }
+    ipLimiter.consume(key, 1)
       .catch((rateLimiterRes) => {
         if(rateLimiterRes instanceof Error) {
           rateLimiterRes.error = true;
@@ -70,28 +80,25 @@ module.exports = function ($p, log, worker) {
           end500({req, res, log, rateLimiterRes});
           return rateLimiterRes;
         }
-        return utils.sleep(20);
+        return utils.sleep(20).then(() => rateLimiterRes);
       })
-      .then((rateLimiterRes) => {
+      .then(async (rateLimiterRes) => {
 
         if(rateLimiterRes instanceof Error) {
           return ;
         }
-
-        const parsed = req.parsed = url.parse(req.url);
-        parsed.paths = parsed.pathname.replace('/', '').split('/');
+        if (rateLimiterRes?.remainingPoints < 2) {
+          await utils.sleep(Math.abs(rateLimiterRes.remainingPoints - 2) * 10);
+        }
+        // if(rateLimiterRes?.remainingPoints) {
+        //   log(`${key}: ${rateLimiterRes.remainingPoints}`);
+        // }
 
         // стартовая маршрутизация по году и зоне
         if(proxy_by_year(req, res)) {
           return ;
         }
 
-        const {host} = req.headers;
-        parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
-        parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
-        parsed.is_event_source = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'events';
-        parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
-        parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|dist|static|imgs|index|builder|about|login|settings|b|o|help)$/.test(parsed.paths[0]);
         req.query = qs.parse(parsed.query);
 
         if(parsed.is_static) {

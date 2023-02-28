@@ -16,6 +16,7 @@ const include = [
   'ireg.i18n',
   'ireg.delivery_schedules',
   'ireg.delivery_scheme',
+  'ireg.predefined_elmnts',
 
   //'*',
   // 'enm.mutual_contract_settlements',
@@ -109,7 +110,7 @@ const preserv_cachable = [
 ];
 
 
-module.exports = function(meta, cache_only) {
+module.exports = function(meta, $p, cache_only) {
   for(const cls in meta) {
     const mgrs = meta[cls];
     if(Array.isArray(mgrs)) {

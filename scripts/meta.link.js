@@ -13,22 +13,22 @@ const {dependencies} = require(path.resolve(__dirname, '../package.json'));
 const repos = [
   {
     local: 'wb-core',
-    remote: '..\\windowbuilder-core',
+    remote: '..\\wb-core',
     dir: 'dist',
   },
   {
     local: 'wb-reports',
-    remote: '..\\windowbuilder-reports',
+    remote: '..\\wb-reports',
     dir: 'server',
   },
   {
     local: 'wb-planning',
-    remote: '..\\windowbuilder-planning',
+    remote: '..\\wb-planning',
     dir: 'server',
   },
   {
     local: 'wb-parametric',
-    remote: '..\\windowbuilder-parametric',
+    remote: '..\\parametric',
     dir: 'server',
   },
   {

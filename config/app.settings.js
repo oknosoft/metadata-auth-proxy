@@ -83,6 +83,7 @@ module.exports = function settings(prm = {}) {
       no_mdm: Boolean(process.env.NOMDM),
       year: process.env.YEAR ? parseFloat(process.env.YEAR) : new Date().getFullYear(),
       disable_mdm: Boolean(process.env.DISABLEMDM),
+      browser_only: Boolean(process.env.BROWSER_ONLY),
       defer: (process.env.DEFER ? parseFloat(process.env.DEFER) : 200000) + Math.random() * 10000,  // задержка пересчета mdm
       eve_url: process.env.EVEURL || 'http://localhost:5984/pl_events',
       rater: {                        // Request rate locker
@@ -91,8 +92,8 @@ module.exports = function settings(prm = {}) {
           limit: 2000,                // Max requests per interval - пока не используем
         },
         ip: {                         // Per-ip requests limit
-          interval: 1,
-          limit: 100,                 // Если limit > 100, добавляем задержку 20мс
+          interval: 3,
+          limit: 9,                   // Если запросов за 3 секундs > 9, добавляем задержку
         }
       },
       upp: {

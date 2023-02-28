@@ -7,12 +7,12 @@ module.exports = function(runtime) {
 	const workerId = runtime && (runtime.common ? 'ram' : (runtime.cluster && runtime.cluster.worker ? runtime.cluster.worker.id : null));
   const workerKey = (message) => {
     const time = new Date();
-    let key = time.toISOString();
+    let key = time.toJSON();
     if(workerId) {
-      key += ` [worker#${workerId}]`
+      key += ` [worker#${workerId}]`;
     }
     if(message.ip) {
-      key += `[${message.ip}]`
+      key += `[${message.ip}]`;
     }
     return key;
   };

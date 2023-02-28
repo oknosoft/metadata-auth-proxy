@@ -10,8 +10,10 @@ const MetaEngine = require('metadata-core')
 const settings = require('../../config/app.settings');
 
 // функция инициализации структуры метаданных
-const meta_init = require('wb-core/dist/init');
-const proxy_init = require('../../src/metadata/init');
+const init_meta = require('wb-core/dist/init_meta');
+const init_sql = require('wb-core/dist/init_sql');
+const init_classes = require('wb-core/dist/init');
+const init_proxy = require('../../src/metadata/init');
 const patch = require('../../scripts/meta.patch');
 
 const ram_changes = require('./changes_ram');
@@ -33,9 +35,11 @@ module.exports = function (log, is_common) {
   const {user_node} = settings();
 
   // выполняем скрипт инициализации метаданных
-  meta_init($p);
-  proxy_init($p);
-  patch($p.md._m, true);
+  init_meta($p);
+  init_sql($p);
+  init_classes($p);
+  init_proxy($p);
+  patch($p.md._m, $p, true);
 
   // сообщяем адаптерам пути, суффиксы и префиксы
   const {wsql, job_prm, adapters: {pouch}, classes, cat, ireg} = $p;

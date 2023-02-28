@@ -49,7 +49,16 @@ function notify(abonent, branch, types, port) {
 
 module.exports = function auto_recalc($p, log) {
 
-  const {cat: {branches, abonents, templates}, doc: {calc_order}, cch: {mdm_groups}, utils, job_prm, md, adapters: {pouch}, pricing} = $p;
+  const {
+    cat: {branches, abonents, templates},
+    doc: {calc_order},
+    cch: {mdm_groups, properties},
+    ireg,
+    utils,
+    job_prm,
+    md,
+    adapters: {pouch},
+    pricing} = $p;
   const {by_branch, order} = require('./index');
   const load_order = order(md);
 
@@ -164,7 +173,7 @@ module.exports = function auto_recalc($p, log) {
       const types = Array.from(queue);
       this.queue.swap = !this.queue.swap;
       queue.clear();
-      log(`Recalcing ${types.length > 6 ? types.length.toFixed() + ' types' : types.join(',')}`);
+      log(`Recalculating ${types.length > 6 ? types.length.toFixed() + ' types' : types.join(',')}`);
 
       try {
 
@@ -248,6 +257,10 @@ module.exports = function auto_recalc($p, log) {
             types,
           });
 
+          if(types.length && types.every((name) => !by_branch.includes(name))) {
+            continue;
+          }
+
           for(const bref in branches.by_ref) {
             const branch = branches.by_ref[bref];
 
@@ -269,6 +282,7 @@ module.exports = function auto_recalc($p, log) {
             });
           }
         }
+        log(`Recalcied ${types.length > 6 ? types.length.toFixed() + ' types' : types.join(',')}`);
       }
       catch (e) {
         log(e);
@@ -321,9 +335,15 @@ module.exports = function auto_recalc($p, log) {
         }
 
         const rows = [];
-        (name === 'cch.predefined_elmnts' ? await load_predefined(pouch.remote.ram) : mgr).forEach((o) => {
+        (name === 'cch.predefined_elmnts' ? await load_predefined({
+          db: pouch.remote.ram,
+          abonent,
+          branch,
+          properties,
+          register: ireg.predefined_elmnts,
+        }) : mgr).forEach((o) => {
           if(check_mdm({o, name, abonent, branch, abranches, job_prm}) && mdm_groups.check({o, name, abonent, branch})) {
-            rows.push(patch(o, name));
+            rows.push(patch(o, name, abonent, branch));
           }
         });
         //log(`Recaled ${zone}:${suffix === 'common' ? '0000' : suffix} ${name}`);
@@ -340,6 +360,7 @@ module.exports = function auto_recalc($p, log) {
           await fs.writeFileAsync(fname, text, 'utf8');
           ctypes.push(name);
         }
+        await utils.sleep(10);
       }
     }
 
@@ -349,7 +370,7 @@ module.exports = function auto_recalc($p, log) {
       branch.empty() && notify(abonent, branch, ctypes, job_prm.server.port);
     }
 
-    return utils.sleep();
+    return utils.sleep(10);
   }
 
   async function recalc_templates({abonent, tmplts}) {
@@ -358,7 +379,7 @@ module.exports = function auto_recalc($p, log) {
 
       const rows = [];
       tmpl.production.forEach(({characteristic: o}) => {
-        !o.empty() && rows.push(patch(o, name));
+        !o.empty() && rows.push(patch(o, name, abonent));
       });
       const text = JSON.stringify({name, rows}) + '\r\n';
 
