@@ -22,7 +22,7 @@ exports.CatAbonents = class CatAbonents extends Object {
         res.add(acl_obj);
       }
     });
-    return Array.from(res).map((acl_obj) => ({acl_obj}));
+    return Array.from(res);
   }
 
   /**
