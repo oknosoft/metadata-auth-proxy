@@ -484,7 +484,7 @@ set servers(v){this._setter_ts('servers',v)}
         res.add(acl_obj);
       }
     });
-    return Array.from(res).map((acl_obj) => ({acl_obj}));
+    return Array.from(res);
   }
 
   /**
