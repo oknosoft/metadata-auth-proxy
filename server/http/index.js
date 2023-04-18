@@ -6,6 +6,7 @@
 
 const url = require('url');
 const qs = require('qs');
+const { hrtime } = require('node:process');
 const {RateLimiterCluster} = require('rate-limiter-flexible');
 const https = require('https');
 const http = require('http');
@@ -57,6 +58,7 @@ module.exports = function ($p, log, worker) {
 
   function handler(req, res) {
     // проверяем лимит запросов в секунду
+    req.hrtime = hrtime();
     const {remotePort, remoteAddress} = res.socket;
 
     const parsed = req.parsed = url.parse(req.url);
