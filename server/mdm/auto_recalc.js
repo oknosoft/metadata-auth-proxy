@@ -10,7 +10,6 @@
 const fs = require('fs');
 const {resolve} = require('path');
 const check_mdm = require('./check_mdm');
-const load_predefined = require('./load_predefined');
 const dyn_mdm = require('./dyn_mdm');
 const fetch = require('node-fetch');
 require('../http/promisify');
@@ -335,13 +334,7 @@ module.exports = function auto_recalc($p, log) {
         }
 
         const rows = [];
-        (name === 'cch.predefined_elmnts' ? await load_predefined({
-          db: pouch.remote.ram,
-          abonent,
-          branch,
-          properties,
-          register: ireg.predefined_elmnts,
-        }) : mgr).forEach((o) => {
+        mgr.forEach((o) => {
           if(check_mdm({o, name, abonent, branch, abranches, job_prm}) && mdm_groups.check({o, name, abonent, branch})) {
             rows.push(patch(o, name, abonent, branch));
           }
