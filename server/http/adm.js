@@ -16,9 +16,6 @@ module.exports = function ($p, log) {
   require('wb-reports')($p, log, route);
   require('wb-parametric')($p, log, route);
   require('wb-paperless/server')($p, log, route);
-  require('./planning')($p, log, route);
-  //require('./supplier')($p, log, route);
-  require('./foroom')($p, log, route);
   require('./calc_stat')($p, log, route);
   require('wb-planning/server/keys')($p, log, route);
 

@@ -22,7 +22,6 @@ module.exports = function ($p, log, worker) {
 
   const {utils, cat: {abonents}} = $p;
   const couchdbProxy = require('./proxy-couchdb')($p, log);
-  const commonProxy = require('./proxy-common');
   const staticProxy = require('./static');
   const adm = require('./adm')($p, log);
   const mdm = require('../mdm')($p, log);
@@ -66,12 +65,11 @@ module.exports = function ($p, log, worker) {
     parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
     parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
     parsed.is_event_source = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'events';
-    parsed.is_common = (parsed.paths[0] === 'common') || (parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'common');
     parsed.is_static = !parsed.paths[0] || parsed.paths[0].includes('.') || /^(light|dist|static|imgs|index|builder|about|login|settings|b|o|help)$/.test(parsed.paths[0]);
 
     const {headers} = req;
     let key = headers.authorization || `${headers['x-forwarded-for'] || headers['x-real-ip'] || remoteAddress}`;
-    if(!headers.authorization && (parsed.is_common || (parsed.is_mdm && parsed.paths.includes('common')) || parsed.is_log || parsed.is_event_source)) {
+    if(!headers.authorization && ((parsed.is_mdm && parsed.paths.includes('common')) || parsed.is_log || parsed.is_event_source)) {
       key += `:${remotePort}`;
     }
     ipLimiter.consume(key, 1)
@@ -118,9 +116,6 @@ module.exports = function ($p, log, worker) {
           })
           .then((user) => {
             if(user) {
-              if(parsed.is_common) {
-                return commonProxy(req, res, conf);
-              }
               if(parsed.is_mdm) {
                 return mdm(req, res, conf);
               }

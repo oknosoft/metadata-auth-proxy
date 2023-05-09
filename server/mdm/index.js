@@ -14,6 +14,7 @@ const merge2 = require('merge2');
 const manifest = require('./manifest');
 const head = require('./head');
 const current_branch = require('./current_branch');
+const direct = require('./direct');
 require('../http/promisify');
 
 // эти режем по отделу
@@ -148,19 +149,14 @@ function mdm ($p, log) {
           }
           const mgr = md.mgr_by_class_name(name);
           if(mgr) {
-            const fname = suffix === 'common' ?
-              resolve(__dirname, `./cache/${zone}/0000/${name}.json`)
-              :
-              resolve(__dirname, `./cache/${zone}/${by_branch.includes(name) ? suffix : '0000'}/${name}.json`);
-
             if(suffix === 'common' && !common.includes(name)) {
               continue;
             }
             if(suffix !== 'common' && common.includes(name)) {
               continue;
             }
-            // если файл существует, добавляем его в поток
-            fs.existsSync(fname) && stream.add(fs.createReadStream(fname));
+            // добавляем данные в поток
+            direct({stream, mgr, utils});
           }
         }
       }
