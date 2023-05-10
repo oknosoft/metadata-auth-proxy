@@ -11,7 +11,7 @@ module.exports = function ({cat}, log) {
   return function templates({req, res, target}) {
     const {paths} = req.parsed;
     if(req.method === 'GET' && paths[paths.length-1].includes('cat.characteristics')) {
-      const ref = paths[paths.length-1].replace('%7C', '|').substr(20);
+      const ref = paths[paths.length-1].replace('%7C', '|').substring(20);
       const o = cat.characteristics.by_ref[ref];
       if(o && o.obj_delivery_state == 'Шаблон') {
         res.setHeader('Via', 'templates');

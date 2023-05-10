@@ -77,7 +77,7 @@ module.exports = function ($p, log, worker) {
         if(rateLimiterRes instanceof Error) {
           rateLimiterRes.error = true;
           rateLimiterRes.status = 500;
-          end500({req, res, log, rateLimiterRes});
+          end500({req, res, log, err: rateLimiterRes});
           return rateLimiterRes;
         }
         return utils.sleep(20).then(() => rateLimiterRes);
