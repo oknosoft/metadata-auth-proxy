@@ -81,6 +81,7 @@ module.exports = function settings(prm = {}) {
       branches: process.env.BRANCHES ? JSON.parse(process.env.BRANCHES) : null,     // список отделов можно ограничить
       single_db: Boolean(process.env.SINGLE_DB),                                    // использовать основную базу doc вместо перебора баз абонентов
       no_mdm: Boolean(process.env.NOMDM),
+      no_background: Boolean(process.env.NOBACKGROUND),
       year: process.env.YEAR ? parseFloat(process.env.YEAR) : new Date().getFullYear(),
       disable_mdm: Boolean(process.env.DISABLEMDM),
       browser_only: Boolean(process.env.BROWSER_ONLY),

@@ -408,6 +408,9 @@ module.exports = function auto_recalc($p, log) {
 
   // регистрируем для будущего пересчета
   pouch.on('ram_change', (change) => {
+    if(job_prm.server.no_background) {
+      return;
+    }
     try {
       const class_name = change.id.split('|')[0];
       if(['cat.branches', 'cat.abonents'].includes(class_name)) {
