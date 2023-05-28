@@ -19,7 +19,6 @@ const worker = require('./worker'),
 if (runtime.cluster.isMaster) {
 
   const cpus = conf.workers.count || require('os').cpus().length;
-  const common = conf.server.start_common && require('child_process').fork('server/ram/index', {env: process.env});
   let workers = [];
 
   // On worker die
@@ -33,13 +32,14 @@ if (runtime.cluster.isMaster) {
     workers.push(runtime.cluster.fork());
   });
 
-  process.on('exit', (code) => {
-    common && common.kill();
-  });
-
   fs.watch(require.resolve('../config/app.settings'), (event, filename) => {
     _restart('Config changed');
   });
+
+  fs.watch(require.resolve('../config/restart.json'), (event, filename) => setTimeout(() => {
+    const data = require('../config/restart.json');
+    _restart(`http request from user: ${data?.user}`);
+  }, 2000));
 
   // Doesn't require any options, it is only storage and messages handler
   new RateLimiterClusterMaster();
