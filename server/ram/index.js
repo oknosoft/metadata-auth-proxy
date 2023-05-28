@@ -37,6 +37,11 @@ if (runtime.cluster.isMaster) {
     _restart('Config changed');
   });
 
+  fs.watch(require.resolve('../../config/restart.json'), (event, filename) => setTimeout(() => {
+    const data = require('../../config/restart.json');
+    _restart(`http request from user: ${data?.user}`);
+  }, 1000));
+
   // Fork workers
   for (let i = 0; i < cpus; i++) {
     workers.push(runtime.cluster.fork());
