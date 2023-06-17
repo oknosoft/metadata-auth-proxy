@@ -24,9 +24,9 @@ module.exports = function ($p, log, worker) {
   const couchdbProxy = require('./proxy-couchdb')($p, log);
   const commonProxy = require('./proxy-common');
   const staticProxy = require('./static');
-  const adm = require('./adm')($p, log);
-  const mdm = require('../mdm')($p, log);
   const auth = require('../auth')($p, log);
+  const adm = require('./adm')($p, log, auth);
+  const mdm = require('../mdm')($p, log);
   const event_source = require('../mdm/event_source')($p, log, auth);
   const conf = require('../../config/app.settings')();
 
@@ -63,6 +63,7 @@ module.exports = function ($p, log, worker) {
 
     const parsed = req.parsed = url.parse(req.url);
     parsed.paths = parsed.pathname.replace('/', '').split('/');
+    parsed.is_adm = parsed.paths[0] === 'adm';
     parsed.is_mdm = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'mdm';
     parsed.is_log = parsed.paths[0] === 'couchdb' && /_log$/.test(parsed.paths[1]);
     parsed.is_event_source = parsed.paths[0] === 'couchdb' && parsed.paths[1] === 'events';
@@ -109,6 +110,9 @@ module.exports = function ($p, log, worker) {
         if(parsed.is_event_source) {
           return event_source(req, res);
         }
+        if(parsed.is_adm) {
+          return adm(req, res);
+        }
 
         // пытаемся авторизовать пользователя
         return auth(req, res)
@@ -127,7 +131,7 @@ module.exports = function ($p, log, worker) {
               if(['couchdb', '_session'].includes(parsed.paths[0])) {
                 return couchdbProxy(req, res, auth);
               }
-              if(['adm', 'r', 'prm', 'plan'].includes(parsed.paths[0])) {
+              if(['r', 'prm', 'plan'].includes(parsed.paths[0])) {
                 return adm(req, res);
               }
               return end404(res, parsed.paths[0]);
@@ -141,7 +145,7 @@ module.exports = function ($p, log, worker) {
           });
 
       });
-  };
+  }
 
   //
   // Create your custom server and just call `proxy.web()` to proxy
