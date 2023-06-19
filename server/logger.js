@@ -11,7 +11,7 @@ module.exports = function(runtime) {
     if(workerId) {
       key += ` [worker#${workerId}]`;
     }
-    if(message.ip) {
+    if(message?.ip) {
       key += `[${message.ip}]`;
     }
     return key;
