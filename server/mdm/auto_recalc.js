@@ -231,7 +231,7 @@ module.exports = function auto_recalc($p, log) {
             for(const t of types) {
               if(t.startsWith('doc.calc_order')) {
                 rm.push(t);
-                const tmpl = calc_order.get(t.substr(15));
+                const tmpl = calc_order.get(t.substring(15));
                 if(tmplts.has(tmpl)) {
                   tt.add(tmpl);
                 }
@@ -404,7 +404,7 @@ module.exports = function auto_recalc($p, log) {
     }, job_prm.server.defer / 2);
   });
 
-  pouch.on('nom_price', () => log('nom_price'));
+  //pouch.on('nom_price', () => log('nom_price'));
 
   // регистрируем для будущего пересчета
   pouch.on('ram_change', (change) => {
