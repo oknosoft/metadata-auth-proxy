@@ -1,13 +1,12 @@
 /**
  * Обрабатывает запросы в иерархии /adm/
- * @module get
  *
- * Created by Evgeniy Malyarov on 05.02.2019.
+ * Created 05.02.2019.
  */
 
-const {end404, end500} = require('./end');
+const {end401, end404, end500} = require('./end');
 
-module.exports = function ($p, log) {
+module.exports = function ($p, log, auth) {
 
   const {cat, cch, utils} = $p;
   const route = {};
@@ -43,6 +42,7 @@ module.exports = function ($p, log) {
         ok: true,
         docs,
       }));
+      break;
 
     default:
       end404(res, `${paths[0]}/${paths[1]}/${paths[2]}/${paths[3]}`);
@@ -66,8 +66,25 @@ module.exports = function ($p, log) {
         return ram_data(req, res);
 
       default:
-        if(route[paths[2]]) {
-          return route[paths[2]](req, res);
+        const method = route[paths[2]];
+        if(method) {
+          const authorization = method.authorization || auth;
+          return authorization(req, res, auth)
+            .catch((err) => {
+              end401({req, res, err, log});
+              return null;
+            })
+            .then((user) => {
+              if(user) {
+                return method(req, res);
+              }
+              else if(!res.finished) {
+                return end401({req, res, err: `${paths[0]}/${paths[1]}/${paths[2]}`, log});
+              }
+            })
+            .catch((err) => {
+              end500({req, res, err, log});
+            });
         }
         else {
           end404(res, `${paths[0]}/${paths[1]}/${paths[2]}`);

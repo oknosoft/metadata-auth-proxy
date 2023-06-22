@@ -18,11 +18,11 @@ module.exports = function ram_changes({adapters: {pouch}, pricing, cat}, log, is
 
       // обновляем ram
       if(change.id.startsWith('doc.nom_prices_setup')) {
-        if(!cat.abonents.price_types.includes(change.doc.price_type)) {
+        if(!cat.abonents.price_types.map(v => v.valueOf()).includes(change.doc.price_type)) {
           return;
         }
         if(!is_common) {
-          pricing.deffered_load_prices(log);
+          pricing.deffered_load_prices(log, false, change.doc.price_type);
         }
       }
       else {
