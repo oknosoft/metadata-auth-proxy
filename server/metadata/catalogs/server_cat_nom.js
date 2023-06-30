@@ -14,7 +14,7 @@ module.exports = function ($p, log) {
 
   // грузит в ram цены номенклатуры
   pricing.load_prices  = function load_prices() {
-    if(process.env.SKIP_PRICES) {
+    if(job_prm.skip_prices) {
       return Promise.resolve();
     }
     const start = Date.now();

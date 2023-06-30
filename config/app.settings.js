@@ -68,6 +68,7 @@ module.exports = function settings(prm = {}) {
 
     // глубина истории цен
     price_depth: 3,
+    skip_prices: Boolean(process.env.SKIP_PRICES),
 
     server: {
       prefix: '/adm/api',             // Mount path, no trailing slash
