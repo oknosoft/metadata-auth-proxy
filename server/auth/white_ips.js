@@ -6,7 +6,10 @@ module.exports = function ips({cat, job_prm}) {
       .replace('::ffff:','');
     for(const [mask, id] of job_prm.server.white_ips) {
       if(mask == ip || (mask.includes('*') && ip.startsWith(mask.split('*')[0]))) {
-        return cat.users.by_id(id);
+        const user = cat.users.by_id(id);
+        if(user && !user.empty()) {
+          return user;
+        }
       }
     }
   } : () => null;
