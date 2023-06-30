@@ -4,7 +4,7 @@ const conf = require('../../config/app.settings')();
 
 module.exports = function check_auth(req) {
   const {authorization} = req.headers;
-  let provider = authorization.substr(0, authorization.indexOf(' ')).toLowerCase();
+  let provider = authorization.substring(0, authorization.indexOf(' ')).toLowerCase();
   if(!provider || provider === 'basic') {
     provider = 'couchdb';
   }

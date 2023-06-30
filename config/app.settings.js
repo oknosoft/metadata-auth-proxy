@@ -98,6 +98,7 @@ module.exports = function settings(prm = {}) {
           limit: 9,                   // Если запросов за 3 секундs > 9, добавляем задержку
         }
       },
+      white_ips: process.env.WHITE_IPS ? JSON.parse(process.env.WHITE_IPS) : null,     // map ip->пользователь
       upp: {
         url: process.env.UPPURL,
         username: process.env.UPPUSER,
