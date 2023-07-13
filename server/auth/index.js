@@ -34,6 +34,7 @@ function cookieKey(cookie) {
 
 function extractAuth(req) {
   let {authorization, impersonation, cookie, zone, branch, year} = req.headers;
+
   if(authorization) {
     //authorization = authorization.replace('Basic', 'LDAP');
     for (const provider in auth.providers) {
@@ -83,13 +84,17 @@ module.exports = function ({cat, job_prm}, log) {
    */
   const method = async (req, res) => {
 
-    const {paths, is_common, is_mdm, is_log, is_event_source} = req.parsed;
+    const {parsed:{paths, is_common, is_mdm, is_log, is_event_source}, headers} = req;
 
     if(job_prm.server.browser_only) {
-      const agent = req.headers['user-agent']?.toLowerCase();
+      const agent = headers['user-agent']?.toLowerCase();
       if((paths[0] !== '_session') && (!agent || agent.includes('1c') || agent.includes('couchdb'))) {
         return end500({req, res, err: {status: 403, message: `This endpoint for browser-only requests, got ${agent}`}, log});
       }
+    }
+
+    if(headers.accept === 'text/event-stream') {
+      return {};
     }
 
     let user = white_ips(req, res);
