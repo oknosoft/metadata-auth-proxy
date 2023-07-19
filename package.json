@@ -40,7 +40,7 @@
     "serve-handler": "^6.1.5",
     "unzipper": "^0.10.14",
     "wb-core": "github:oknosoft/windowbuilder-core#738632cb332af05d8ebc742a24aa146dde661c55",
-    "wb-paperless": "github:oknosoft/paperless#a6016ab1aae91fdd6902d1cbefeb7102b493c527",
+    "wb-paperless": "github:oknosoft/paperless#d94f7f2eeb849263e778836fed5134670fb4fb76",
     "wb-parametric": "github:oknosoft/windowbuilder-parametric#27f980730c0bce343626cc02ef8000559ef4b623",
     "wb-planning": "github:oknosoft/windowbuilder-planning#e607a74231c55bc693227dcb871fb28275497abd",
     "wb-reports": "github:oknosoft/windowbuilder-reports#6bfe73659fefbe2bdd3dfe9d4fc4cbe95d34c78c",
