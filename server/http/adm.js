@@ -20,7 +20,7 @@ module.exports = function ($p, log, auth) {
   //require('./supplier')($p, log, route);
   require('./foroom')($p, log, route);
   require('./calc_stat')($p, log, route);
-  require('wb-planning/server/keys')($p, log, route);
+  require('wb-planning/server')($p, log, route);
 
   // формирует json описания продукции заказа
   async function ram_data(req, res) {
