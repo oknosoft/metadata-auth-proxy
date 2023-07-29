@@ -35,9 +35,12 @@ module.exports = function (runtime) {
 
     process.on('unhandledRejection', (error, promise) => {
       if(error) {
-        log(`unhandledRejection ${error && error.message ? error.message : ''}`, 'error');
+        log(error, 'error');
         // end restart process
         runtime.cluster.worker.kill();
+      }
+      else {
+        log(`unhandledRejection`, 'error');
       }
     });
   }
