@@ -68,6 +68,7 @@ module.exports = function settings(prm = {}) {
 
     // глубина истории цен
     price_depth: 3,
+    skip_prices: Boolean(process.env.SKIP_PRICES),
 
     server: {
       prefix: '/adm/api',             // Mount path, no trailing slash
@@ -81,11 +82,12 @@ module.exports = function settings(prm = {}) {
       branches: process.env.BRANCHES ? JSON.parse(process.env.BRANCHES) : null,     // список отделов можно ограничить
       single_db: Boolean(process.env.SINGLE_DB),                                    // использовать основную базу doc вместо перебора баз абонентов
       no_mdm: Boolean(process.env.NOMDM),
+      no_background: Boolean(process.env.NOBACKGROUND),
       year: process.env.YEAR ? parseFloat(process.env.YEAR) : new Date().getFullYear(),
       disable_mdm: Boolean(process.env.DISABLEMDM),
       browser_only: Boolean(process.env.BROWSER_ONLY),
       defer: (process.env.DEFER ? parseFloat(process.env.DEFER) : 200000) + Math.random() * 10000,  // задержка пересчета mdm
-      eve_url: process.env.EVEURL || 'http://localhost:5984/pl_events',
+      eve_url: process.env.EVEURL,
       rater: {                        // Request rate locker
         all: {                        // Total requests limit
           interval: 4,                // Seconds, collect interval
@@ -96,6 +98,7 @@ module.exports = function settings(prm = {}) {
           limit: 9,                   // Если запросов за 3 секундs > 9, добавляем задержку
         }
       },
+      white_ips: process.env.WHITE_IPS ? JSON.parse(process.env.WHITE_IPS) : null,     // map ip->пользователь
       upp: {
         url: process.env.UPPURL,
         username: process.env.UPPUSER,
