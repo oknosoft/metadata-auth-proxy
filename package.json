@@ -40,7 +40,7 @@
     "serve-handler": "^6.1.5",
     "unzipper": "^0.10.14",
     "wb-core": "github:oknosoft/windowbuilder-core#9968e16554142bff45a7bbeca49832bd5699566e",
-    "wb-cutting": "github:oknosoft/genetic-cutting#fc585769c36f320c2d5049ad309930b6631f74bb",
+    "wb-cutting": "github:oknosoft/genetic-cutting#2b481aafb251979f3377064f7d1632c4791ef526",
     "wb-paperless": "github:oknosoft/paperless#59dba5a74aa65bf8a148526c3270892342fb447d",
     "wb-parametric": "github:oknosoft/windowbuilder-parametric#2d7778c68ddc7584bf112582956d2356b7c18e5f",
     "wb-planning": "github:oknosoft/windowbuilder-planning#539e80c3610a94d289d96093d7478aa5605a8f0b",
