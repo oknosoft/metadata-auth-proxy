@@ -88,6 +88,14 @@ const exclude = [
   'rep.cash',
   'rep.selling',
   'rep.goods',
+  'CatBranchesOrganizationsRow',
+  'CatBranchesPartnersRow',
+  'CatBranchesDivisionsRow',
+  'CatBranchesPrice_typesRow',
+  'CatBranchesKeysRow',
+  'CatBranchesExtra_fieldsRow',
+  'CatAbonentsServersRow',
+  'CatAbonentsHttp_apisRow',
 ];
 const minimal = [
   //'doc.purchase_order',
@@ -155,5 +163,6 @@ module.exports = function(meta, $p, cache_only) {
 }
 
 module.exports.include = include;
+module.exports.exclude = exclude;
 module.exports.preserv_cachable = preserv_cachable;
 

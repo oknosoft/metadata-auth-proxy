@@ -256,6 +256,9 @@ function obj_constructor_text(_m, category, name, categoties) {
 
     // создаём конструктор строки табчасти
     const row_fn_name = DataManager.prototype.obj_constructor.call({class_name: category + '.' + name, constructor_names: {}}, ts);
+    if(patch.exclude.includes(row_fn_name)) {
+      continue;
+    }
 
     text += `class ${row_fn_name} extends TabularSectionRow{\n`;
 
