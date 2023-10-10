@@ -2,7 +2,7 @@
 const fetch = require('node-fetch');
 const {Headers} = fetch;
 
-module.exports = function ({DocCalc_order, classes: {DocObj}, job_prm: {server, user_node}, cat, doc}, log) {
+module.exports = function ({DocCalc_order, classes: {DocObj}, job_prm: {server, user_node}, utils, cat, doc}, log) {
 
   DocCalc_order.prototype.toJSON = function toJSON() {
     const json = DocObj.prototype.toJSON.call(this);
@@ -17,13 +17,13 @@ module.exports = function ({DocCalc_order, classes: {DocObj}, job_prm: {server, 
    * @desc Если год и зона, обслуживаются текущим proxy - выполняет стандартную обработку.
    * Иначе - перенаправляет запрос стороннему proxy и тот выполняет стандартную обработку.
    * @param {String} ref - ссылка документа
-   * @param {String|Number} zone - номер зоны
+   * @param {String|Number|CatAbonents} zone - номер зоны или ссылка абонента, или сам абонент
    * @param {String|Number} year - год
-   * @param {String} branch - ссылка отдела абонента
+   * @param {String|Number|CatBranches} branch - ссылка отдела абонента или номер отдела сам отдел
    */
   doc.calc_order.routedGet = async function ({ref, zone, year, branch}) {
     const key = parseFloat(year);
-    const abonent = cat.abonents.by_id(zone);
+    const abonent = utils.is_guid(zone) ? cat.abonents.get(zone) : cat.abonents.by_id(zone);
     if(abonent.is_new()) {
       throw new Error(`unknown zone=${zone}`);
     }
@@ -31,7 +31,7 @@ module.exports = function ({DocCalc_order, classes: {DocObj}, job_prm: {server, 
     if(!yrow?.proxy) {
       throw new Error(`unknown proxy for zone=${zone} year=${year}`);
     }
-    branch = cat.branches.get(branch);
+    branch = typeof branch === 'number' ? cat.branches.find({suffix: branch}) : cat.branches.get(branch);
     if(!branch.empty() && branch.owner !== abonent) {
       throw new Error(`branch owner ${branch.owner.id}!==${abonent.id}`);
     }
