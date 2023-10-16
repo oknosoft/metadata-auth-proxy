@@ -13,7 +13,7 @@ module.exports = function ({cat}, log) {
     if(req.method === 'GET' && paths[paths.length-1].includes('cat.characteristics')) {
       const ref = paths[paths.length-1].replace('%7C', '|').substring(20);
       const o = cat.characteristics.by_ref[ref];
-      if(o && o.obj_delivery_state == 'Шаблон') {
+      if(o?.obj_delivery_state?.is('Шаблон')) {
         res.setHeader('Via', 'templates');
         res.end(JSON.stringify(o));
         return true;
