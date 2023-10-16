@@ -45,7 +45,7 @@ module.exports = function ($p, log, worker) {
         const abonent = abonents.by_id(zone);
         if(!abonent.is_new()) {
           const yrow = abonent.servers.find({key});
-          if(yrow && yrow.proxy) {
+          if(yrow?.proxy) {
             const proxy_server = proxy[yrow.proxy.startsWith('https://') ? 'https' : 'http'];
             delete req.headers.year;
             proxy_server.web(req, res, {target: yrow.proxy});
