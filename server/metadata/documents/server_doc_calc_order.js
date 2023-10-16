@@ -6,7 +6,7 @@ module.exports = function ({DocCalc_order, classes: {DocObj}, job_prm: {server, 
 
   DocCalc_order.prototype.toJSON = function toJSON() {
     const json = DocObj.prototype.toJSON.call(this);
-    if(this instanceof DocCalc_order && this.obj_delivery_state == 'Шаблон') {
+    if(this instanceof DocCalc_order && this.obj_delivery_state.is('Шаблон')) {
       json._rev = this._rev;
     }
     return json;
@@ -63,4 +63,3 @@ module.exports = function ({DocCalc_order, classes: {DocObj}, job_prm: {server, 
     return calc_order;
   }
 };
-
