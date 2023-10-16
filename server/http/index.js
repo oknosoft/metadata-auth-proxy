@@ -40,7 +40,7 @@ module.exports = function ($p, log, worker) {
     const {year, zone} = req.headers;
     if(zone && year) {
       const key = parseFloat(year);
-      if(key !== conf.server.year) {
+      if(key !== conf.server.year || !conf.server.abonents.includes(parseFloat(zone))) {
         const abonent = abonents.by_id(zone);
         if(!abonent.is_new()) {
           const yrow = abonent.servers.find({key});
@@ -140,7 +140,7 @@ module.exports = function ($p, log, worker) {
           });
 
       });
-  };
+  }
 
   //
   // Create your custom server and just call `proxy.web()` to proxy

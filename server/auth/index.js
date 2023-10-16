@@ -34,6 +34,7 @@ function cookieKey(cookie) {
 
 function extractAuth(req) {
   let {authorization, impersonation, cookie, zone, branch, year} = req.headers;
+
   if(authorization) {
     //authorization = authorization.replace('Basic', 'LDAP');
     for (const provider in auth.providers) {
@@ -74,6 +75,8 @@ function extractAuth(req) {
 
 module.exports = function ({cat, job_prm}, log) {
 
+  const white_ips = require('./white_ips')({cat, job_prm});
+
   /**
    * Получает на вход httpRequest и возвращает Promise с идентификатором пользователя или reject, усли авторизоваться не удалось
    * @param req
@@ -81,85 +84,88 @@ module.exports = function ({cat, job_prm}, log) {
    */
   const method = async (req, res) => {
 
-    const {paths, is_common, is_mdm, is_log, is_event_source} = req.parsed;
+    const {parsed:{paths, is_common, is_mdm, is_log, is_event_source}, headers} = req;
 
     if(job_prm.server.browser_only) {
-      const agent = req.headers['user-agent']?.toLowerCase();
+      const agent = headers['user-agent']?.toLowerCase();
       if((paths[0] !== '_session') && (!agent || agent.includes('1c') || agent.includes('couchdb'))) {
         return end500({req, res, err: {status: 403, message: `This endpoint for browser-only requests, got ${agent}`}, log});
       }
     }
 
-    if(paths[0] === 'auth' && !['ldap', 'couchdb'].includes(paths[1])) {
-      return oauth(req, res);
-    }
-
-    // проверяем авторизацию
-    const authorization = extractAuth(req);
-    if(!authorization) {
-      if(is_common || (is_mdm && paths.includes('common')) || is_log || is_event_source) {
-        return {};
+    let user = white_ips(req, res);
+    if(!user) {
+      if(paths[0] === 'auth' && !['ldap', 'couchdb'].includes(paths[1])) {
+        return oauth(req, res);
       }
-      res.statusCode = 401;
-      res.setHeader('WWW-Authenticate', 'Basic realm="couchdb auth"');
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      res.end('Укажите логин и пароль');
-      return false;
-    }
 
-    if(paths[0] === 'auth' && req.method === 'DELETE') {
-      cache.del(authorization.key);
-      res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ok: true}));
-      return;
-    }
-
-    let token = cache.get(authorization.key);
-    if(!token) {
-      try{
-        token = await authorization.method(req, res);
-      }
-      catch (e) {}
-      if(!token) {
+      // проверяем авторизацию
+      const authorization = extractAuth(req);
+      if(!authorization) {
         if(is_common || (is_mdm && paths.includes('common')) || is_log || is_event_source) {
           return {};
         }
-        throw new TypeError(`Неверный логин/пароль '${authorization.username}' для провайдера '${authorization.provider}'`);
+        res.statusCode = 401;
+        res.setHeader('WWW-Authenticate', 'Basic realm="couchdb auth"');
+        res.setHeader('Content-Type', 'text/html; charset=utf-8');
+        res.end('Укажите логин и пароль');
+        return false;
       }
-      cache.put(authorization.key, token, authorization.impersonation);
-    }
 
-    let user = cat.users.by_auth(token);
-    if(!user) {
-      if(is_common) {
-        return {};
+      if(paths[0] === 'auth' && req.method === 'DELETE') {
+        cache.del(authorization.key);
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify({ok: true}));
+        return;
       }
-      throw new TypeError(`Пользователь '${authorization.username}' авторизован провайдером '${authorization.provider
-      }', но отсутствует в справочнике 'Пользователи'`);
-    }
-    if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
-      throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
-    }
-    if(job_prm.server.restrict_archive &&
+
+      let token = cache.get(authorization.key);
+      if(!token) {
+        try{
+          token = await authorization.method(req, res);
+        }
+        catch (e) {}
+        if(!token) {
+          if(is_common || (is_mdm && paths.includes('common')) || is_log || is_event_source) {
+            return {};
+          }
+          throw new TypeError(`Неверный логин/пароль '${authorization.username}' для провайдера '${authorization.provider}'`);
+        }
+        cache.put(authorization.key, token, authorization.impersonation);
+      }
+
+      user = cat.users.by_auth(token);
+      if(!user) {
+        if(is_common) {
+          return {};
+        }
+        throw new TypeError(`Пользователь '${authorization.username}' авторизован провайдером '${authorization.provider
+        }', но отсутствует в справочнике 'Пользователи'`);
+      }
+      if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
+        throw new TypeError(`Пользователю '${user.name}' запрещен вход в программу`);
+      }
+      if(job_prm.server.restrict_archive &&
         !user.roles.includes('doc_full') &&
         !user.roles.includes('_admin') &&
         !user.acl_objs._obj.some((row) => row.type == 'ПросмотрАрхивов') &&
         !user.acl_objs._obj.some((row) => row.type == 'СогласованиеРасчетовЗаказов')) {
-      throw new TypeError(`Пользователю '${user.name}' запрещен доступ к базе архива`);
-    }
-
-    // TODO: учесть branch, zone и year из заголовков
-
-    // олицетворение - вход от имени другого пользователя
-    const impersonation = authorization.impersonation || cache.ext(authorization.key);
-    // TODO: учесть вложенность отдела абонента
-    if(impersonation && (user.roles.includes('doc_full') || user.roles.includes('impersonation'))) {
-      user = cat.users.get(impersonation);
-      if(!user) {
-        throw new TypeError(`Пользователь '${impersonation}' отсутствует в справочнике 'Пользователи'`);
+        throw new TypeError(`Пользователю '${user.name}' запрещен доступ к базе архива`);
       }
-      if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
-        throw new TypeError(`Пользователю '${user.name || impersonation}' запрещен вход в программу`);
+
+      // TODO: учесть branch, zone и year из заголовков
+
+      // олицетворение - вход от имени другого пользователя
+      const impersonation = authorization.impersonation || cache.ext(authorization.key);
+      // TODO: учесть вложенность отдела абонента
+      if(impersonation && (user.roles.includes('doc_full') || user.roles.includes('impersonation'))) {
+        user = cat.users.get(impersonation);
+        if(!user) {
+          throw new TypeError(`Пользователь '${impersonation}' отсутствует в справочнике 'Пользователи'`);
+        }
+        if(!user.roles || !(user.roles.includes('ram_reader') || user.roles.includes('ram_editor')) || user.invalid) {
+          throw new TypeError(`Пользователю '${user.name || impersonation}' запрещен вход в программу`);
+        }
       }
     }
 
