@@ -56,6 +56,7 @@ const common = [
   'cat.http_apis',
   'cat.work_center_kinds',
   'cat.work_centers',
+  'cat.work_shifts',
   'cat.stages',
   'cat.project_categories',
   'cat.lead_src',
