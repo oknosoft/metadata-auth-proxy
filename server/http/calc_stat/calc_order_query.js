@@ -8,7 +8,7 @@
 
 
 function select(acc, date) {
-  return acc.client.query(`date, department, partner, manager, doc calc_order, nom, sys,
+  return acc.client.query(`select date, department, partner, manager, doc calc_order, nom, sys,
   sum(case when state = 0 then quantity else 0 end) q0,
   sum(case when state = 1 then quantity else 0 end) q1,
   sum(case when state = 0 then s else 0 end) s0,
