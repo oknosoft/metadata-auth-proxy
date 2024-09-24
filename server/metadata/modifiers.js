@@ -7,6 +7,7 @@ module.exports = function ($p, log) {
   utils.getBody = require('../http/raw-body');
   utils.hrtime = require('../http/hrtime')(log);
   require('wb-core/dist/node')($p, log);
+  require('./log_processing')($p, log);
   require('./documents/server_doc_calc_order')($p, log);
   require('./catalogs/server_cat_characteristics')($p, log);
   require('./catalogs/server_cat_users')($p, log);
