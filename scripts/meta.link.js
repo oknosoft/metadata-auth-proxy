@@ -38,7 +38,7 @@ const repos = [
   },
 ];
 
-for(const local of Object.keys(dependencies).filter(v => /^metadata-/.test(v))) {
+for(const local of ['metadata-core', 'metadata-pouchdb']) {
   repos.push({
     local,
     remote: `..\\metadata\\packages\\${local}`,
