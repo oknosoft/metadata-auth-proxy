@@ -1,5 +1,5 @@
 
-module.exports = function load_predefined({db, register, abonent, branch, properties}) {
+module.exports = function load_predefined({db, register, abonent, branch, properties, job_prm}) {
   // читаем стандартные константы
   return db.allDocs({
     include_docs: true,
@@ -8,8 +8,8 @@ module.exports = function load_predefined({db, register, abonent, branch, proper
     endkey: 'cch.predefined_elmnts\ufff0',
   })
     .then(({rows}) => rows.map(({doc}) => {
-      doc.ref = doc._id.substr(22);
-      // смотрим, нет ли для данного абонента или отдела, переопределения в регистре "предопределенные элемкенты"
+      doc.ref = doc._id.substring(22);
+      // смотрим, нет ли для данного абонента или отдела, переопределения в регистре "предопределенные элементы"
       let parent = doc.parent && rows.find(({id}) => id.includes(doc.parent));
       if(parent?.doc?.synonym && doc.synonym) {
         const synonym = `${parent.doc.synonym}/${doc.synonym}`;
@@ -17,11 +17,14 @@ module.exports = function load_predefined({db, register, abonent, branch, proper
         if(property) {
           let _row;
           register.find_rows({property}, (row) => {
-            const {obj} = row;
-            if(!_row && obj == abonent) {
+            const {obj, recipient} = row;
+            if(!_row && !recipient && (!obj || obj === abonent)) {
               _row = row;
             }
-            if(!branch.empty() && obj._hierarchy(branch)) {
+            else if(recipient === abonent && obj?.id == job_prm.zone) {
+              _row = row;
+            }
+            if(!branch.empty() && obj?._hierarchy(branch)) {
               _row = row;
             }
             if(!branch.empty() && obj == branch) {

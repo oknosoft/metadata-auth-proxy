@@ -296,7 +296,11 @@ module.exports = function auto_recalc($p, log) {
     else if(name === 'cch.properties' && !o.predefined_name.includes('/')) {
       let drow;
       ireg.predefined_elmnts.find_rows({property: o}, (row) => {
-        if(!drow || row.obj === abonent) {
+        const {obj, recipient} = row;
+        if(!recipient && (!obj || obj === abonent)) {
+          drow = row;
+        }
+        else if(recipient === abonent && obj?.id == job_prm.zone) {
           drow = row;
         }
       });
@@ -354,6 +358,7 @@ module.exports = function auto_recalc($p, log) {
           branch,
           properties,
           register: ireg.predefined_elmnts,
+          job_prm,
         }) : mgr).forEach((o) => {
           if(check_mdm({o, name, abonent, branch, abranches, job_prm}) && mdm_groups.check({o, name, abonent, branch})) {
             rows.push(patch(o, name, abonent, branch));
