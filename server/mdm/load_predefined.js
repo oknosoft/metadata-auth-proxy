@@ -24,7 +24,8 @@ module.exports = function load_predefined({db, register, abonent, branch, proper
             else if(recipient === abonent && obj?.id == job_prm.zone) {
               _row = row;
             }
-            if(!branch.empty() && obj?._hierarchy(branch)) {
+            if(!branch.empty() && (branch._hierarchy(obj) ||
+                recipient && obj?.id == job_prm.zone && branch._hierarchy(recipient))) {
               _row = row;
             }
             if(!branch.empty() && obj == branch) {
