@@ -50,6 +50,7 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
 
   const svgs = require('./svgs')({doc, pouch, utils}, log);
   const templates = require('./templates')({cat, pouch, utils}, log);
+  const pgsql = require('./pgsql')({utils}, log);
 
   return async function couchdbProxy(req, res, auth) {
     // You can define here your custom logic to handle the request
@@ -181,7 +182,9 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     else {
       const target = `${server.href.replace(new RegExp(server.pathname + '$'), '')}${path.replace('/couchdb/', '/')}`;
 
-      if(svgs({req, res, parts, query, target}) || templates({req, res, target})) {
+      if(svgs({req, res, parts, query, target}) ||
+          templates({req, res, target}) ||
+          pgsql({req, res, parts, query})) {
         return;
       }
 

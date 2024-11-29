@@ -10,6 +10,7 @@ module.exports = function ($p, log, auth) {
 
   const {cat, cch, utils} = $p;
   const route = {};
+  utils.route = route;
 
   // подключаем плагины
   require('wb-reports')($p, log, route);
