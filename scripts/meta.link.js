@@ -17,6 +17,11 @@ const repos = [
     dir: 'dist',
   },
   {
+    local: 'wb-cutting',
+    remote: '..\\genetic-cutting',
+    dir: 'src',
+  },
+  {
     local: 'wb-reports',
     remote: '..\\wb-reports',
     dir: 'server',
@@ -46,7 +51,7 @@ for(const local of Object.keys(dependencies).filter(v => /^metadata-/.test(v))) 
   });
 }
 
-function fromDir(startPath, filter, callback) {
+function fromDir(startPath, filter, callback, force) {
 
   if(!fs.existsSync(startPath)) {
     console.log('no dir ', startPath);
@@ -56,19 +61,19 @@ function fromDir(startPath, filter, callback) {
   const files = fs.readdirSync(startPath);
   for (let i = 0; i < files.length; i++) {
     const filename = path.join(startPath, files[i]);
-    if(/node_modules|\\src\\|\/src\//.test(filename)){
+    if(!force && /node_modules|\\src\\|\/src\//.test(filename)){
       continue;
     }
     const stat = fs.lstatSync(filename);
     if(stat.isDirectory()) {
       callback(filename, true);
-      fromDir(filename, filter, callback); //recurse
+      fromDir(filename, filter, callback, force); //recurse
     }
     else if(filter.test(filename)) {
       callback(filename);
     }
-  };
-};
+  }
+}
 
 // исполняем
 let copied;
@@ -88,7 +93,7 @@ for(const {local, remote, dir} of repos) {
       i++;
       fs.createReadStream(rname).pipe(fs.createWriteStream(lame));
     }
-  });
+  }, dir === 'src');
   if(i){
     copied = true;
     console.log(`from ${rpath} written ${i} files`);
