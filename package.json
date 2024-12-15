@@ -38,11 +38,11 @@
     "rate-limiter-flexible": "^5.0",
     "serve-handler": "^6.1",
     "unzipper": "^0.12",
-    "wb-core": "github:oknosoft/windowbuilder-core#8ea76b3b896ae142cdcb002dd352d277f68aedf5",
+    "wb-core": "github:oknosoft/windowbuilder-core#88c92bed375f706137f1b803edbd95d54499f563",
     "wb-cutting": "github:oknosoft/genetic-cutting#a94221e17bd3ab20bae5782a087efc3d61f5f727",
     "wb-paperless": "github:oknosoft/paperless#619a77020a719c75319a181ae91beb657f4719b5",
     "wb-parametric": "github:oknosoft/windowbuilder-parametric#2df8b98e7819c6796b08b8ad8037af331face727",
-    "wb-planning": "github:oknosoft/windowbuilder-planning#0861330ad94cd7a4755c8ba5ab798d2baf4006f6",
+    "wb-planning": "github:oknosoft/windowbuilder-planning#357c00eff9ac4d2033c10678e30b18f9a086db2a",
     "wb-reports": "github:oknosoft/windowbuilder-reports#aa4201cef21d577353eceddbc487662e68c5129a",
     "yamljs": "^0.3.0"
   },
