@@ -67,9 +67,12 @@ module.exports = function ($p, log, auth) {
       case 'ram':
         return ram_data(req, res);
 
-      default:
-        const method = route[paths[2]];
+      default: {
+        let method = route[paths[2]];
         if(method) {
+          if(paths[3] && typeof method[paths[3]] === 'function') {
+            method = method[paths[3]];
+          }
           const authorization = method.authorization || auth;
           return authorization(req, res, auth)
             .catch((err) => {
@@ -91,6 +94,7 @@ module.exports = function ($p, log, auth) {
         else {
           end404(res, `${paths[0]}/${paths[1]}/${paths[2]}`);
         }
+      }
       }
     }
     catch (err) {
