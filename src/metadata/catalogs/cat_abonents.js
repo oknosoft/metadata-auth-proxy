@@ -16,13 +16,8 @@ exports.CatAbonents = class CatAbonents extends Object {
    * @return {Array.CatNom_prices_types}
    */
   get price_types() {
-    const res = new Set();
-    this._manager._owner.branches.find_rows({owner: this}, (branch) => {
-      for(const {acl_obj} of branch.price_types) {
-        res.add(acl_obj);
-      }
-    });
-    return Array.from(res);
+    const {job_prm: {pricing}} = this._manager._owner.$p;
+    return [pricing.price_type_first_cost];
   }
 
   /**
