@@ -199,7 +199,9 @@ module.exports = function auto_recalc($p, log) {
             }
           });
 
+          log(`Abonent ${abonent.name} prepare start`);
           await dyn_mdm.prepare(Array.from(objs), Array.from(tmplts), $p);
+          log(`Abonent ${abonent.name} prepared`);
 
           // пересчет продукций текущих шаблонов
           if(types.includes('doc.calc_order')) {
@@ -235,6 +237,7 @@ module.exports = function auto_recalc($p, log) {
             suffix: 'common',
             types,
           });
+          log(`Abonent ${abonent.name} root recalcied`);
 
           if(types.length && types.every((name) => !by_branch.includes(name))) {
             continue;
@@ -259,6 +262,7 @@ module.exports = function auto_recalc($p, log) {
               suffix: branch.suffix,
               types,
             });
+            log(`Branch ${branch.suffix} ${branch.name} recalcied`);
           }
         }
         log(`Recalcied ${types.length > 6 ? types.length.toFixed() + ' types' : types.join(',')}`);
@@ -387,6 +391,7 @@ module.exports = function auto_recalc($p, log) {
           ctypes.push(name);
         }
         await utils.sleep(10);
+        log(name);
       }
     }
 
