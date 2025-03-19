@@ -62,7 +62,7 @@ module.exports = function settings(prm = {}) {
     },
 
     keys: {
-      dadata: 'bc6f1add49fc97e9db87781cd613235064dbe0f9',
+      dadata: process.env.DADATA || '',
       geonames: 'oknosoft',
     },
 
