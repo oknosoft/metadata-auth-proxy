@@ -9,10 +9,11 @@
 const {resolve} = require('path');
 const fs = require('fs');
 
-module.exports = async function manifest({res, zone, suffix, by_branch, common}) {
-  const path1 = resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}/manifest.json`);
+module.exports = async function manifest({res, zone, zone0, suffix, by_branch, common}) {
+  const is_common = suffix === 'common' || suffix === '0000';
+  const path1 = resolve(__dirname, `./cache/${is_common ? zone : zone0}/${is_common ? '0000' : suffix}/manifest.json`);
   const m1 = JSON.parse(await fs.readFileAsync(path1, 'utf8'));
-  const m2 = (suffix === 'common' || suffix === '0000') ? m1 : JSON.parse(
+  const m2 = is_common ? m1 : JSON.parse(
     await fs.readFileAsync(resolve(__dirname, `./cache/${zone}/0000/manifest.json`), 'utf8'));
   let m;
   if(suffix === 'common') {

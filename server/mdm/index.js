@@ -71,9 +71,16 @@ function mdm ($p, log) {
 
     try{
       const {user, parsed: {query, path, paths}, headers} = req;
-      const zone = paths[2];
+      const zone0 = paths[2];
+      let zone = zone0;
       let suffix = paths[3];
-      let branch = user && user.branch;
+      let branch = branches.get(headers.branch);
+      if(user?.branch && !user.branch.empty()) {
+        branch = user.branch;
+      }
+      if(!branch.filter.empty()) {
+        zone = branch.filter.id;
+      }
 
       const {abonents} = job_prm.server;
       if(!abonents.some((id) => id == zone)) {
@@ -130,11 +137,12 @@ function mdm ($p, log) {
       }
 
       // проверяем наличие каталога
-      if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
-        return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
+      const is_common = suffix === 'common';
+      if(!fs.existsSync(resolve(__dirname, `./cache/${is_common ? zone : zone0}/${is_common ? '0000' : suffix}`))) {
+        return end404(res, `/couchdb/mdm/${is_common ? zone : zone0}/${is_common ? '0000' : suffix}`);
       }
       // пишем манифест в head
-      await manifest({res, zone, suffix, by_branch, common});
+      await manifest({res, zone, zone0, suffix, by_branch, common});
 
       const tags = {};
       const stream = merge2();
@@ -150,7 +158,7 @@ function mdm ($p, log) {
             const fname = suffix === 'common' ?
               resolve(__dirname, `./cache/${zone}/0000/${name}.json`)
               :
-              resolve(__dirname, `./cache/${zone}/${by_branch.includes(name) ? suffix : '0000'}/${name}.json`);
+              resolve(__dirname, `./cache/${by_branch.includes(name) ? zone0 : zone}/${by_branch.includes(name) ? suffix : '0000'}/${name}.json`);
 
             if(suffix === 'common' && !common.includes(name)) {
               continue;
