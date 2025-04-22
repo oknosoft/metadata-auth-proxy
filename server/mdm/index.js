@@ -11,54 +11,11 @@ const {end404, end500} = require('../http/end');
 const fs = require('fs');
 const {resolve} = require('path');
 const merge2 = require('merge2');
-const {manifest} = require('./slice');
+const {manifest, common, by_branch} = require('./slice');
 const current_branch = require('./current_branch');
 const direct = require('./direct');
 require('../http/promisify');
 
-// эти режем по отделу
-const by_branch = [
-  'cat.partners',
-  'cat.branches',
-  'cat.divisions',
-  'cat.users',
-  'cat.individuals',
-  'cat.organizations',
-  'cat.cashboxes',
-  'cat.stores',
-  'cch.predefined_elmnts',
-];
-// эти общие - их не режем и грузим сразу
-const common = [
-  'cch.properties',
-  'cat.abonents',
-  'cat.price_groups',
-  'cat.property_values',
-  'cat.property_values_hierarchy',
-  'cat.contact_information_kinds',
-  'cat.cash_flow_articles',
-  'cat.clrs',
-  'cat.color_price_groups',
-  'cat.delivery_areas',
-  'cat.delivery_directions',
-  'cat.units',
-  'cat.countries',
-  'cat.currencies',
-  'cat.scheme_settings',
-  'cat.meta_ids',
-  'cat.destinations',
-  'cat.nom_groups',
-  'cat.nom_kinds',
-  'cat.elm_visualization',
-  'cat.templates',
-  'cat.http_apis',
-  'cat.work_center_kinds',
-  'cat.work_centers',
-  'cat.work_shifts',
-  'cat.stages',
-  'cat.project_categories',
-  'cat.lead_src',
-];
 
 function mdm ($p, log) {
 
