@@ -89,11 +89,11 @@ function mdm ($p, log) {
       }
 
       // проверяем наличие каталога
-      if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
-        return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
-      }
+      // if(!fs.existsSync(resolve(__dirname, `./cache/${zone}/${suffix === 'common' ? '0000' : suffix}`))) {
+      //   return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
+      // }
       // пишем манифест в head
-      manifest(res);
+      // manifest(res);
 
       const tags = {};
       const stream = merge2();
