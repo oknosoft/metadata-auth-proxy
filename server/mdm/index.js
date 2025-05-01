@@ -11,7 +11,7 @@ const {end404, end500} = require('../http/end');
 const fs = require('fs');
 const {resolve} = require('path');
 const merge2 = require('merge2');
-const {manifest, common, by_branch} = require('./slice');
+const {manifest} = require('./slice');
 const current_branch = require('./current_branch');
 const direct = require('./direct');
 require('../http/promisify');
@@ -20,15 +20,15 @@ require('../http/promisify');
 function mdm ($p, log) {
 
   const {md, cat: {branches, templates, users}, utils, job_prm, adapters: {pouch}} = $p;
-  // порядок загрузки, чтобы при загрузке меньше оборванных ссылок
-  const load_order = order(md);
+  // порядок загрузки, чтобы на старте было меньше оборванных ссылок
+  const {common} = md.order;
+  const load_order = md.order();
 
   return async (req, res) => {
-    const {query, path, paths} = req.parsed;
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
 
     try{
-      const {user, parsed: {query, path, paths}, headers} = req;
+      const {user, query, parsed: {path, paths}, headers} = req;
       const zone = paths[2];
       let suffix = paths[3];
       let branch = user && user.branch;
@@ -84,7 +84,7 @@ function mdm ($p, log) {
       }
 
       if(req.method === 'HEAD') {
-        manifest(res);
+        manifest({req, res, suffix, md});
         return res.end();
       }
 
@@ -93,11 +93,11 @@ function mdm ($p, log) {
       //   return end404(res, `/couchdb/mdm/${zone}/${suffix === 'common' ? '0000' : suffix}`);
       // }
       // пишем манифест в head
-      // manifest(res);
+      manifest({req, res, suffix, md});
 
       const tags = {};
       const stream = merge2();
-      const types = headers.types ? headers.types.split(',') : null;
+      const types = query.type ? [query.type] : (headers.types ? headers.types.split(',') : null);
       for(const names of load_order) {
         for(const name of names) {
           // если запросили определенные типы данных, возвращаем только их
@@ -127,47 +127,5 @@ function mdm ($p, log) {
 
   };
 }
-
-function order (md) {
-  const res = [
-    new Set(['cch.properties']),
-    new Set(),
-    new Set(),
-    new Set(),
-    new Set(),
-    new Set(),
-    new Set(['cch.predefined_elmnts', 'ireg.currency_courses', 'ireg.margin_coefficients', 'doc.calc_order'])
-  ];
-
-  for(const class_name of md.classes().cat) {
-    if(['servers', 'nom_units', 'meta_fields', 'meta_objs'].includes(class_name)) {
-      continue;
-    }
-    else if(['abonents', 'property_values', 'property_values_hierarchy', 'contact_information_kinds', 'currencies'].includes(class_name)) {
-      res[1].add(`cat.${class_name}`);
-    }
-    else if(class_name === 'users') {
-      res[2].add(`cat.${class_name}`);
-    }
-    else if(class_name.includes('nom')) {
-      res[3].add(`cat.${class_name}`);
-    }
-    else if(class_name === 'formulas') {
-      res[5].add(`cat.${class_name}`);
-    }
-    else if(class_name === 'choice_params') {
-      res[6].add(`cat.${class_name}`);
-    }
-    else{
-      res[4].add(`cat.${class_name}`);
-    }
-  }
-
-  return res;
-}
-
-mdm.by_branch = by_branch;
-mdm.order = order;
-mdm.common = common;
 
 module.exports = mdm;

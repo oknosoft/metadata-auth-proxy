@@ -57,8 +57,8 @@ module.exports = function auto_recalc($p, log) {
     md,
     adapters: {pouch},
     pricing} = $p;
-  const {by_branch, order} = require('./index');
-  const load_order = order(md);
+  const {by_branch} = md.order;
+  const load_order = md.order();
 
   const changes = {
 

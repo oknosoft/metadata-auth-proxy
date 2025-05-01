@@ -1,5 +1,4 @@
 const dyn_mdm = require('./dyn_mdm');
-const {common} = require('./index');
 
 module.exports = function check_mdm({o, name, abonent, branch, abranches, job_prm}) {
 
@@ -7,6 +6,7 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
     return false;
   }
 
+  const {common} = job_prm.$p.md.order;
   const zone = abonent.id;
   const {_obj} = o;
 
