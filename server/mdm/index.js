@@ -104,8 +104,9 @@ function mdm ($p, log) {
           if(types && !types.includes(name)) {
             continue;
           }
+          const meta = md.get(name);
           const mgr = md.mgr_by_class_name(name);
-          if(mgr) {
+          if(mgr && !meta.joint) {
             if(suffix === 'common' && !common.includes(name)) {
               continue;
             }
