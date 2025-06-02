@@ -177,7 +177,7 @@ module.exports = function auto_recalc($p, log) {
 
         if(types.includes('doc.nom_prices_setup')) {
           // обновляем цены
-          await pricing.deffered_load_prices(log, true);
+          await pricing.deffered_load_prices(log, false, {$gt: null});
           const index = types.indexOf('doc.nom_prices_setup');
           types.splice(index, 1);
           if(!types.includes('cat.nom')) {

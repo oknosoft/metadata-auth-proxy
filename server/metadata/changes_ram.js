@@ -17,7 +17,7 @@ module.exports = function ram_changes({md, adapters: {pouch}, job_prm, pricing, 
 
       // обновляем ram
       if(change.id.startsWith('doc.nom_prices_setup')) {
-        if(job_prm.silent_prices || !cat.abonents.price_types.map(v => v.valueOf()).includes(change.doc.price_type)) {
+        if(job_prm.silent_prices || (!cat.abonents.price_types.map(v => v.valueOf()).includes(change.doc.price_type) && !job_prm.pricing.all_types)) {
           return;
         }
         if(!is_common) {

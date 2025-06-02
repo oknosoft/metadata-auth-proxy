@@ -18,7 +18,10 @@ module.exports = function ($p, log) {
       return Promise.resolve();
     }
     const start = Date.now();
-    return this.by_range({log})
+    return this.by_range({
+      log,
+      price_type: job_prm.pricing.all_types ? {$gt: null} : null,
+    })
       .then(async () => {
         // затем, подписываемся на изменения doc и meta
         doc_changes($p, log);
