@@ -30,7 +30,7 @@ module.exports = function ({DocCalc_order, classes: {DocObj}, job_prm: {server, 
     if(!yrow?.proxy) {
       throw new Error(`unknown proxy for zone=${zone} year=${year}`);
     }
-    branch = typeof branch === 'number' ? cat.branches.find({suffix: branch}) : cat.branches.get(branch);
+    branch = utils.is_guid(branch) ? cat.branches.get(branch) : cat.branches.find({suffix: branch});
     if(!branch.empty() && branch.owner !== abonent) {
       throw new Error(`branch owner ${branch.owner.id}!==${abonent.id}`);
     }
