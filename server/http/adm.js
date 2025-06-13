@@ -20,7 +20,7 @@ module.exports = function ($p, log, auth) {
   require('./planning')($p, log, route);
   require('./restart')($p, log, route);
   require('./calc_stat')($p, log, route);
-  require('../queue')($p, log, route);
+  //require('../queue')($p, log, route);
   //require('./supplier')($p, log, route);
   //require('./foroom')($p, log, route);
 
