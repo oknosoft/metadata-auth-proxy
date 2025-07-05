@@ -59,11 +59,14 @@ const common = [
   'cat.lead_src',
 ];
 
+
 function mdm ($p, log) {
 
   const {md, cat: {branches, templates, users}, utils, job_prm, adapters: {pouch}} = $p;
   // порядок загрузки, чтобы при загрузке меньше оборванных ссылок
   const load_order = order(md);
+
+  const raw_data = require('./raw_data')(pouch);
 
   return async (req, res) => {
     const {query, path, paths} = req.parsed;
@@ -172,6 +175,7 @@ function mdm ($p, log) {
         }
       }
       suffix === 'common' && current_branch({stream, branches, users, headers, utils});
+      suffix !== 'common' && (!types || types.length > 50) && raw_data(stream);
       stream.pipe(res);
       res.on('close', () => stream.destroy());
     }
