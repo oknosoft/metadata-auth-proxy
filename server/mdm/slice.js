@@ -62,7 +62,7 @@ function init(md) {
   }
 }
 
-function onCgange(md, id) {
+function onChange(md, id) {
   const mgr = md.mgr_by_class_name(id.split('|')[0]);
   if (mgr?.slice) {
     set(mgr);
@@ -102,4 +102,4 @@ function manifest({req, res, suffix, md}) {
   }
 }
 
-module.exports = {init, onCgange, manifest};
+module.exports = {init, onChange, manifest};

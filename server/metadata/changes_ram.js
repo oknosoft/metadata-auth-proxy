@@ -28,7 +28,7 @@ module.exports = function ram_changes({md, adapters: {pouch}, job_prm, pricing, 
         pouch.load_changes({docs: [change.doc]});
       }
       pouch.emit('ram_change', change);
-      slice.onCgange(md, change.id);
+      slice.onChange(md, change.id);
     })
     .on('error', (err) => {
       log(`change error ${err}`);
