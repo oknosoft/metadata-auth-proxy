@@ -11,8 +11,9 @@ const {end404, end500} = require('../http/end');
 const fs = require('fs');
 const {resolve} = require('path');
 const merge2 = require('merge2');
-const manifest = require('./manifest');
-const head = require('./head');
+//const manifest = require('./manifest');
+const {manifest} = require('./slice');
+//const head = require('./head');
 const current_branch = require('./current_branch');
 require('../http/promisify');
 
@@ -136,7 +137,9 @@ function mdm ($p, log) {
       }
 
       if(req.method === 'HEAD') {
-        return await head({res, zone, suffix, by_branch, common});
+        // return await head({res, zone, suffix, by_branch, common});
+        manifest({req, res, suffix, md});
+        return res.end();
       }
 
       // проверяем наличие каталога
@@ -145,7 +148,8 @@ function mdm ($p, log) {
         return end404(res, `/couchdb/mdm/${is_common ? zone : zone0}/${is_common ? '0000' : suffix}`);
       }
       // пишем манифест в head
-      await manifest({res, zone, zone0, suffix, by_branch, common});
+      // await manifest({res, zone, zone0, suffix, by_branch, common});
+      manifest({req, res, suffix, md});
 
       const tags = {};
       const stream = merge2();
