@@ -14,7 +14,7 @@ const skip = [
 const revs = {};
 const commonRevs = {};
 
-function reduceer(sum, [moment, count]) {
+function reducer(sum, [moment, count]) {
   if(moment > sum[0]) {
     sum[0] = moment;
   }
@@ -27,11 +27,11 @@ function set(mgr) {
   const {common} = _owner.$p.md.order;
   if(common.includes(class_name)) {
     commonRevs[mgr.metadata().id || class_name] = [slice.moment, Object.keys(by_ref).length];
-    revs.common = Object.values(commonRevs).reduce(reduceer, [0, 0]);
+    revs.common = Object.values(commonRevs).reduce(reducer, [0, 0]);
   }
   else {
     revs[mgr.metadata().id || class_name] = [slice.moment, Object.keys(by_ref).length];
-    revs.other = Object.values(revs).reduce(reduceer, [0, 0]);
+    revs.other = Object.values(revs).reduce(reducer, [0, 0]);
   }
 }
 
@@ -49,7 +49,7 @@ function init(md) {
   }
 }
 
-function onCgange(md, id) {
+function onChange(md, id) {
   const mgr = md.mgr_by_class_name(id.split('|')[0]);
   if (mgr?.slice) {
     set(mgr);
@@ -89,4 +89,4 @@ function manifest({req, res, suffix, md}) {
   }
 }
 
-module.exports = {init, onCgange, manifest};
+module.exports = {init, onChange, manifest};

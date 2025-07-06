@@ -6,14 +6,12 @@
  * Created by Evgeniy Malyarov on 14.06.2019.
  */
 
+const slice = require('../mdm/slice');
 
-module.exports = function ram_changes({adapters: {pouch}, job_prm, pricing, cat}, log, is_common) {
+module.exports = function ram_changes({md, adapters: {pouch}, job_prm, pricing, cat}, log, is_common) {
 
-  pouch.local.ram.changes({
-    since: 'now',
-    live: true,
-    include_docs: true,
-  })
+  slice.init(md);
+  pouch.local.ram.changes({since: 'now', live: true, include_docs: true})
     .on('change', (change) => {
 
       // обновляем ram
@@ -31,6 +29,7 @@ module.exports = function ram_changes({adapters: {pouch}, job_prm, pricing, cat}
         pouch.load_changes({docs: [change.doc]});
       }
       pouch.emit('ram_change', change);
+      slice.onChange(md, change.id);
     })
     .on('error', (err) => {
       log(`change error ${err}`);
