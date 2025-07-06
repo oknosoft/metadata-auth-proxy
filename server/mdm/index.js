@@ -23,6 +23,7 @@ function mdm ($p, log) {
   // порядок загрузки, чтобы на старте было меньше оборванных ссылок
   const {common} = md.order;
   const load_order = md.order();
+  const raw_data = require('./raw_data')(pouch);
 
   return async (req, res) => {
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
@@ -119,6 +120,7 @@ function mdm ($p, log) {
         }
       }
       suffix === 'common' && current_branch({stream, branches, users, headers, utils});
+      suffix !== 'common' && (!types || types.length > 50) && raw_data(stream);
       stream.pipe(res);
       res.on('close', () => stream.destroy());
     }
