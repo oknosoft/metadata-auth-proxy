@@ -43,7 +43,7 @@ module.exports = {
     for(const ts in tabular_sections) {
       const {fields} = tabular_sections[ts];
       obj[ts].forEach((row) => {
-        this.sub_links(row, fields);
+        row && this.sub_links(row, fields);
       });
     }
     this.dedup.add(obj);
