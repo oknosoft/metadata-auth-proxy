@@ -31,7 +31,10 @@ function set(mgr) {
   }
   else {
     revs[mgr.metadata().id || class_name] = [slice.moment, Object.keys(by_ref).length];
-    revs.other = Object.values(revs).reduce(reducer, [0, 0]);
+    revs.other = Object.keys(revs)
+      .filter(key => key !== 'common' && key !== 'other')
+      .map(key => revs[key])
+      .reduce(reducer, [0, 0]);
   }
 }
 
