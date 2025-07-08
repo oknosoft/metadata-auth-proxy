@@ -1,17 +1,4 @@
 
-// эти режем по отделу
-const by_branch = [
-  'cat.partners',
-  'cat.branches',
-  'cat.divisions',
-  'cat.users',
-  'cat.individuals',
-  'cat.organizations',
-  'cat.cashboxes',
-  'cat.stores',
-  'cch.predefined_elmnts',
-];
-
 const skip = [
   'cat.meta_objs',
   'cat.meta_fields',
@@ -27,7 +14,7 @@ const skip = [
 const revs = {};
 const commonRevs = {};
 
-function reduceer(sum, [moment, count]) {
+function reducer(sum, [moment, count]) {
   if(moment > sum[0]) {
     sum[0] = moment;
   }
@@ -40,11 +27,14 @@ function set(mgr) {
   const {common} = _owner.$p.md.order;
   if(common.includes(class_name)) {
     commonRevs[mgr.metadata().id || class_name] = [slice.moment, Object.keys(by_ref).length];
-    revs.common = Object.values(commonRevs).reduce(reduceer, [0, 0]);
+    revs.common = Object.values(commonRevs).reduce(reducer, [0, 0]);
   }
   else {
     revs[mgr.metadata().id || class_name] = [slice.moment, Object.keys(by_ref).length];
-    revs.other = Object.values(revs).reduce(reduceer, [0, 0]);
+    revs.other = Object.keys(revs)
+      .filter(key => key !== 'common' && key !== 'other')
+      .map(key => revs[key])
+      .reduce(reducer, [0, 0]);
   }
 }
 
