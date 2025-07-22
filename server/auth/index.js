@@ -159,6 +159,7 @@ module.exports = function ({cat, job_prm}, log) {
       const impersonation = authorization.impersonation || cache.ext(authorization.key);
       // TODO: учесть вложенность отдела абонента
       if(impersonation && (user.roles.includes('doc_full') || user.roles.includes('impersonation'))) {
+        log(`impersonation: ${impersonation}`);
         user = cat.users.get(impersonation);
         if(!user) {
           throw new TypeError(`Пользователь '${impersonation}' отсутствует в справочнике 'Пользователи'`);
