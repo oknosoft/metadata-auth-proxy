@@ -7,7 +7,7 @@
     "url": "https://github.com/oknosoft/metadata-auth-proxy"
   },
   "engines": {
-    "node": ">=20.11",
+    "node": ">=20.19",
     "yarn": "^1.22"
   },
   "keywords": [
@@ -25,7 +25,7 @@
   "homepage": "https://adm.oknosoft.ru",
   "proxy": "http://localhost:3016/",
   "dependencies": {
-    "@node-saml/passport-saml": "^5.0",
+    "@node-saml/passport-saml": "^5.1",
     "canvas": "^2.11",
     "compression": "^1.8",
     "http-proxy": "^1.18",
@@ -35,14 +35,14 @@
     "passport-ldapauth": "^3.0",
     "pg": "^8.16",
     "qs": "^6.14",
-    "rate-limiter-flexible": "^7.1",
+    "rate-limiter-flexible": "^7.2",
     "serve-handler": "^6.1",
     "unzipper": "^0.12",
-    "wb-core": "github:oknosoft/windowbuilder-core#9420c4622c84f2e54a3be260c0bd216fd16ecdb0",
+    "wb-core": "github:oknosoft/windowbuilder-core#98d5b113bbac5a6337087b5624309e1fc8a7d1b3",
     "wb-cutting": "github:oknosoft/genetic-cutting#a94221e17bd3ab20bae5782a087efc3d61f5f727",
     "wb-paperless": "github:oknosoft/paperless#619a77020a719c75319a181ae91beb657f4719b5",
     "wb-parametric": "github:oknosoft/windowbuilder-parametric#2df8b98e7819c6796b08b8ad8037af331face727",
-    "wb-planning": "github:oknosoft/windowbuilder-planning#357c00eff9ac4d2033c10678e30b18f9a086db2a",
+    "wb-planning": "github:oknosoft/windowbuilder-planning#a7e2fe181bc7eb0e08f46abcd4157db4b01e6be2",
     "wb-reports": "github:oknosoft/windowbuilder-reports#76aef1421fb1f8dd3a839145544ae22d29d86940",
     "yamljs": "^0.3.0"
   },
