@@ -31,7 +31,7 @@ module.exports = function raw_handler(pouch) {
   pouch.on('ram_change', (change) => {
     const {doc: {ref, ...other}, id} = change;
     const parts = id.split('|')[0]?.split('.');
-    const rows = parts && raw[parts[0]][parts[1]];
+    const rows = parts && raw[parts[0]]?.[parts[1]];
     const doc = {_id: id, ...other};
     if(rows) {
       const row = rows.find(v => v._id === id);
