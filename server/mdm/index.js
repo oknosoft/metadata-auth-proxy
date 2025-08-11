@@ -107,7 +107,7 @@ function mdm ($p, log) {
           }
           const meta = md.get(name);
           const mgr = md.mgr_by_class_name(name);
-          if(mgr && !meta.joint) {
+          if(mgr && !meta.joint && meta.cachable !== 'pgsql') {
             if(suffix === 'common' && !common.includes(name)) {
               continue;
             }
