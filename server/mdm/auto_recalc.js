@@ -343,6 +343,10 @@ module.exports = function auto_recalc($p, log) {
     }
 
     for(const name of types) {
+      if(job_prm.server.disabledmdm_types.includes(name)) {
+        log(`${name} skipped`);
+        continue;
+      }
       const mgr = md.mgr_by_class_name(name);
       if(mgr) {
         const fname = suffix === 'common' ?
