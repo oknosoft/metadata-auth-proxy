@@ -31,9 +31,9 @@ module.exports = function raw_handler(pouch) {
   pouch.on('ram_change', (change) => {
     const {doc: {ref, ...other}, id} = change;
     const parts = id.split('|')[0]?.split('.');
-    const rows = parts && raw[parts[0]][parts[1]];
-    const doc = {_id: id, ...other};
+    const rows = parts && raw[parts[0]]?.[parts[1]];
     if(rows) {
+      const doc = {_id: id, ...other};
       const row = rows.find(v => v._id === id);
       if(row) {
         rows[rows.indexOf(row)] = doc;
