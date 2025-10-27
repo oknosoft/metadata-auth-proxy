@@ -11,7 +11,7 @@ module.exports = function ({doc, pouch, utils}, log) {
   return function svgs({req, res, query, target}) {
     const {paths} = req.parsed;
     if(req.method === 'POST' && query && query.includes('svgs') && paths[paths.length-1].includes('doc.calc_order')) {
-      const ref = paths[paths.length-1].replace('%7C', '|').substr(15);
+      const ref = paths[paths.length-1].replace('%7C', '|').substring(15);
       const o = doc.calc_order.by_ref[ref];
       const keys = [];
       res.setHeader('Content-Type', 'application/json');

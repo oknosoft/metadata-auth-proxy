@@ -12,7 +12,7 @@ module.exports = function getBody(req) {
     req.on('data', (chunk) => data += chunk);
     req.on('end', () => {
       if(data.length > 0 && data.charCodeAt(0) == 65279) {
-        data = data.substr(1);
+        data = data.substring(1);
       }
       resolve(data);
     });

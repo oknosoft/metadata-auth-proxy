@@ -48,8 +48,9 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     log(err.message || err, 'error');
   });
 
-  const svgs = require('./svgs')({doc, pouch, utils}, log);
-  const templates = require('./templates')({cat, pouch, utils}, log);
+  const svgs = require('./proxy-couchdb-svgs')({doc, pouch, utils}, log);
+  const templates = require('./proxy-couchdb-templates')({cat, pouch, utils}, log);
+  const couchdbFind = require('./proxy-couchdb-find')({cat, pouch, utils, _http, _agent}, log);
 
   return async function couchdbProxy(req, res, auth) {
     // You can define here your custom logic to handle the request
@@ -155,10 +156,10 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     }
 
     server = new url.URL(server.http);
-    if(query && query.includes('feed=longpoll')) {
+    if(query?.includes('feed=longpoll')) {
       const upstreamReq = _http[server.protocol].request({
         method: req.method,
-        headers: headers,
+        headers,
         hostname: server.hostname,
         port: parseInt(server.port, 10),
         path: path.replace('/couchdb/', '/'),
@@ -181,7 +182,9 @@ module.exports = function ({cat, doc, job_prm, utils, adapters: {pouch}}, log) {
     else {
       const target = `${server.href.replace(new RegExp(server.pathname + '$'), '')}${path.replace('/couchdb/', '/')}`;
 
-      if(svgs({req, res, parts, query, target}) || templates({req, res, target})) {
+      if(svgs({req, res, parts, query, target}) ||
+        templates({req, res, target}) ||
+        couchdbFind({req, res, query, path, server})) {
         return;
       }
 
