@@ -78,7 +78,7 @@ module.exports = function ({cat, job_prm}, log) {
   const white_ips = require('./white_ips')({cat, job_prm});
 
   /**
-   * Получает на вход httpRequest и возвращает Promise с идентификатором пользователя или reject, усли авторизоваться не удалось
+   * Получает на вход httpRequest и возвращает Promise с идентификатором пользователя или reject, если авторизоваться не удалось
    * @param req
    * @return {Promise<string>}
    */

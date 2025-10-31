@@ -38,6 +38,11 @@ module.exports = function auto_recalc($p, log) {
     pricing} = $p;
   const {by_branch, order} = require('./index');
   const load_order = order(md);
+  // небольшой патч метаданных
+  ((ts) => {
+    ts.cnn_elmnts.skip_mdm_links = true;
+    ts.priorities.skip_mdm_links = true;
+  })(md.get('cat.cnns').tabular_sections);
 
   const changes = {
 

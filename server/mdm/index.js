@@ -86,7 +86,7 @@ function mdm ($p, log) {
         zone = branch.filter.id;
       }
 
-      const {abonents} = job_prm.server;
+      const {abonents, disabledmdm_types} = job_prm.server;
       if(!abonents.some((id) => id == zone)) {
         return end500({req, res, err: {status: 406, message: `Текущий proxy обслуживает зоны ${abonents.join(', ')}, но запрошена зона ${zone}`}, log});
       }
@@ -157,7 +157,7 @@ function mdm ($p, log) {
       for(const names of load_order) {
         for(const name of names) {
           // если запросили определенные типы данных, возвращаем только их
-          if(types && !types.includes(name)) {
+          if(types && !types.includes(name) || disabledmdm_types.includes(name)) {
             continue;
           }
           const mgr = md.mgr_by_class_name(name);
