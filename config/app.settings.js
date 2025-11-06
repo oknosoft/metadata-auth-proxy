@@ -69,7 +69,8 @@ module.exports = function settings(prm = {}) {
     // глубина истории цен
     price_depth: 3,
     skip_prices: Boolean(process.env.SKIP_PRICES),
-    silent_prices: Boolean(process.env.SILENT_PRICES),
+    silent_prices: Boolean(process.env.SILENT_PRICES || process.env.SKIP_PRICES),
+    skip_templates: Boolean(process.env.SKIP_TEMPLATES),
 
     server: {
       prefix: '/adm/api',             // Mount path, no trailing slash
@@ -83,6 +84,7 @@ module.exports = function settings(prm = {}) {
       no_mdm: Boolean(process.env.NOMDM),
       year: process.env.YEAR ? parseFloat(process.env.YEAR) : new Date().getFullYear(),
       disable_mdm: Boolean(process.env.DISABLEMDM),
+      disabledmdm_types: process.env.DISABLEDMDM_TYPES ? JSON.parse(process.env.DISABLEDMDM_TYPES) : [],
       browser_only: Boolean(process.env.BROWSER_ONLY),
       defer: (process.env.DEFER ? parseFloat(process.env.DEFER) : 200000) + Math.random() * 10000,  // задержка пересчета mdm
       eve_url: process.env.EVEURL,
