@@ -243,6 +243,9 @@ module.exports = function auto_recalc($p, log) {
             types,
           });
           log(`Abonent ${abonent.name} root recalcied`);
+          if(job_prm.server.repl_task) {
+            require('./repl_task')(abonent);
+          }
 
           if(types.length && types.every((name) => !by_branch.includes(name))) {
             continue;

@@ -89,6 +89,7 @@ module.exports = function settings(prm = {}) {
       disable_mdm: Boolean(process.env.DISABLEMDM),
       disabledmdm_types: process.env.DISABLEDMDM_TYPES ? JSON.parse(process.env.DISABLEDMDM_TYPES) : [],
       browser_only: Boolean(process.env.BROWSER_ONLY),
+      repl_task: Boolean(process.env.REPL_TASK),
       defer: (process.env.DEFER ? parseFloat(process.env.DEFER) : 200000) + Math.random() * 10000,  // задержка пересчета mdm
       eve_url: process.env.EVEURL,
       cut_url: process.env.CUTURL,
