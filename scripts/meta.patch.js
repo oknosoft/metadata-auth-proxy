@@ -13,6 +13,7 @@ const include = [
   'cat.http_apis',
   'cat.servers',
   'cat.users',
+  'cat.work_centers',
   'ireg.i18n',
   'ireg.delivery_schedules',
   'ireg.delivery_scheme',
@@ -98,6 +99,7 @@ const writable = [
   'cat.clrs',
   'cat.servers',
   'cat.users',
+  'cat.work_centers',
 ];
 const read_only = [];
 

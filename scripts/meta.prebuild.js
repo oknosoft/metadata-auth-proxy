@@ -31,6 +31,13 @@ const MetaEngine = require('metadata-core')
   .plugin(require('metadata-abstract-ui/meta'))
   .plugin(require('metadata-abstract-ui'));
 
+const extModules = {
+  cat: {
+    // parameters_keys: require('wb-planning/server/metadata/catalogs/cat_parameters_keys'),
+    work_centers: require('wb-planning/server/metadata/catalogs/cat_work_centers'),
+  }
+};
+
 debug('Создаём объект MetaEngine');
 
 const $p = new MetaEngine();    // подключим метадату
@@ -161,7 +168,7 @@ function create_modules(_m) {
   // менеджеры объектов данных, отчетов и обработок
   for (const category in categoties) {
     for (const name in _m[category]) {
-      if (sys_nsmes.indexOf(name) == -1) {
+      if (!sys_nsmes.includes(name)) {
         text += obj_constructor_text(_m, category, name, categoties);
       }
     }
@@ -182,15 +189,15 @@ function obj_constructor_text(_m, category, name, categoties) {
     f, props = '';
 
   const filename = dir && path.resolve(__dirname, `../src/metadata/${dir}/${category}_${name}.js`);
-  let extModule;
-  if(dir && fs.existsSync(filename)) {
+  let extModule = extModules[category]?.[name];
+  if(!extModule && dir && fs.existsSync(filename)) {
     try {
       extModule = require(filename);
     }
     catch(err) {
       !err.message.includes('token') && debug(err);
     }
-  };
+  }
 
   const extender = extModule && extModule[fn_name] && extModule[fn_name].toString();
   const objText = extender && extender.substring(extender.indexOf('{') + 1, extender.lastIndexOf('}') - 1);
