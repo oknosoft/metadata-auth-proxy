@@ -35,6 +35,8 @@ const extModules = {
   cat: {
     // parameters_keys: require('wb-planning/server/metadata/catalogs/cat_parameters_keys'),
     work_centers: require('wb-planning/server/metadata/catalogs/cat_work_centers'),
+    work_center_kinds: require('wb-planning/server/metadata/catalogs/cat_work_center_kinds'),
+    production_kinds: require('wb-planning/server/metadata/catalogs/cat_production_kinds'),
   }
 };
 
@@ -185,7 +187,7 @@ function obj_constructor_text(_m, category, name, categoties) {
   const {DataManager} = MetaEngine.classes;
   let meta = _m[category][name],
     fn_name = DataManager.prototype.obj_constructor.call({class_name: category + '.' + name, constructor_names: {}}),
-    text = '\n/**\n* ### ' + $p.msg.meta[category] + ' ' + meta.name,
+    text = '\n/**\n* @summary ' + $p.msg.meta[category] + ' ' + meta.name,
     f, props = '';
 
   const filename = dir && path.resolve(__dirname, `../src/metadata/${dir}/${category}_${name}.js`);
@@ -209,10 +211,10 @@ function obj_constructor_text(_m, category, name, categoties) {
   const managerText = extModule && extModule[managerName] && extModule[managerName].toString();
 
 
-  text += '\n* ' + (meta.illustration || meta.synonym);
+  text += '\n* @desc ' + (meta.illustration || meta.synonym);
   text += '\n* @class ' + fn_name;
   text += '\n* @extends ' + proto;
-  text += '\n* @constructor \n*/\n';
+  text += '\n*/\n';
   text += `class ${fn_name} extends ${proto}{\n`;
 
   // если описан конструктор объекта, используем его

@@ -14,6 +14,8 @@ const include = [
   'cat.servers',
   'cat.users',
   'cat.work_centers',
+  'cat.work_center_kinds',
+  'cat.production_kinds',
   'ireg.i18n',
   'ireg.delivery_schedules',
   'ireg.delivery_scheme',
