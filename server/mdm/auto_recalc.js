@@ -43,6 +43,7 @@ module.exports = function auto_recalc($p, log) {
     ts.cnn_elmnts.skip_mdm_links = true;
     ts.priorities.skip_mdm_links = true;
   })(md.get('cat.cnns').tabular_sections);
+  md.get('cat.insert_bind').tabular_sections.production.skip_mdm_links = true;
 
   const changes = {
 
