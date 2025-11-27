@@ -37,7 +37,7 @@ module.exports = function log_processing({md, adapters: {pouch}, classes}, log) 
           logDoc.events.push(row);
         }
         if(error) {
-          row.error = error.stack || error.message || error;
+          row.error = error.message || error;
         }
         else if(row.error) {
           delete row.error;
