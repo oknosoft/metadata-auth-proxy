@@ -71,7 +71,7 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
 
 
 function check_characteristics(o) {
-  return o.calc_order.empty();
+  return o.calc_order.empty() && dyn_mdm.check(o.owner);
   // if(!check_characteristics.cache) {
   //   check_characteristics.cache = new Set();
   //   o._manager._owner.templates.forEach((template) => {
