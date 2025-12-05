@@ -35,7 +35,8 @@ module.exports = function auto_recalc($p, log) {
     job_prm,
     md,
     adapters: {pouch},
-    pricing} = $p;
+    pricing,
+    CatProduction_params} = $p;
   const {by_branch, order} = require('./index');
   const load_order = order(md);
   // небольшой патч метаданных
@@ -189,8 +190,13 @@ module.exports = function auto_recalc($p, log) {
             });
           }
           // добавляем только шаблоны абонента
-          abonent.acl_objs.forEach(({obj}) => {
-            if(obj) {
+          for(const {obj} of abonent.acl_objs) {
+            if(obj instanceof CatProduction_params) {
+              objs.add(obj);
+            }
+          }
+          for(const {obj} of abonent.acl_objs) {
+            if(obj && !objs.has(obj)) {
               objs.add(obj);
               if(!abonent.no_mdm) {
                 if(obj._manager === calc_order && obj.obj_delivery_state == 'Шаблон') {
@@ -203,9 +209,9 @@ module.exports = function auto_recalc($p, log) {
                 }
               }
             }
-          });
+          }
 
-          log(`Abonent ${abonent.name} prepare start`);
+          log(`Abonent ${abonent.name} prepare start acl_objs: ${abonent.acl_objs.count()}, objs: ${objs.size}`);
           await dyn_mdm.prepare(Array.from(objs), Array.from(tmplts), $p);
           log(`Abonent ${abonent.name} prepared`);
 

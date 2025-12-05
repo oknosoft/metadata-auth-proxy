@@ -35,7 +35,7 @@
     "passport-ldapauth": "^3.0",
     "pg": "^8.16",
     "qs": "^6.14",
-    "rate-limiter-flexible": "^8.1",
+    "rate-limiter-flexible": "^9.0",
     "serve-handler": "^6.1",
     "unzipper": "^0.12",
     "wb-core": "github:oknosoft/windowbuilder-core#1cb68e145ef45761e238c093a5dc6be1c94fd976",
