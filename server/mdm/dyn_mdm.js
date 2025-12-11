@@ -37,7 +37,10 @@ module.exports = {
 
   // цикл по объекту и строкам табчастей
   links(obj, force, children) {
-    if(!force && (!obj || !obj.empty || obj.empty() || this.dedup.has(obj))) {
+    if(!obj || !obj.empty || obj.empty()) {
+      return;
+    }
+    if(!force && this.dedup.has(obj)) {
       return;
     }
     const {fields, tabular_sections} = obj._metadata();
@@ -55,7 +58,7 @@ module.exports = {
     // если объект является папкой, добавляем всех его детей
     if(children && obj.is_folder && obj._children) {
       for(const child of obj._children()) {
-        this.links(child, false, children);
+        this.links(child, force, children);
       }
     }
   },
@@ -99,7 +102,7 @@ module.exports = {
 
     // формируем кеш по массиву входящих ссылок
     for(const obj of objs) {
-      res = res.then(() => this.links(obj, false, true));
+      res = res.then(() => this.links(obj, true, true));
     }
 
     return res
