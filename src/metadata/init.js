@@ -495,12 +495,13 @@ set servers(v){this._setter_ts('servers',v)}
    * @return {Object}
    */
   toJSON() {
-    const {ref, id, name, no_mdm, servers} = this;
+    const {ref, id, name, no_mdm, area, servers} = this;
     return {
       ref,
       id,
       name,
       no_mdm,
+      area,
       servers: servers._obj.map(({key, proxy, name}) => ({key, proxy, name})),
     };
   }}
