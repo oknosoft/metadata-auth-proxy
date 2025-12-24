@@ -27,7 +27,7 @@ function notify(abonent, branch, types, port) {
 module.exports = function auto_recalc($p, log) {
 
   const {
-    cat: {branches, abonents, templates},
+    cat: {branches, abonents, templates, nom},
     doc: {calc_order},
     cch: {mdm_groups, properties},
     ireg,
@@ -208,6 +208,14 @@ module.exports = function auto_recalc($p, log) {
                   });
                 }
               }
+            }
+          }
+          // номенклатуры с кодом цветового аналога
+          const clr_key = {property: job_prm.properties.clr_key};
+          for(const obj of nom) {
+            const row = obj.extra_fields.find(clr_key);
+            if(row?.value) {
+              objs.add(obj);
             }
           }
 
