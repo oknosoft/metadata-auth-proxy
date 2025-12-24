@@ -201,7 +201,7 @@ class CatWork_centersManager extends CatManager {
   async loadRegister(client, {md, wsql: {alasql}, cat: {work_shifts}, enm: {planning_phases}, utils: {moment}}) {
     const pq = await client.query(`SELECT register, register_type, sign, phase,
       date, shift, work_center, planing_key, stage, calc_order, power, part, part_type FROM areg_dates where phase = 'plan' and date between $1 and $2`, [
-      moment().add(-1, 'month').toDate(),
+      moment().add(-2, 'month').toDate(), // TODO: вернуть
       moment().add(1, 'month').toDate(),
     ]);
 
