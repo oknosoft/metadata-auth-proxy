@@ -210,14 +210,6 @@ module.exports = function auto_recalc($p, log) {
               }
             }
           }
-          // номенклатуры с кодом цветового аналога
-          const clr_key = {property: job_prm.properties.clr_key};
-          for(const obj of nom) {
-            const row = obj.extra_fields.find(clr_key);
-            if(row?.value) {
-              objs.add(obj);
-            }
-          }
 
           log(`Abonent ${abonent.name} prepare start acl_objs: ${abonent.acl_objs.count()}, objs: ${objs.size}`);
           await dyn_mdm.prepare(Array.from(objs), Array.from(tmplts), $p);
