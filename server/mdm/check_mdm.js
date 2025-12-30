@@ -7,12 +7,6 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
     return false;
   }
 
-  const zone = abonent.id;
-  const {_obj} = o;
-
-  if(name === 'cat.characteristics') {
-    return check_characteristics(o);
-  }
   if(common.includes(name)) {
     if(name === 'cat.clrs') {
       return o.ref && o.name && o.name !== ' \\ ';
@@ -32,6 +26,10 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
 
   if(abonent.no_mdm && branch.empty() || branch.no_mdm || job_prm.server.no_mdm) {
     return true;
+  }
+
+  if(name === 'cat.characteristics') {
+    return check_characteristics(o);
   }
 
   if(branch.empty()) {
@@ -72,14 +70,6 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
 
 function check_characteristics(o) {
   return o.calc_order.empty() && dyn_mdm.check(o.owner);
-  // if(!check_characteristics.cache) {
-  //   check_characteristics.cache = new Set();
-  //   o._manager._owner.templates.forEach((template) => {
-  //     template.templates.forEach(({template}) => {
-  //       check_characteristics.cache.add(template);
-  //     });
-  //   });
-  // }
 }
 
 function check_calc_order(o) {
