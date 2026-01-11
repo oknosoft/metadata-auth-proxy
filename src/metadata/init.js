@@ -207,7 +207,7 @@ class CatWork_centersManager extends CatManager {
   async loadRegister(client, {md, wsql: {alasql}, cat: {work_shifts}, enm: {planning_phases}, utils: {moment}}) {
     const pq = await client.query(`SELECT register, register_type, sign, phase,
       date, shift, work_center, planing_key, stage, calc_order, power, part, part_type FROM areg_dates where phase = 'plan' and date between $1 and $2`, [
-      moment().add(-2, 'month').toDate(), // TODO: вернуть
+      moment().add(-3, 'month').toDate(), // TODO: вернуть
       moment().add(1, 'month').toDate(),
     ]);
 
@@ -244,7 +244,7 @@ class CatWork_centersManager extends CatManager {
           if(prev?.stage === stage && stack.length > 1) {
             prev = stack[stack.length - 2];
           }
-          if(prev) {
+          if(prev && prev.stage !== stage && prev.work_center !== work_center) {
             const jumpDelay = prev.work_center.delay(work_center) || prev.work_center.delay(stage);
             if(jumpDelay && dateShift.jumpDelay < jumpDelay) {
               dateShift.jumpDelay = jumpDelay;
@@ -259,6 +259,7 @@ class CatWork_centersManager extends CatManager {
           dateShift.date += 1;
           dateShift.time -= 86400;
         }
+        // TODO: набрать массив доступных и выбрать оптимальный
         const available = work_center.register.firstForward({...dateShift, demand, used});
         if(available) {
           if(dateShift.startKey) {
@@ -270,11 +271,40 @@ class CatWork_centersManager extends CatManager {
     }
   }
 
-  availableBackward({stage, date, demand, used}) {
+  availableBackward({stage, date, time, demand, used, endKey}) {
+    const keys = typeof endKey === 'string' ? new Set([endKey]) : endKey;
     for(const work_center of this.register) {
       if(work_center.work_center_kinds.find({kind: stage})) {
-        const available = work_center.register.firstBackward({date, time, demand, used});
+        const dateShift = {date, time, jumpDelay: 0};
+        for(const endKey of keys) {
+          const stack = used.stackMap.get(endKey);
+          let prev = stack.length && stack[stack.length - 1];
+          if(prev?.stage === stage && stack.length > 1) {
+            prev = stack[stack.length - 2];
+          }
+          if(prev && prev.stage !== stage && prev.work_center !== work_center) {
+            const jumpDelay = work_center.delay(prev.work_center) || work_center.delay(prev.stage);
+            if(jumpDelay && dateShift.jumpDelay < jumpDelay) {
+              dateShift.jumpDelay = jumpDelay;
+              dateShift.endKey = endKey;
+            }
+          }
+        }
+        let delay = work_center.delay() + dateShift.jumpDelay
+        while (delay > 86400) {
+          dateShift.date -= 1;
+          delay -= 86400;
+        }
+        if(delay) {
+          dateShift.time -= delay;
+        }
+        // TODO: набрать массив доступных и выбрать оптимальный (доступен позже и время перехода меньше)
+        const available = work_center.register.firstBackward({...dateShift, demand, used});
         if(available) {
+          if(dateShift.endKey) {
+            available.endKey = dateShift.endKey;
+          }
+
           return available;
         }
       }
