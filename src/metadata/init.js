@@ -173,13 +173,14 @@ get extra_fields(){return this._getter_ts('extra_fields')}
 set extra_fields(v){this._setter_ts('extra_fields',v)}
 get time_standard(){return this._getter_ts('time_standard')}
 set time_standard(v){this._setter_ts('time_standard',v)}
+
+
   delay(recipient) {
     if(!recipient) {
       recipient = this;
     }
     return this.time_standard.find({recipient})?.event_time || 0;
-  }
-}
+  }}
 $p.CatWork_centers = CatWork_centers;
 class CatWork_centersWork_center_kindsRow extends TabularSectionRow{
 get kind(){return this._getter('kind')}
@@ -204,7 +205,7 @@ set event_time(v){this._setter('event_time',v)}
 $p.CatWork_centersTime_standardRow = CatWork_centersTime_standardRow;
 class CatWork_centersManager extends CatManager {
 
-  async loadRegister(client, {md, wsql: {alasql}, cat: {work_shifts}, enm: {planning_phases}, utils: {moment}}) {
+  async loadRegister(client, {md, wsql: {alasql}, cat: {work_shifts, delivery_directions}, enm: {planning_phases}, utils: {moment}}) {
     const pq = await client.query(`SELECT register, register_type, sign, phase,
       date, shift, work_center, planing_key, stage, calc_order, power, part, part_type FROM areg_dates where phase = 'plan' and date between $1 and $2`, [
       moment().add(-3, 'month').toDate(), // TODO: вернуть
@@ -215,7 +216,7 @@ class CatWork_centersManager extends CatManager {
 
     // создадим и наполним хранилища
     for(let {work_center: ref, ...other} of pq.rows) {
-      const work_center = this.get(ref);
+      const work_center = this.by_ref[ref] || delivery_directions.by_ref[ref];
       if(!work_center.register) {
         work_center.register = new this.constructor.RowsFragment(work_center);
         this.register.add(work_center);
@@ -310,6 +311,7 @@ class CatWork_centersManager extends CatManager {
       }
     }
   }
+
   //static _replace = true;
 }
 $p.cat.create('work_centers', CatWork_centersManager, false);
