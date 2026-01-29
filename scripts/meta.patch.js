@@ -16,6 +16,7 @@ const include = [
   'cat.work_centers',
   'cat.work_center_kinds',
   'cat.production_kinds',
+  'cat.delivery_directions',
   'ireg.i18n',
   'ireg.delivery_schedules',
   'ireg.delivery_scheme',
@@ -58,7 +59,6 @@ const include = [
   // 'cat.stores',
   // 'cat.nom_prices_types',
   // 'cat.individuals',
-  // 'cat.delivery_directions',
   // 'cat.choice_params',
   //
   // 'cch.predefined_elmnts',

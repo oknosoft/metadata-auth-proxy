@@ -37,6 +37,7 @@ const extModules = {
     work_centers: require('wb-planning/server/metadata/catalogs/cat_work_centers'),
     work_center_kinds: require('wb-planning/server/metadata/catalogs/cat_work_center_kinds'),
     production_kinds: require('wb-planning/server/metadata/catalogs/cat_production_kinds'),
+    delivery_directions: require('wb-planning/server/metadata/catalogs/cat_delivery_directions'),
   }
 };
 

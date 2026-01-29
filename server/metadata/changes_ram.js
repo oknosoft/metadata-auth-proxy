@@ -9,7 +9,7 @@
 const slice = require('../mdm/slice');
 
 
-module.exports = function ram_changes({md, adapters: {pouch}, job_prm, pricing, cat}, log, is_common) {
+module.exports = function ram_changes({md, adapters: {pouch}, job_prm, pricing, cat, cch}, log, is_common) {
 
   slice.init(md);
   pouch.local.ram.changes({since: 'now', live: true,include_docs: true})
@@ -29,6 +29,9 @@ module.exports = function ram_changes({md, adapters: {pouch}, job_prm, pricing, 
       }
       pouch.emit('ram_change', change);
       slice.onChange(md, change.id);
+      if(change.id.startsWith('cch.predefined_elmnts')) {
+        cch.predefined_elmnts.job_prm(cch.predefined_elmnts.get(change.id.split('|')[1]));
+      }
     })
     .on('error', (err) => {
       log(`change error ${err}`);
