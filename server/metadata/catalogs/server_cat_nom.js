@@ -63,6 +63,10 @@ module.exports = function ($p, log) {
           return `${v.ref},${v.id},${v.name},${v.qualifier_unit},${v.heft||0},${v.volume||0},${v.coefficient||1},${v.rounding_threshold||0}`;
         })
         .join('\n');
+      const {operations} = this._obj;
+      if(operations) {
+        json.operations = operations;
+      }
     }
     return json;
   };
