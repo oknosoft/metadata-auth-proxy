@@ -25,7 +25,9 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
   }
 
   if(abonent.no_mdm && branch.empty() || branch.no_mdm || job_prm.server.no_mdm) {
-    return true;
+    if(name !== 'cat.partners') {
+      return true;
+    }
   }
 
   if(name === 'cat.characteristics') {
@@ -49,8 +51,12 @@ module.exports = function check_mdm({o, name, abonent, branch, abranches, job_pr
     }
   }
   if(name === 'cat.partners') {
-    const rows = o.is_folder ? o._children().concat(o) : [o];
-    return rows.some((acl_obj) => abranches.some((branch) => branch.partners.find({acl_obj})));
+    if(o.is_folder) {
+      return true;
+    }
+    return branch.partners.count() < 30 && branch.partners.find({acl_obj: o});
+    // const rows = o.is_folder ? o._children().concat(o) : [o];
+    // return rows.some((acl_obj) => abranches.some((branch) => branch.partners.find({acl_obj})));
   }
   else if(name === 'cat.organizations') {
     return abranches.some((branch) => branch.organizations.find({acl_obj: o}));
