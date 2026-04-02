@@ -38,7 +38,7 @@
     "rate-limiter-flexible": "^10.0",
     "serve-handler": "^6.1",
     "unzipper": "^0.12",
-    "wb-core": "github:oknosoft/windowbuilder-core#d06973ba6d82c72201f5e27c50c71d60cc15da2f",
+    "wb-core": "github:oknosoft/windowbuilder-core#72dcd08a202a669ebd87bf1e0a7430510c85b02b",
     "wb-cutting": "github:oknosoft/genetic-cutting#a94221e17bd3ab20bae5782a087efc3d61f5f727",
     "wb-paperless": "github:oknosoft/paperless#619a77020a719c75319a181ae91beb657f4719b5",
     "wb-parametric": "github:oknosoft/windowbuilder-parametric#2df8b98e7819c6796b08b8ad8037af331face727",
