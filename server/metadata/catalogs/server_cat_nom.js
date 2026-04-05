@@ -10,7 +10,7 @@ const doc_changes = require('../changes_doc');
 
 module.exports = function ($p, log) {
 
-  const {CatNom, classes: {CatObj}, pricing, adapters: {pouch}, cat: {nom_units}, utils, job_prm} = $p;
+  const {CatNom, classes: {CatObj}, pricing, adapters: {pouch}, cat: {nom_units, characteristics}, utils, job_prm} = $p;
 
   // грузит в ram цены номенклатуры
   pricing.load_prices  = function load_prices() {
@@ -63,10 +63,30 @@ module.exports = function ($p, log) {
           return `${v.ref},${v.id},${v.name},${v.qualifier_unit},${v.heft||0},${v.volume||0},${v.coefficient||1},${v.rounding_threshold||0}`;
         })
         .join('\n');
-      const {operations} = this._obj;
+      let {operations, characteristics: cxrefs} = this._obj;
       if(operations) {
         json.operations = operations;
       }
+      if(!cxrefs) {
+        cxrefs = this.characteristics().map(v => v.ref);
+      }
+      if(cxrefs.length) {
+        json.characteristics = cxrefs.map((ref) => {
+          const {owner, ...other} = characteristics.get(ref).toJSON();
+          const rm = [];
+          for(const fld in other) {
+            const v = other[fld];
+            if(!v || Array.isArray(v) && !v.length) {
+              rm.push(fld);
+            }
+          }
+          for(const fld of rm) {
+            delete other[fld];
+          }
+          return other;
+        });
+      }
+
     }
     return json;
   };
