@@ -28,6 +28,7 @@ const by_branch = [
   'cat.cashboxes',
   'cat.stores',
   'cch.predefined_elmnts',
+  'cat.margin_coefficients',
 ];
 // эти общие - их не режем и грузим сразу
 const common = [
