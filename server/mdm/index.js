@@ -175,6 +175,7 @@ function mdm ($p, log) {
               continue;
             }
             // если файл существует, добавляем его в поток
+            //name === 'cat.margin_coefficients' && !['common','0000'].includes(suffix) && log(fname);
             fs.existsSync(fname) && stream.add(fs.createReadStream(fname));
           }
         }

@@ -67,10 +67,7 @@ module.exports = function ($p, log) {
       if(operations) {
         json.operations = operations;
       }
-      if(!cxrefs) {
-        cxrefs = this.characteristics().map(v => v.ref);
-      }
-      if(cxrefs.length) {
+      if(cxrefs?.length) {
         json.characteristics = cxrefs.map((ref) => {
           const {owner, ...other} = characteristics.get(ref).toJSON();
           const rm = [];
