@@ -19,7 +19,6 @@ require('../http/promisify');
 
 // эти режем по отделу
 const by_branch = [
-  'cat.partners',
   'cat.branches',
   'cat.divisions',
   'cat.users',
