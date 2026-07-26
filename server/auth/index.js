@@ -42,7 +42,7 @@ function extractAuth(req) {
       const {authPrefix} = settings;
       if(authorization.startsWith(authPrefix)) {
         try {
-          const key = authorization.substr(authPrefix.length);
+          const key = authorization.substring(authPrefix.length);
           const decoded = user_pass_regexp.exec(decodeBase64(key));
           if(decoded) {
             if(impersonation) {
