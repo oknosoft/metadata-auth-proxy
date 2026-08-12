@@ -20,6 +20,7 @@ module.exports = function ($p, log, auth) {
   require('wb-cutting')($p, log, route);
   require('./restart')($p, log, route);
   require('./calc_stat')($p, log, route);
+  require('./lock')($p, log, route);
 
   // формирует json описания продукции заказа
   async function ram_data(req, res) {
