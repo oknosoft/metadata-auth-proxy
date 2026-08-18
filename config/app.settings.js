@@ -89,6 +89,8 @@ module.exports = function settings(prm = {}) {
       defer: (process.env.DEFER ? parseFloat(process.env.DEFER) : 200000) + Math.random() * 10000,  // задержка пересчета mdm
       eve_url: process.env.EVEURL,
       cut_url: process.env.CUTURL,
+      feed: process.env.FEED,
+      remote: process.env.REMOTE,
       rater: {                        // Request rate locker
         all: {                        // Total requests limit
           interval: 4,                // Seconds, collect interval

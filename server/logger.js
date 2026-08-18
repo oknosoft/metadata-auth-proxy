@@ -25,7 +25,9 @@ module.exports = function(runtime) {
 
 		console[logObject.type === 'error' || message instanceof Error ? 'error' : 'log'](
       workerKey(message) + `[${logObject.type}]: `+
-      (logObject.message instanceof Error ? logObject.message.stack : JSON.stringify(logObject.message))
+      (logObject.message instanceof Error ?
+        logObject.message.message + (logObject.message.cause ? ` ${logObject.message.cause.message}` : '') :
+        JSON.stringify(logObject.message))
 		);
 	};
 

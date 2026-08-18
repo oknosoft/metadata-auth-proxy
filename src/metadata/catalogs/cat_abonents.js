@@ -25,6 +25,19 @@ exports.CatAbonents = class CatAbonents extends Object {
     return Array.from(res);
   }
 
+  branch(id) {
+    if(!this.branches) {
+      this.branches = new Map();
+    }
+    if(!this.branches.has(id)) {
+      this.branches.set(id, this._owner.branches.find({
+        owner: this,
+        suffix: typeof id === 'number' ? id.pad(4) : id,
+      }));
+    }
+    return this.branches.get(id);
+  }
+
   /**
    * Сериализация
    * @return {Object}
