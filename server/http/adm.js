@@ -16,7 +16,8 @@ module.exports = function ($p, log, auth) {
   require('wb-parametric')($p, log, route);
   require('wb-paperless')($p, log, route);
   require('wb-planning')($p, log, route);
-  require('wb-cutting')($p, log, route);
+  //require('wb-cutting')($p, log, route);
+  require('./proxy-cut2d')($p, log, route);
   require('./planning')($p, log, route);
   require('./restart')($p, log, route);
   require('./calc_stat')($p, log, route);
