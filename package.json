@@ -1,6 +1,6 @@
 {
   "name": "metadata-auth-proxy",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Сервис авторизации и MDM, а так же - администрирования баз и пользователей",
   "repository": {
     "type": "git",
@@ -8,8 +8,9 @@
   },
   "engines": {
     "node": ">=20.19",
-    "yarn": "^1.22"
+    "pnpm": ">=12"
   },
+  "packageManager": "pnpm@12.8.1",
   "keywords": [
     "metadata",
     "authorization",
@@ -39,7 +40,7 @@
     "rate-limiter-flexible": "^11.2",
     "serve-handler": "^6.1",
     "unzipper": "^0.12",
-    "wb-core": "github:oknosoft/windowbuilder-core#da52bc4e12305b1d001df151826b574b35f21061",
+    "wb-core": "github:oknosoft/windowbuilder-core#9a72056e26f3562986a72b245d989a84db4c5fec",
     "wb-paperless": "github:oknosoft/paperless#feec3ce9319fce7dcd8e44a9adca16834e5fe28b",
     "wb-parametric": "github:oknosoft/windowbuilder-parametric#2df8b98e7819c6796b08b8ad8037af331face727",
     "wb-planning": "github:oknosoft/windowbuilder-planning#a7e2fe181bc7eb0e08f46abcd4157db4b01e6be2",
@@ -47,7 +48,6 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {},
-  "packageManager": "yarn@1.22.22",
   "scripts": {
     "analyze": "webpack-bundle-analyzer scripts/stats.json",
     "server": "node server",
