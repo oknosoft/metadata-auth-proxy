@@ -1,0 +1,6 @@
+allowBuilds:
+  canvas: true
+minimumReleaseAgeExclude:
+  - metadata-core@2.0.41-beta.1
+  - metadata-abstract-ui@2.0.41-beta.1
+  - metadata-pouchdb@2.0.41-beta.1
