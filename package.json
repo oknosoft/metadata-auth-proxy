@@ -1,6 +1,6 @@
 {
   "name": "metadata-auth-proxy",
-  "version": "0.0.15",
+  "version": "0.0.17",
   "description": "Сервис авторизации и MDM, а так же - администрирования баз и пользователей",
   "repository": {
     "type": "git",
@@ -8,8 +8,9 @@
   },
   "engines": {
     "node": ">=20.19",
-    "yarn": "^1.22"
+    "pnpm": ">=12"
   },
+  "packageManager": "pnpm@12.8.1",
   "keywords": [
     "metadata",
     "authorization",
@@ -39,16 +40,14 @@
     "rate-limiter-flexible": "^11.2",
     "serve-handler": "^6.1",
     "unzipper": "^0.12",
-    "wb-core": "github:oknosoft/windowbuilder-core#3b0c4b5551bf063b4747877c07513e828196af4b",
-    "wb-cutting": "github:oknosoft/genetic-cutting#8c851d8c1e53714b5a7121338954b7a98b9e3f36",
-    "wb-paperless": "github:oknosoft/paperless#619a77020a719c75319a181ae91beb657f4719b5",
-    "wb-parametric": "github:oknosoft/windowbuilder-parametric#2d7778c68ddc7584bf112582956d2356b7c18e5f",
+    "wb-core": "github:oknosoft/windowbuilder-core#9a72056e26f3562986a72b245d989a84db4c5fec",
+    "wb-paperless": "github:oknosoft/paperless#feec3ce9319fce7dcd8e44a9adca16834e5fe28b",
+    "wb-parametric": "github:oknosoft/windowbuilder-parametric#2df8b98e7819c6796b08b8ad8037af331face727",
     "wb-planning": "github:oknosoft/windowbuilder-planning#ef0306adf76733027b1a5f70bc9fa42b5a41f51c",
     "wb-reports": "github:oknosoft/windowbuilder-reports#6d4a93bea3514ce30e04a7c36a2d1bd6d432dbbd",
     "yamljs": "^0.3.0"
   },
   "devDependencies": {},
-  "packageManager": "yarn@1.22.22",
   "scripts": {
     "analyze": "webpack-bundle-analyzer scripts/stats.json",
     "server": "node server",
