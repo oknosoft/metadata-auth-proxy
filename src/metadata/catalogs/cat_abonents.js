@@ -25,7 +25,7 @@ exports.CatAbonents = class CatAbonents extends Object {
    * @return {Object}
    */
   toJSON() {
-    const {ref, id, name, no_mdm, area, servers} = this;
+    const {ref, id, name, no_mdm, area, servers, formulas} = this;
     return {
       ref,
       id,
@@ -33,6 +33,7 @@ exports.CatAbonents = class CatAbonents extends Object {
       no_mdm,
       area,
       servers: servers._obj.map(({key, proxy, name}) => ({key, proxy, name})),
+      formulas: formulas.toJSON(),
     };
   }
 };
