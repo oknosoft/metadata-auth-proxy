@@ -10,7 +10,7 @@
     "node": ">=20.19",
     "pnpm": ">=12"
   },
-  "packageManager": "pnpm@12.8.1",
+  "packageManager": "pnpm@12.16.1",
   "keywords": [
     "metadata",
     "authorization",

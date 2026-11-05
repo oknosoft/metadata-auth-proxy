@@ -508,7 +508,7 @@ set formulas(v){this._setter_ts('formulas',v)}
    * @return {Object}
    */
   toJSON() {
-    const {ref, id, name, no_mdm, area, servers} = this;
+    const {ref, id, name, no_mdm, area, servers, formulas} = this;
     return {
       ref,
       id,
@@ -516,6 +516,7 @@ set formulas(v){this._setter_ts('formulas',v)}
       no_mdm,
       area,
       servers: servers._obj.map(({key, proxy, name}) => ({key, proxy, name})),
+      formulas: formulas.toJSON(),
     };
   }}
 $p.CatAbonents = CatAbonents;
