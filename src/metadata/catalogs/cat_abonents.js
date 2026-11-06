@@ -33,7 +33,7 @@ exports.CatAbonents = class CatAbonents extends Object {
       no_mdm,
       area,
       servers: servers._obj.map(({key, proxy, name}) => ({key, proxy, name})),
-      formulas: formulas.toJSON(),
+      formulas: formulas._obj.map(({acl_obj}) => ({acl_obj})),
     };
   }
 };

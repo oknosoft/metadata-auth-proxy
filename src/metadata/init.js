@@ -516,7 +516,7 @@ set formulas(v){this._setter_ts('formulas',v)}
       no_mdm,
       area,
       servers: servers._obj.map(({key, proxy, name}) => ({key, proxy, name})),
-      formulas: formulas.toJSON(),
+      formulas: formulas._obj.map(({acl_obj}) => ({acl_obj})),
     };
   }}
 $p.CatAbonents = CatAbonents;
