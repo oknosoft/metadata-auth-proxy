@@ -10,7 +10,7 @@
     "node": ">=20.19",
     "pnpm": ">=12"
   },
-  "packageManager": "pnpm@12.8.1",
+  "packageManager": "pnpm@12.16.1",
   "keywords": [
     "metadata",
     "authorization",
@@ -33,6 +33,10 @@
     "http-proxy": "^1.18",
     "md5-file": "^5.0",
     "merge2": "^1.4.1",
+    "metadata-abstract-ui": "2.0.41-beta.1",
+    "metadata-core": "2.0.41-beta.1",
+    "metadata-pouchdb": "2.0.41-beta.1",
+    "paper": "0.12.18",
     "passport": "^0.7",
     "passport-ldapauth": "^3.0",
     "pg": "^8.23",
@@ -40,7 +44,7 @@
     "rate-limiter-flexible": "^11.2",
     "serve-handler": "^6.1",
     "unzipper": "^0.12",
-    "wb-core": "github:oknosoft/windowbuilder-core#db5873b9b3d770097d45938b395352e55603805b",
+    "wb-core": "github:oknosoft/windowbuilder-core#3febae74117c0d7d77caefab91c6942e0544e252",
     "wb-paperless": "github:oknosoft/paperless#feec3ce9319fce7dcd8e44a9adca16834e5fe28b",
     "wb-parametric": "github:oknosoft/windowbuilder-parametric#2df8b98e7819c6796b08b8ad8037af331face727",
     "wb-planning": "github:oknosoft/windowbuilder-planning#ef0306adf76733027b1a5f70bc9fa42b5a41f51c",

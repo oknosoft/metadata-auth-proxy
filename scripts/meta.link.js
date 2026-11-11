@@ -17,11 +17,6 @@ const repos = [
     dir: 'dist',
   },
   {
-    local: 'wb-cutting',
-    remote: '..\\genetic-cutting',
-    dir: 'src',
-  },
-  {
     local: 'wb-reports',
     remote: '..\\wb-reports',
     dir: 'server',
